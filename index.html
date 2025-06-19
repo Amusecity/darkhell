@@ -3,188 +3,165 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Zero Day Terminal</title>
+<title>Son Terminal Kabusu - @MHMTXASLAN</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-  html, body {
+  html,body {
     margin:0; padding:0; height:100%;
-    background: black;
-    color: #0f0;
-    font-family: 'Share Tech Mono', monospace;
-    overflow: hidden;
+    background:black; overflow:hidden;
+    font-family:'Share Tech Mono', monospace;
     user-select:none;
-    -webkit-user-select:none;
-    -moz-user-select:none;
   }
   #overlay {
-    position: fixed;
-    top:0; left:0;
-    width: 100vw; height: 100vh;
-    background: black;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10;
+    position:fixed;top:0;left:0;
+    width:100vw;height:100vh;
+    background:black;
+    display:flex;align-items:center;justify-content:center;
+    z-index:10;
   }
   #startBtn {
-    font-size: 72px;
-    color: red;
-    cursor: pointer;
-    user-select: none;
-    border: 5px solid red;
-    border-radius: 50%;
-    width: 120px; height: 120px;
-    line-height: 120px;
-    text-align: center;
-    font-weight: 900;
-    box-shadow: 0 0 20px red;
-    transition: all 0.3s ease;
-  }
-  #startBtn:hover {
-    background: red;
-    color: black;
+    font-size:72px;color:red;
+    cursor:pointer;
+    border:5px solid red;
+    border-radius:50%;
+    width:120px;height:120px;
+    line-height:120px;
+    text-align:center;
+    font-weight:900;
+    box-shadow:0 0 20px red;
   }
   #terminal {
-    padding: 20px;
-    white-space: pre-wrap;
-    height: 100vh;
-    overflow-y: auto;
-    box-sizing: border-box;
-    font-size: 16px;
-    line-height: 1.2em;
-    display: none;
-    position: relative;
+    display:none;
+    padding:20px;
+    height:100vh;
+    overflow-y:auto;
+    box-sizing:border-box;
+    color:#0f0;
+    font-size:16px;
+    line-height:1.2em;
   }
-  #header {
-    font-size: 24px;
-    font-weight: 900;
-    color: red;
-    margin-bottom: 10px;
+  #line1 {
+    font-size:24px;
+    font-weight:900;
+    margin-bottom:10px;
+    opacity:0;
   }
-  #hackedMask {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 200px;
-    color: red;
-    opacity: 0;
-    pointer-events: none;
-    mix-blend-mode: screen;
-    font-weight: 900;
+  #mask {
+    display:none;
+    position:fixed;
+    top:40%;left:50%;
+    transform:translate(-50%,-50%);
+    color:red;
+    font-size:200px;
+    font-weight:900;
+    text-align:center;
+    z-index:5;
+    mix-blend-mode:screen;
+    user-select:none;
+    pointer-events:none;
+  }
+  #errorMsg {
+    display:none;
+    position:fixed;
+    bottom:10%;
+    width:100%;
+    text-align:center;
+    color:red;
+    font-size:32px;
+    font-weight:900;
+    text-shadow:0 0 10px red;
     user-select:none;
   }
-  #hackedText {
-    position: fixed;
-    top: 60%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 48px;
-    font-weight: 900;
-    color: red;
-    text-shadow:
-      0 0 10px red,
-      0 0 20px red,
-      0 0 40px red;
-    opacity: 0;
-    pointer-events: none;
-    user-select:none;
+  .flicker {
+    animation:flickerAnim 0.1s infinite;
+  }
+  @keyframes flickerAnim {
+    0%,100%{opacity:1;}
+    50%{opacity:0.2;}
   }
 </style>
 </head>
 <body>
 
-<div id="overlay">
-  <div id="startBtn">×</div>
-</div>
-
+<div id="overlay"><div id="startBtn">×</div></div>
 <div id="terminal">
-  <div id="header">Zero Day Terminal</div>
+  <div id="line1">@MHMTXASLAN</div>
   <div id="content"></div>
 </div>
+<div id="mask">
+  ▄▀▄ █░█ █▀▄▐█▄  
+  ▀▄▀ ▀▄▀ █▄▀░█░
+</div>
+<div id="errorMsg">SİSTEM HATASI</div>
 
-<div id="hackedMask">😷</div>
-<div id="hackedText">SİSTEM ELE GEÇİRİLDİ</div>
+<audio id="beep" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto"></audio>
 
 <script>
   const startBtn = document.getElementById('startBtn');
   const overlay = document.getElementById('overlay');
   const terminal = document.getElementById('terminal');
+  const line1 = document.getElementById('line1');
   const content = document.getElementById('content');
-  const hackedMask = document.getElementById('hackedMask');
-  const hackedText = document.getElementById('hackedText');
+  const mask = document.getElementById('mask');
+  const errorMsg = document.getElementById('errorMsg');
+  const beep = document.getElementById('beep');
 
   const chars = "0123456789ABCDEF!@#$%^&*()-_=+[]{};:'\",.<>/?\\|";
-  const scaryMsgs = [
-    "BAŞLATILIYOR...",
+  const msgs = [
     "SİSTEM İZLENİYOR...",
-    "HACK İZLERİ BULUNUYOR...",
-    "GÜVENLİK İHLALİ TESPİT EDİLDİ!",
-    "VERİLER ŞİFRELENİYOR!",
-    "KÖK ERİŞİM ELDE EDİLDİ!",
-    "FIREWALL BAYPAS EDİLDİ!",
+    "VERİLER ŞİFRELENDİ...",
+    "FIREWALL BAYPAS EDİLDİ...",
+    "KÖK ERİŞİM SAĞLANDI...",
+    "GÜVENLİK İHLALİ TESPİT EDİLDİ...",
     "BAĞLANTI KESİLİYOR...",
-    "SİSTEM ELE GEÇİRİLDİ!",
+    "SUNUCU ELE GEÇİRİLDİ...",
+    "YENİ SALDIRI GELİYOR..."
   ];
 
-  let interval, elapsed = 0;
+  let elapsed = 0, intervalId, beepInterval;
 
-  function randomChar() {
-    return chars.charAt(Math.floor(Math.random() * chars.length));
+  function randomLine() {
+    let s="";
+    for(let i=0;i<60;i++) s+=chars.charAt(Math.floor(Math.random()*chars.length));
+    return s;
   }
 
-  function writeRandomLine() {
-    let line = '';
-    for(let i=0; i<80; i++) {
-      line += randomChar();
+  function writeBurst() {
+    content.textContent += randomLine()+"\n";
+    if(Math.random()<0.1) {
+      content.textContent += ">>> "+msgs[Math.floor(Math.random()*msgs.length)]+"\n";
     }
-    content.textContent += line + '\n';
-    content.scrollTop = content.scrollHeight;
-  }
-
-  function writeScaryMsg() {
-    const msg = scaryMsgs[Math.floor(Math.random() * scaryMsgs.length)];
-    content.textContent += "\n>>> " + msg + "\n\n";
-    content.scrollTop = content.scrollHeight;
-  }
-
-  // Google Audio beep: kısa ses için URL
-  function playBeep() {
-    const beep = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
-    beep.play();
+    content.scrollTop=content.scrollHeight;
   }
 
   startBtn.onclick = () => {
-    overlay.style.display = "none";
-    terminal.style.display = "block";
-
-    interval = setInterval(() => {
-      elapsed += 100;
-      writeRandomLine();
-
-      if(elapsed % 1000 === 0){
-        writeScaryMsg();
-      }
-
-      // 15 saniyede bip ses başlat
-      if(elapsed === 15000){
-        playBeep();
-        beepInterval = setInterval(playBeep, 800);
-      }
-
-      // 30 saniyede son efektler
-      if(elapsed === 30000){
-        clearInterval(interval);
-        clearInterval(beepInterval);
-        hackedMask.style.opacity = "0.4";
-        hackedText.style.opacity = "1";
-        terminal.style.color = "red";
-        terminal.style.fontWeight = "900";
-        content.textContent += "\n\n!!! SİSTEM ELE GEÇİRİLDİ !!!\n\n";
-        content.scrollTop = content.scrollHeight;
-      }
-    }, 100);
-
+    overlay.style.display="none";
+    terminal.style.display="block";
+    line1.style.opacity=1;
+    setTimeout(() => {
+      line1.style.color="green";
+      line1.classList.add('flicker');
+    }, 500);
+    setTimeout(() => {
+      line1.style.color="red";
+    }, 4500);
+    setTimeout(() => {
+      line1.classList.remove('flicker');
+      intervalId = setInterval(() => {
+        elapsed += 100;
+        writeBurst();
+        if(elapsed === 15000) {
+          beep.play();
+          beepInterval = setInterval(() => beep.play(),800);
+        }
+        if(elapsed === 30000) {
+          clearInterval(intervalId);
+          clearInterval(beepInterval);
+          mask.style.display="block";
+          errorMsg.style.display="block";
+        }
+      }, 100);
+    }, 6000);
   };
 </script>
 
