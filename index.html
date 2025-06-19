@@ -1,112 +1,198 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <title>mhmtxaslan Hack Korku</title>
-  <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    html, body {
-      width:100%; height:100vh;
-      background: black;
-      color: #0f0;
-      font-family: monospace;
-      overflow: hidden;
-      position: relative;
-    }
-    #startBtn {
-      position:absolute; top:50%; left:50%;
-      transform: translate(-50%, -50%);
-      font-size:6rem; color:red; background:none;
-      border:none; cursor:pointer; z-index:10;
-    }
-    #mhmtBox {
-      position:absolute; top:50%; left:50%;
-      transform:translate(-50%, -50%);
-      font-size:3rem; color:#0f0;
-      border:2px solid #0f0; padding:1rem 2rem;
-      display:none; z-index:9;
-    }
-    #terminal {
-      position:absolute; top:0; left:0;
-      width:100%; height:100%;
-      background:black; color:#0f0;
-      padding:2rem; overflow-y:auto;
-      font-size:1rem;
-      display:none; z-index:8;
-    }
-    #errorScreen {
-      position:absolute; top:0; left:0;
-      width:100%; height:100%;
-      background:red; color:white;
-      font-family: monospace;
-      font-size:2rem;
-      display:none;
-      justify-content:center; align-items:center;
-      text-align:center;
-      padding:1rem; z-index:7;
-      animation: glitch 0.3s infinite;
-    }
-    @keyframes glitch {
-      0%   { transform: translate(0, 0); }
-      25%  { transform: translate(-5px, 3px); }
-      50%  { transform: translate(4px, -4px); }
-      75%  { transform: translate(-3px, 5px); }
-      100% { transform: translate(0, 0); }
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Korkutucu Terminal - Yok Artık!</title>
+<style>
+  html, body {
+    margin:0; padding:0; height:100%; width:100%;
+    background: black; color: #0f0; font-family: monospace;
+    overflow: hidden; user-select: none;
+  }
+  #overlay {
+    position: fixed; top:0; left:0; width:100vw; height:100vh;
+    background: black; display: flex;
+    justify-content: center; align-items: center;
+    z-index: 9999;
+  }
+  #closeBtn {
+    font-size: 120px;
+    color: red;
+    cursor: pointer;
+    border: 6px solid red;
+    border-radius: 50%;
+    width: 160px;
+    height: 160px;
+    line-height: 140px;
+    text-align: center;
+    font-weight: 900;
+    box-shadow: 0 0 60px red;
+    user-select:none;
+    transition: transform 0.3s ease;
+  }
+  #closeBtn:hover {
+    transform: scale(1.1);
+  }
+  #terminal {
+    position: fixed;
+    top: 5vh; left: 5vw; right:5vw; bottom: 15vh;
+    padding: 20px;
+    box-sizing: border-box;
+    background: black;
+    color: #0f0;
+    font-size: 18px;
+    line-height: 1.4em;
+    white-space: pre-wrap;
+    overflow-y: auto;
+    font-weight: 600;
+    display: none;
+    filter: drop-shadow(0 0 4px #0f0);
+    animation: tvNoise 0.15s infinite alternate;
+  }
+  @keyframes tvNoise {
+    0% { filter: drop-shadow(0 0 4px #0f0) contrast(1) brightness(1); transform: translate(0, 0) skew(0deg);}
+    50% { filter: drop-shadow(0 0 6px #0f0) contrast(1.2) brightness(1.1); transform: translate(1px, -1px) skew(1deg);}
+    100% { filter: drop-shadow(0 0 4px #0f0) contrast(1) brightness(1); transform: translate(0, 0) skew(0deg);}
+  }
+  #errorScreen {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(255,0,0,0.9);
+    color: black;
+    font-size: 56px;
+    font-weight: 900;
+    text-align: center;
+    line-height: 100vh;
+    user-select:none;
+    display: none;
+    animation: errorFlash 1s infinite;
+    z-index: 10000;
+  }
+  @keyframes errorFlash {
+    0%, 50%, 100% { opacity: 1; }
+    25%, 75% { opacity: 0; }
+  }
+  #finalMessage {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    color: #ff0000;
+    font-size: 96px;
+    font-weight: 900;
+    text-shadow:
+      0 0 10px #ff0000,
+      0 0 20px #ff0000,
+      0 0 30px #ff0000,
+      0 0 40px #ff0000;
+    user-select:none;
+    display: none;
+    z-index: 11000;
+    animation: pulse 1.5s infinite alternate;
+  }
+  @keyframes pulse {
+    0% { opacity: 1; text-shadow: 0 0 10px #ff0000; }
+    100% { opacity: 0.6; text-shadow: 0 0 30px #ff0000; }
+  }
+</style>
 </head>
 <body>
 
-<button id="startBtn">✖</button>
-<div id="mhmtBox">@mhmtxaslan</div>
+<div id="overlay">
+  <div id="closeBtn" aria-label="Başlat">×</div>
+</div>
+
 <div id="terminal"></div>
-<div id="errorScreen">!!! SİSTEM ÇÖKTÜ !!!<br/>mhmtxaslan</div>
+
+<div id="errorScreen">SİSTEM HATASI</div>
+
+<div id="finalMessage">YOK ARTIK!</div>
+
+<!-- Sesler -->
+<audio id="beep" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
+<audio id="alarm" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg"></audio>
+<audio id="boom" src="https://actions.google.com/sounds/v1/explosions/explosion.ogg"></audio>
 
 <script>
-  const startBtn = document.getElementById('startBtn');
-  const mhmtBox = document.getElementById('mhmtBox');
+  const closeBtn = document.getElementById('closeBtn');
+  const overlay = document.getElementById('overlay');
   const terminal = document.getElementById('terminal');
   const errorScreen = document.getElementById('errorScreen');
+  const finalMessage = document.getElementById('finalMessage');
 
-  const keySound = new Audio('https://cdn.pixabay.com/audio/2022/03/15/audio_c13b0c7dd5.mp3');
-  const crashSound = new Audio('https://cdn.pixabay.com/audio/2023/10/08/audio_70a46a7e96.mp3');
+  const beepSound = document.getElementById('beep');
+  const alarmSound = document.getElementById('alarm');
+  const boomSound = document.getElementById('boom');
 
-  const fakeCmds = [
-    "starting mhmt-core...",
-    "authenticating user mhmtxaslan...",
-    "root privileges granted.",
-    "loading modules [████▂▁.....]",
-    "injecting payload...",
-    "payload activated.",
-    "system integrity compromised.",
-    "initiating crash dump.",
-    "fatal: unrecoverable error!",
+  // Terminal mesajları
+  const messages = [
+    "KOMUT: BAŞLATILIYOR...",
+    "SİSTEM: DOSYALAR YÜKLENİYOR...",
+    "UYGULAMA: KÖK YETKİLERİ ALINDI.",
+    "GÜVENLİK: İZİNSİZ ERİŞİM TESPİT EDİLDİ!",
+    "YAPAY ZEKA: KONTROL KAYBI",
+    "UYARI: SİSTEM İSTİKRARSIZ!",
+    "ALGORİTMA: YENİ PROTOKOL OLUŞTURULUYOR...",
+    "DİKKAT: VERİLER BOZULUYOR!",
+    "HATA: ÖNLEM ALINMIYOR!",
+    "SON UYARI: İŞLEM DURDURULMALI!"
   ];
 
-  async function typeCmds(i = 0) {
-    if (i >= fakeCmds.length) return;
-    terminal.innerHTML += fakeCmds[i] + "\n";
-    terminal.scrollTop = terminal.scrollHeight;
-    keySound.currentTime = 0;
-    keySound.play();
-    setTimeout(() => typeCmds(i + 1), 800);
+  let idx = 0;
+  let beepInterval;
+  let messageInterval;
+
+  function playBeep() {
+    beepSound.currentTime = 0;
+    beepSound.play();
   }
 
-  startBtn.addEventListener('click', async () => {
-    startBtn.style.display = 'none';
-    mhmtBox.style.display = 'block';
+  function startTerminal() {
+    overlay.style.display = 'none';
+    terminal.style.display = 'block';
+    idx = 0;
+    terminal.textContent = "";
 
+    messageInterval = setInterval(() => {
+      if(idx >= messages.length){
+        clearInterval(messageInterval);
+        startErrorSequence();
+        return;
+      }
+      terminal.textContent += messages[idx] + "\n\n";
+      terminal.scrollTop = terminal.scrollHeight;
+      playBeep();
+      idx++;
+    }, 2800);
+  }
+
+  function startErrorSequence() {
+    alarmSound.loop = true;
+    alarmSound.currentTime = 0;
+    alarmSound.play();
+
+    errorScreen.style.display = 'block';
+
+    // 8 saniye sonra YOK ARTIK! göster
     setTimeout(() => {
-      mhmtBox.style.display = 'none';
-      terminal.style.display = 'block';
-      typeCmds();
+      errorScreen.style.display = 'none';
+      alarmSound.pause();
+      finalMessage.style.display = 'block';
+      boomSound.play();
+      // 4 saniye sonra kapanış
       setTimeout(() => {
-        terminal.style.display = 'none';
-        errorScreen.style.display = 'flex';
-        crashSound.play();
-      }, fakeCmds.length * 800 + 1000); // tüm komutlar tamamlanınca
-    }, 2000);
-  });
+        finalMessage.style.display = 'none';
+        alert("Yok artık! :D Korktun mu?");
+        location.reload();
+      }, 4000);
+    }, 8000);
+  }
+
+  closeBtn.onclick = () => {
+    // İlk basışta sesi açar ve terminali başlatır
+    startTerminal();
+  };
 </script>
 
 </body>
