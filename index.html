@@ -3,193 +3,257 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>@mhmtxaslan Hack Terminal</title>
+<title>@mhmtxaslan - Korku Terminali</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-  body {
-    margin: 0; background: black; color: #0f0;
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: black;
+    color: #00ff00;
     font-family: 'Share Tech Mono', monospace;
     overflow: hidden;
   }
-  #terminalBox {
+  #terminal {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+  #text {
+    white-space: pre-wrap;
+    line-height: 1.2em;
+    max-height: 100%;
+    overflow-y: auto;
+  }
+  #mask {
     position: fixed;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    width: 80vw; height: 70vh;
-    background: #000;
-    border: 4px solid #0f0;
-    box-shadow: 0 0 20px #0f0 inset;
-    padding: 20px;
-    overflow-y: auto;
-    white-space: pre-wrap;
-    font-size: 1.2rem;
-    line-height: 1.4rem;
+    font-size: 150px;
+    color: red;
+    opacity: 0;
+    mix-blend-mode: difference;
     user-select: none;
+    pointer-events: none;
+    animation: flicker 0.15s infinite;
   }
-  #errorScreen {
-    display: none;
+  #error {
     position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: red;
-    color: black;
-    font-size: 6rem;
-    font-weight: 900;
-    font-family: 'Courier New', Courier, monospace;
-    text-align: center;
-    line-height: 100vh;
-    animation: flicker 0.15s infinite alternate;
-    z-index: 9999;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 90px;
+    color: red;
+    font-weight: bold;
+    opacity: 0;
+    user-select: none;
+    pointer-events: none;
+    text-shadow:
+      0 0 10px #ff0000,
+      0 0 20px #ff0000,
+      0 0 30px #ff0000,
+      0 0 40px #ff0000;
   }
   @keyframes flicker {
-    0% { opacity: 1; }
-    100% { opacity: 0.4; }
+    0%, 100% {opacity:1;}
+    50% {opacity:0.3;}
   }
   .blink {
-    animation: blinkAnim 1s step-start infinite;
+    animation: blink 1s step-start infinite;
   }
-  @keyframes blinkAnim {
+  @keyframes blink {
     50% { opacity: 0; }
-  }
-  .redText {
-    color: #f00;
-  }
-  .greenText {
-    color: #0f0;
-  }
-  .warningMark {
-    position: fixed;
-    font-size: 3rem;
-    color: yellow;
-    animation: flash 1s infinite alternate;
-  }
-  @keyframes flash {
-    from { opacity: 1; }
-    to { opacity: 0; }
   }
 </style>
 </head>
 <body>
-<div id="terminalBox">@mhmtxaslan</div>
-<div id="errorScreen">SİSTEM ELE GEÇİRİLDİ!</div>
+<div id="terminal">
+  <div id="text"></div>
+</div>
+<div id="mask">👺</div>
+<div id="error">!!! SYSTEM BREACH DETECTED !!!</div>
+
+<audio id="beep" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" preload="auto"></audio>
+<audio id="static" src="https://actions.google.com/sounds/v1/electronic/static.ogg" preload="auto"></audio>
+<audio id="glitch" src="https://actions.google.com/sounds/v1/electronic/glitch.ogg" preload="auto"></audio>
 
 <script>
-  const terminal = document.getElementById('terminalBox');
-  const errorScreen = document.getElementById('errorScreen');
-  let textLines = [
-    "Bağlantı kuruluyor...",
-    "Kullanıcı doğrulanıyor...",
-    "Veri sızdırılıyor...",
-    "Şifre çözücü aktif...",
-    "Sunucuya giriş sağlandı...",
-    "Firewall devre dışı bırakıldı...",
-    "Sistem kontrolü aşıldı...",
-    "Veri tabanı ele geçiriliyor...",
-    "Tüm erişimler açıldı...",
-    "İşlem tamamlanıyor...",
+  const textEl = document.getElementById('text');
+  const maskEl = document.getElementById('mask');
+  const errorEl = document.getElementById('error');
+  const beepSound = document.getElementById('beep');
+  const staticSound = document.getElementById('static');
+  const glitchSound = document.getElementById('glitch');
+
+  const introText = '@mhmtxaslan\n\n';
+  const scaryLines = [
+    "GÜVENLİK İHLALİ TESPİT EDİLDİ!",
+    "SİSTEMİNİZE YABANCI BİR GİRİŞ OLDU!",
+    "VERİLERİNİZ ŞİFRELENDİ!",
+    "İZİN VERİLMEDİ!",
+    "HACKERLAR TARAFINDAN TAKİP EDİLİYORSUNUZ!",
+    "VERİLER SİLİNİYOR...",
+    "SİSTEM ÇÖKÜYOR...",
+    "ACİL DURUM PROTOKOLÜ DEVREDE!",
+    "YENİ BİR GİRİŞ SAĞLANIYOR...",
+    "İZİN VERİLMEYEN BAĞLANTI TESİS EDİLDİ!",
+    "KÖK ERİŞİM KAYBI!",
+    "SİSTEM ELE GEÇİRİLDİ!",
+    "VERİ TABANI PATLATILIYOR!",
+    "ANTİVİRÜS KAPANDI!",
+    "SUNUCUYA ZARAR VERİLİYOR!",
+    "GİZLİ BİLGİLER ELE GEÇİRİLDİ!",
+    "BU BİR DENEME DEĞİL!",
+    "DERHAL KAPAT!",
+    "KORUNMAZSANİZ YENİ SALDIRILAR GELECEK!",
   ];
 
   let index = 0;
-  let charIndex = 0;
-  let speed = 60;
+  let pos = 0;
+  let speed = 80;
   let blinking = false;
 
-  function writeLine(line, callback) {
-    let i = 0;
-    let interval = setInterval(() => {
-      terminal.textContent += line.charAt(i);
-      i++;
-      terminal.scrollTop = terminal.scrollHeight;
-      if (i >= line.length) {
-        clearInterval(interval);
-        terminal.textContent += "\n";
-        if (callback) callback();
-      }
-    }, speed);
-  }
-
-  function writeNext() {
-    if(index < textLines.length) {
-      writeLine(textLines[index], () => {
-        index++;
-        setTimeout(writeNext, 500);
-      });
+  // Yazıyı yavaş yavaş yazan fonksiyon
+  function typeWriter(text, callback) {
+    if (pos < text.length) {
+      textEl.textContent += text.charAt(pos);
+      pos++;
+      setTimeout(() => typeWriter(text, callback), speed);
     } else {
-      setTimeout(showError, 1000);
+      if (callback) callback();
     }
   }
 
-  // Başlangıçta @mhmtxaslan yeşil, sonra hızlı kırmızı yanıp sönme efekti
-  function start() {
-    let name = "@mhmtxaslan";
-    let i = 0;
-    let greenPhase = true;
-    terminal.textContent = "";
-    let blinkCount = 0;
+  // Korkutucu yazıları tek tek yazdır
+  function writeScaryLines(i = 0) {
+    if (i >= scaryLines.length) {
+      // Final efektlere geç
+      finalScare();
+      return;
+    }
+    typeWriter(scaryLines[i] + "\n", () => {
+      // Satır satır yavaşça kaydır
+      textEl.scrollTop = textEl.scrollHeight;
+      setTimeout(() => {
+        pos = 0;
+        writeScaryLines(i + 1);
+      }, 500);
+    });
+  }
 
-    let interval = setInterval(() => {
-      if (greenPhase) {
-        terminal.style.color = "#0f0";
-        terminal.textContent = name.substring(0, i);
-        i++;
-        if (i > name.length) {
-          greenPhase = false;
-          i = 0;
-        }
-      } else {
-        terminal.style.color = "#f00";
-        terminal.textContent = name;
-        terminal.classList.add('blink');
-        blinkCount++;
-        if (blinkCount > 10) {
-          clearInterval(interval);
-          terminal.classList.remove('blink');
-          terminal.textContent = name + "\n\n";
-          setTimeout(writeNext, 500);
-        }
+  // Yanıp sönme efekti hızlandırma ve sesleri açma
+  function startFlicker() {
+    let flickCount = 0;
+    const flickInterval = setInterval(() => {
+      if (flickCount > 30) {
+        clearInterval(flickInterval);
+        maskEl.style.opacity = 0;
+        errorEl.style.opacity = 1;
+        beepSound.play();
+        return;
       }
-    }, 200);
+      maskEl.style.opacity = flickCount % 2 === 0 ? 1 : 0;
+      glitchSound.play();
+      flickCount++;
+    }, 80);
   }
 
-  // Error ekranı göster, yanıp sönen ünlem işaretleri ekle
-  function showError() {
-    terminal.style.display = 'none';
-    errorScreen.style.display = 'block';
-    addWarnings();
-    playSound();
-    flickerBackground();
-  }
-
-  // Yanıp sönen sarı ünlem işaretleri ekranda rastgele yerleşsin
-  function addWarnings() {
-    for (let i = 0; i < 15; i++) {
-      let mark = document.createElement('div');
-      mark.textContent = "!!!";
-      mark.classList.add('warningMark');
-      mark.style.top = Math.random() * window.innerHeight + 'px';
-      mark.style.left = Math.random() * window.innerWidth + 'px';
-      mark.style.animationDuration = (Math.random() * 1 + 0.5) + 's';
-      document.body.appendChild(mark);
-    }
-  }
-
-  // Korkutucu ses efektini oynat
-  function playSound() {
-    let audio = new Audio('https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg');
-    audio.loop = true;
-    audio.play();
-  }
-
-  // Kırmızı siyah arka plan yanıp sönsün
-  function flickerBackground() {
-    let toggle = false;
-    setInterval(() => {
-      document.body.style.backgroundColor = toggle ? 'black' : 'red';
-      toggle = !toggle;
+  // Final korku efektleri
+  function finalScare() {
+    // Karanlık ve yanıp sönme
+    let flashes = 0;
+    const flashInterval = setInterval(() => {
+      if (flashes > 12) {
+        clearInterval(flashInterval);
+        // Sonunda "SYSTEM BREACH DETECTED" kalacak
+        errorEl.style.opacity = 1;
+        beepSound.play();
+        return;
+      }
+      if (flashes % 2 === 0) {
+        document.body.style.background = 'red';
+        errorEl.style.color = 'black';
+        errorEl.style.textShadow = 'none';
+      } else {
+        document.body.style.background = 'black';
+        errorEl.style.color = 'red';
+        errorEl.style.textShadow =
+          '0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 30px #ff0000';
+      }
+      flashes++;
     }, 300);
+
+    // Ünlem işaretleri yanıp sönme efektleri
+    const exclamations = ['!', '‼', '⚠', '⚡', '✱', '✶'];
+    const exclamationContainer = document.createElement('div');
+    exclamationContainer.style.position = 'fixed';
+    exclamationContainer.style.top = '0';
+    exclamationContainer.style.left = '0';
+    exclamationContainer.style.width = '100vw';
+    exclamationContainer.style.height = '100vh';
+    exclamationContainer.style.pointerEvents = 'none';
+    document.body.appendChild(exclamationContainer);
+
+    let exclamCount = 0;
+    const exclamInterval = setInterval(() => {
+      if (exclamCount > 60) {
+        clearInterval(exclamInterval);
+        return;
+      }
+      const exclam = document.createElement('div');
+      exclam.textContent = exclamations[Math.floor(Math.random() * exclamations.length)];
+      exclam.style.position = 'absolute';
+      exclam.style.color = 'red';
+      exclam.style.fontSize = `${20 + Math.random() * 40}px`;
+      exclam.style.top = `${Math.random() * 100}vh`;
+      exclam.style.left = `${Math.random() * 100}vw`;
+      exclam.style.opacity = Math.random();
+      exclamationContainer.appendChild(exclam);
+
+      setTimeout(() => {
+        exclam.remove();
+      }, 1000);
+
+      exclamCount++;
+    }, 150);
   }
 
-  // 5 saniye bekle @mhmtxaslan yazısını göster, sonra başlat
-  setTimeout(start, 5000);
+  // Ana akış
+  function start() {
+    // 1. @mhmtxaslan yeşil yazı
+    textEl.style.color = '#00ff00';
+    typeWriter(introText, () => {
+      // 2. yazıyı kırmızı yap, hızlı yanıp sönmeye başla
+      textEl.style.color = 'red';
+      flickerEffect();
+
+      // 3. Korkutucu yazılar
+      setTimeout(() => {
+        writeScaryLines();
+      }, 2000);
+    });
+  }
+
+  // Hızlı yanıp sönme efekti
+  function flickerEffect() {
+    let count = 0;
+    const maxCount = 20;
+    const flickerInterval = setInterval(() => {
+      if (count >= maxCount) {
+        clearInterval(flickerInterval);
+        textEl.style.color = 'red';
+        speed = 80;
+        return;
+      }
+      textEl.style.color = count % 2 === 0 ? 'darkred' : 'red';
+      speed = count < 10 ? 200 : 30;
+      count++;
+    }, 100);
+  }
+
+  // Başlat
+  start();
 </script>
 </body>
 </html>
