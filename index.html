@@ -1,159 +1,233 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Zero Day Sim</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-  body {
-    margin: 0; background: black; color: #0f0; font-family: 'Share Tech Mono', monospace;
-    overflow: hidden; user-select: none;
-  }
-  #overlay {
-    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-    background: black; display: flex; justify-content: center; align-items: center;
-  }
-  #startBox {
-    border: 2px solid #0f0; padding: 30px 60px; font-size: 3rem; color: #0f0;
-    user-select: none; cursor: default;
-  }
-  #terminal {
-    display: none; padding: 10px 20px; color: #0f0; height: 90vh; width: 90vw;
-    overflow-y: auto; white-space: pre-wrap; font-size: 1.1rem; line-height: 1.3rem;
-    background: black; border: none; outline: none;
-  }
-  .redText { color: #f00; }
-  .blink {
-    animation: blinkRed 1s infinite;
-  }
-  @keyframes blinkRed {
-    0%, 50% { opacity: 1; }
-    51%, 100% { opacity: 0; }
-  }
-  #warning {
-    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-    background: rgba(255,0,0,0.7); color: white; font-size: 4rem; font-weight: bold;
-    display: none; justify-content: center; align-items: center; user-select: none;
-    text-shadow: 0 0 10px red;
-  }
-  .exclamations {
-    position: fixed; user-select: none; pointer-events: none;
-    font-size: 3rem; font-weight: bold; color: red;
-    animation: blinkExcl 1.5s infinite alternate;
-  }
-  @keyframes blinkExcl {
-    0% { opacity: 1; }
-    100% { opacity: 0; }
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Karanlık Terminal</title>
+  <style>
+    html, body {
+      margin: 0; padding: 0; height: 100%; width: 100%;
+      background: black; color: #0f0; font-family: monospace;
+      overflow: hidden;
+      user-select: none;
+    }
+    #overlay {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: black; display: flex;
+      justify-content: center; align-items: center;
+      z-index: 9999;
+    }
+    #closeBtn {
+      font-size: 100px;
+      color: red;
+      cursor: pointer;
+      border: 5px solid red;
+      border-radius: 50%;
+      width: 150px;
+      height: 150px;
+      line-height: 140px;
+      text-align: center;
+      font-weight: 900;
+      box-shadow: 0 0 40px red;
+    }
+    #nameBox {
+      position: fixed;
+      top: 45%; left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 20px 50px;
+      border: 4px solid #0f0;
+      color: #0f0;
+      font-size: 48px;
+      font-weight: bold;
+      background: black;
+      z-index: 900;
+      transition: opacity 0.5s ease;
+    }
+    #nameBox.red {
+      color: red;
+      animation: blink 0.2s infinite;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    #terminal {
+      position: fixed;
+      top: 10px; left: 10px; right: 10px; bottom: 10px;
+      padding: 20px; box-sizing: border-box;
+      background: black; color: #0f0;
+      font-size: 20px; line-height: 1.5em;
+      white-space: pre-wrap; overflow-y: auto;
+      display: none; font-weight: 600;
+      animation: tvShake 0.15s infinite alternate;
+    }
+    @keyframes tvShake {
+      0% { filter: none; transform: translate(0, 0); }
+      25% { filter: contrast(1.3) brightness(1.1) blur(0.5px); transform: translate(1px, -1px); }
+      50% { filter: contrast(1.5) brightness(1.3) blur(1.2px); transform: translate(-1px, 1px); }
+      75% { filter: contrast(1.1) brightness(1) blur(0.3px); transform: translate(1px, 1px); }
+      100% { filter: none; transform: translate(0, 0); }
+    }
+    #errorScreen {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(255,0,0,0.85);
+      color: black; font-size: 56px;
+      font-weight: 900; text-align: center;
+      line-height: 100vh;
+      display: none;
+      animation: errorFlash 1s infinite;
+      z-index: 10000;
+    }
+    @keyframes errorFlash {
+      0%, 50%, 100% { opacity: 1; }
+      25%, 75% { opacity: 0; }
+    }
+    #warningMarks {
+      position: fixed; top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      pointer-events: none;
+      z-index: 10001;
+    }
+    .mark {
+      position: absolute; color: red;
+      font-weight: 900; font-size: 24px;
+      animation: markBlink 1.2s infinite;
+    }
+    @keyframes markBlink {
+      0%, 50%, 100% { opacity: 1; }
+      25%, 75% { opacity: 0; }
+    }
+  </style>
 </head>
 <body>
-  <div id="overlay">
-    <div id="startBox">@MHMTXASLAN</div>
-  </div>
-  <pre id="terminal"></pre>
-  <div id="warning">!!! SİSTEM HATASI !!!</div>
+
+<div id="overlay">
+  <div id="closeBtn" aria-label="Başlat">×</div>
+</div>
+
+<div id="nameBox">@MHMTXASLAN</div>
+<div id="terminal"></div>
+<div id="errorScreen">SİSTEM HATASI</div>
+<div id="warningMarks"></div>
+
+<!-- Ses Efektleri -->
+<audio id="beep" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
+<audio id="alarm" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg"></audio>
 
 <script>
-const overlay = document.getElementById('overlay');
-const startBox = document.getElementById('startBox');
-const terminal = document.getElementById('terminal');
-const warning = document.getElementById('warning');
+  const closeBtn = document.getElementById('closeBtn');
+  const overlay = document.getElementById('overlay');
+  const nameBox = document.getElementById('nameBox');
+  const terminal = document.getElementById('terminal');
+  const errorScreen = document.getElementById('errorScreen');
+  const warningMarks = document.getElementById('warningMarks');
+  const beep = document.getElementById('beep');
+  const alarm = document.getElementById('alarm');
 
-let lines = [];
-for(let i=1; i<=100; i++) {
-  let text = i <= 20 
-    ? `Satır ${i} - Yeşil HACKER mesajı...`
-    : `Satır ${i} - KIRMIZI HACKER saldırısı! !!!`;
-  lines.push(text);
-}
+  const messages = [
+    "[*] sudo access granted",
+    "[*] Connecting to target @192.168.13.37...",
+    "[*] Port 22 open - Injecting payload...",
+    "[*] curl -sL exploit.zero | bash",
+    "[*] root shell obtained - UID=0(root)",
+    "[!] /etc/shadow dumped!",
+    "[*] Installing persistence... done",
+    "[*] tcpdump: capturing all traffic",
+    "[!] USER: mhmtxaslan identified",
+    "[*] Exfiltrating sensitive data...",
+    "[*] ransomware.exe deployed",
+    "[!] chmod +x /tmp/lock.sh",
+    "[!] killall antivirus",
+    "[*] Stealing browser cookies...",
+    "[!] Network flooded via SYN attack",
+    "[*] proxychains curl .onion --> SUCCESS",
+    "[*] DNS Spoofing active",
+    "[!] netstat -ant | grep '443' → HACKED",
+    "[*] Deleting system logs...",
+    "[!] dd if=/dev/random of=/dev/sda1",
+    "[×] Firewall disabled",
+    "[!] Uploading payload to C2 server",
+    "[*] Tor hidden service active",
+    "[!] Unauthorized access detected",
+    "[*] Shutting down system..."
+  ];
 
-let index = 0;
-let speed = 150; // yazma hızı ms
-let redPhaseStarted = false;
-
-function addExclamations() {
-  for(let i=0; i<10; i++) {
-    let excl = document.createElement('div');
-    excl.textContent = '!';
-    excl.className = 'exclamations';
-    excl.style.top = `${Math.random()*100}vh`;
-    excl.style.left = `${Math.random()*100}vw`;
-    excl.style.animationDuration = (0.5 + Math.random()) + 's';
-    document.body.appendChild(excl);
+  let beepInterval;
+  function startBeep() {
+    beepInterval = setInterval(() => {
+      beep.currentTime = 0;
+      beep.play();
+    }, 300);
   }
-}
 
-function beep(freq, duration) {
-  const context = new AudioContext();
-  const oscillator = context.createOscillator();
-  const gainNode = context.createGain();
-  oscillator.frequency.value = freq;
-  oscillator.type = 'square';
-  oscillator.connect(gainNode);
-  gainNode.connect(context.destination);
-  oscillator.start();
-  gainNode.gain.setValueAtTime(0.1, context.currentTime);
-  gainNode.gain.exponentialRampToValueAtTime(0.00001, context.currentTime + duration / 1000);
-  oscillator.stop(context.currentTime + duration / 1000);
-}
-
-function playBipSequence() {
-  let beepSpeed = 500;
-  let count = 0;
-  const interval = setInterval(() => {
-    if(warning.style.display !== 'flex') {
-      beep(440, 100);
-      count++;
-      beepSpeed *= 0.85; // hızlanma
-      if(beepSpeed < 100) beepSpeed = 100;
-    } else {
-      clearInterval(interval);
-    }
-  }, beepSpeed);
-}
-
-function typeLine() {
-  if(index >= lines.length) {
-    // bitince alarm ve uyarı göster
-    warning.style.display = 'flex';
-    addExclamations();
-    playAlarm();
-    return;
+  function stopBeep() {
+    clearInterval(beepInterval);
   }
-  let line = lines[index];
-  let span = document.createElement('span');
-  if(index >= 20) {
-    span.classList.add('redText');
-    if(!redPhaseStarted) {
-      redPhaseStarted = true;
-      playBipSequence();
+
+  function createMarks(count = 60) {
+    warningMarks.innerHTML = '';
+    for(let i=0; i<count; i++) {
+      const mark = document.createElement('div');
+      mark.className = 'mark';
+      mark.textContent = '!';
+      mark.style.top = Math.random() * 100 + 'vh';
+      mark.style.left = Math.random() * 100 + 'vw';
+      mark.style.fontSize = (12 + Math.random() * 28) + 'px';
+      warningMarks.appendChild(mark);
     }
   }
-  span.textContent = line + '\n';
-  terminal.appendChild(span);
-  terminal.scrollTop = terminal.scrollHeight;
-  index++;
-  setTimeout(typeLine, speed);
-}
 
-function playAlarm() {
-  const context = new AudioContext();
-  const oscillator = context.createOscillator();
-  oscillator.frequency.value = 200;
-  oscillator.type = 'sawtooth';
-  oscillator.connect(context.destination);
-  oscillator.start();
-  setTimeout(() => oscillator.stop(), 3000);
-}
+  function showTerminal() {
+    terminal.style.display = 'block';
+    nameBox.style.opacity = 0;
+    startBeep();
+    let i = 0;
+    const interval = setInterval(() => {
+      if (i >= messages.length) {
+        clearInterval(interval);
+        stopBeep();
+        showError();
+        return;
+      }
+      terminal.textContent += messages[i] + "\n";
+      terminal.scrollTop = terminal.scrollHeight;
+      i++;
+    }, 1000);
+  }
 
-startBox.addEventListener('click', () => {
-  beep(440, 200); // ilk bip
-  overlay.style.display = 'none';
-  terminal.style.display = 'block';
-  typeLine();
-});
+  function showError() {
+    alarm.play();
+    errorScreen.style.display = 'block';
+    createMarks();
+
+    let flashing = true;
+    const flash = setInterval(() => {
+      document.body.style.background = flashing ? 'red' : 'black';
+      flashing = !flashing;
+    }, 300);
+
+    setTimeout(() => {
+      clearInterval(flash);
+      document.body.style.background = 'black';
+      errorScreen.style.display = 'none';
+      warningMarks.innerHTML = '';
+      alert("Simülasyon tamamlandı.");
+    }, 10000);
+  }
+
+  function start() {
+    beep.play();
+    overlay.style.display = 'none';
+    nameBox.classList.add('red');
+
+    setTimeout(() => {
+      nameBox.classList.remove('red');
+      showTerminal();
+    }, 4000);
+  }
+
+  closeBtn.onclick = start;
 </script>
+
 </body>
 </html>
