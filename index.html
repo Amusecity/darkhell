@@ -2,73 +2,55 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>mhmtxaslan Terminal Hack</title>
+  <title>mhmtxaslan Hack Korku</title>
   <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
     html, body {
-      margin: 0; padding: 0;
+      width:100%; height:100vh;
       background: black;
       color: #0f0;
       font-family: monospace;
       overflow: hidden;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      position: relative;
     }
-
     #startBtn {
-      font-size: 6rem;
-      color: red;
-      background: none;
-      border: none;
-      cursor: pointer;
-      z-index: 10;
-      position: absolute;
+      position:absolute; top:50%; left:50%;
+      transform: translate(-50%, -50%);
+      font-size:6rem; color:red; background:none;
+      border:none; cursor:pointer; z-index:10;
     }
-
     #mhmtBox {
-      display: none;
-      font-size: 3rem;
-      border: 2px solid #0f0;
-      padding: 1rem 2rem;
-      position: absolute;
-      z-index: 20;
+      position:absolute; top:50%; left:50%;
+      transform:translate(-50%, -50%);
+      font-size:3rem; color:#0f0;
+      border:2px solid #0f0; padding:1rem 2rem;
+      display:none; z-index:9;
     }
-
     #terminal {
-      display: none;
-      position: absolute;
-      width: 90vw;
-      height: 80vh;
-      background: black;
-      color: #0f0;
-      font-size: 1.1rem;
-      padding: 1rem;
-      overflow-y: auto;
-      border: 1px solid #0f0;
-      z-index: 30;
+      position:absolute; top:0; left:0;
+      width:100%; height:100%;
+      background:black; color:#0f0;
+      padding:2rem; overflow-y:auto;
+      font-size:1rem;
+      display:none; z-index:8;
     }
-
     #errorScreen {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      background: red;
-      color: white;
-      font-size: 3rem;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 100;
+      position:absolute; top:0; left:0;
+      width:100%; height:100%;
+      background:red; color:white;
+      font-family: monospace;
+      font-size:2rem;
+      display:none;
+      justify-content:center; align-items:center;
+      text-align:center;
+      padding:1rem; z-index:7;
       animation: glitch 0.3s infinite;
     }
-
     @keyframes glitch {
-      0% { transform: translate(0, 0); }
-      25% { transform: translate(-5px, 2px); }
-      50% { transform: translate(3px, -3px); }
-      75% { transform: translate(-2px, 5px); }
+      0%   { transform: translate(0, 0); }
+      25%  { transform: translate(-5px, 3px); }
+      50%  { transform: translate(4px, -4px); }
+      75%  { transform: translate(-3px, 5px); }
       100% { transform: translate(0, 0); }
     }
   </style>
@@ -78,65 +60,52 @@
 <button id="startBtn">✖</button>
 <div id="mhmtBox">@mhmtxaslan</div>
 <div id="terminal"></div>
-<div id="errorScreen">SİSTEM ÇÖKTÜ - mhmtxaslan</div>
+<div id="errorScreen">!!! SİSTEM ÇÖKTÜ !!!<br/>mhmtxaslan</div>
 
 <script>
-  const startBtn = document.getElementById("startBtn");
-  const mhmtBox = document.getElementById("mhmtBox");
-  const terminal = document.getElementById("terminal");
-  const errorScreen = document.getElementById("errorScreen");
+  const startBtn = document.getElementById('startBtn');
+  const mhmtBox = document.getElementById('mhmtBox');
+  const terminal = document.getElementById('terminal');
+  const errorScreen = document.getElementById('errorScreen');
 
-  const keySound = new Audio("https://cdn.pixabay.com/audio/2022/03/15/audio_c13b0c7dd5.mp3");
-  const crashSound = new Audio("https://cdn.pixabay.com/audio/2023/10/08/audio_70a46a7e96.mp3"); // patlama gibi bir crash sesi
+  const keySound = new Audio('https://cdn.pixabay.com/audio/2022/03/15/audio_c13b0c7dd5.mp3');
+  const crashSound = new Audio('https://cdn.pixabay.com/audio/2023/10/08/audio_70a46a7e96.mp3');
 
-  const fakeCommands = [
-    "Initializing mhmtOS...",
-    "Verifying root access...",
-    "Loading @mhmtxaslan core...",
-    "Injecting terminal payload...",
-    "HACK DETECTED",
-    "System files compromised.",
-    "Writing to /dev/null",
-    "Overwriting kernel...",
-    "█ █ █ █ █ █ █ █ █ █ █ █ █",
-    "SYSTEM OVERRIDE ACTIVATED",
-    "Critical error detected.",
-    "STACK DUMP...",
-    "STACK DUMP...",
-    "FATAL ERROR 0xDEADDEAD"
+  const fakeCmds = [
+    "starting mhmt-core...",
+    "authenticating user mhmtxaslan...",
+    "root privileges granted.",
+    "loading modules [████▂▁.....]",
+    "injecting payload...",
+    "payload activated.",
+    "system integrity compromised.",
+    "initiating crash dump.",
+    "fatal: unrecoverable error!",
   ];
 
-  async function typeLines(lines, index = 0) {
-    if (index >= lines.length) return;
-
-    terminal.innerHTML += `<div>> ${lines[index]}</div>`;
+  async function typeCmds(i = 0) {
+    if (i >= fakeCmds.length) return;
+    terminal.innerHTML += fakeCmds[i] + "\n";
     terminal.scrollTop = terminal.scrollHeight;
-
     keySound.currentTime = 0;
     keySound.play();
-
-    const delay = lines[index].includes("█") ? 200 : 800;
-    setTimeout(() => typeLines(lines, index + 1), delay);
+    setTimeout(() => typeCmds(i + 1), 800);
   }
 
-  startBtn.addEventListener("click", () => {
-    startBtn.style.display = "none";
-    mhmtBox.style.display = "block";
+  startBtn.addEventListener('click', async () => {
+    startBtn.style.display = 'none';
+    mhmtBox.style.display = 'block';
 
     setTimeout(() => {
-      mhmtBox.style.display = "none";
-      terminal.style.display = "block";
-
-      typeLines(fakeCommands);
-
-      // 20 saniye sonra hata ekranı
+      mhmtBox.style.display = 'none';
+      terminal.style.display = 'block';
+      typeCmds();
       setTimeout(() => {
-        terminal.style.display = "none";
-        errorScreen.style.display = "flex";
+        terminal.style.display = 'none';
+        errorScreen.style.display = 'flex';
         crashSound.play();
-      }, 20000);
-
-    }, 3000); // Başlangıçta 3 sn bekletme
+      }, fakeCmds.length * 800 + 1000); // tüm komutlar tamamlanınca
+    }, 2000);
   });
 </script>
 
