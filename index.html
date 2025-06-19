@@ -3,67 +3,78 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>@mhmtxaslan - Korku Terminali</title>
+<title>Kabus Terminali</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
   html, body {
     margin: 0; padding: 0; height: 100%;
     background: black;
-    color: #00ff00;
-    font-family: 'Share Tech Mono', monospace;
     overflow: hidden;
+    font-family: 'Share Tech Mono', monospace;
+    user-select: none;
   }
   #terminal {
-    position: relative;
     width: 100vw;
     height: 100vh;
     padding: 20px;
     box-sizing: border-box;
+    color: red;
+    font-size: 18px;
+    line-height: 1.1em;
     overflow: hidden;
+    position: relative;
   }
   #text {
     white-space: pre-wrap;
-    line-height: 1.2em;
     max-height: 100%;
-    overflow-y: auto;
+    overflow-y: hidden;
   }
   #mask {
     position: fixed;
-    top: 50%; left: 50%;
+    top: 50%;
+    left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 150px;
-    color: red;
-    opacity: 0;
-    mix-blend-mode: difference;
+    font-size: 200px;
+    color: #ff0000;
+    opacity: 0.1;
+    mix-blend-mode: screen;
+    animation: flicker 0.05s infinite;
     user-select: none;
     pointer-events: none;
-    animation: flicker 0.15s infinite;
   }
-  #error {
+  #hacked {
     position: fixed;
-    top: 50%; left: 50%;
+    top: 40%;
+    left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 90px;
-    color: red;
-    font-weight: bold;
-    opacity: 0;
-    user-select: none;
-    pointer-events: none;
+    font-size: 140px;
+    font-weight: 900;
+    color: #ff0000;
     text-shadow:
       0 0 10px #ff0000,
-      0 0 20px #ff0000,
       0 0 30px #ff0000,
-      0 0 40px #ff0000;
+      0 0 50px #ff0000,
+      0 0 80px #ff0000;
+    opacity: 0;
+    user-select: none;
+    pointer-events: none;
+    animation: pulse 1s infinite alternate;
   }
   @keyframes flicker {
-    0%, 100% {opacity:1;}
-    50% {opacity:0.3;}
+    0%, 100% {opacity: 0.1;}
+    50% {opacity: 0.3;}
   }
-  .blink {
-    animation: blink 1s step-start infinite;
+  @keyframes pulse {
+    0% {opacity: 0;}
+    100% {opacity: 1;}
   }
-  @keyframes blink {
-    50% { opacity: 0; }
+  #flash {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: red;
+    opacity: 0;
+    pointer-events: none;
   }
 </style>
 </head>
@@ -71,189 +82,97 @@
 <div id="terminal">
   <div id="text"></div>
 </div>
-<div id="mask">👺</div>
-<div id="error">!!! SYSTEM BREACH DETECTED !!!</div>
+<div id="mask">
+  █▀▄█ █▀█ █▄█ █▀█ █▄▀ █▀█ █ █▄░█ █▀▀ █▀▄
+</div>
+<div id="hacked">HACKED</div>
+<div id="flash"></div>
 
-<audio id="beep" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" preload="auto"></audio>
-<audio id="static" src="https://actions.google.com/sounds/v1/electronic/static.ogg" preload="auto"></audio>
+<audio id="alarm" src="https://actions.google.com/sounds/v1/alarms/bugle_tune.ogg" preload="auto"></audio>
 <audio id="glitch" src="https://actions.google.com/sounds/v1/electronic/glitch.ogg" preload="auto"></audio>
 
 <script>
   const textEl = document.getElementById('text');
-  const maskEl = document.getElementById('mask');
-  const errorEl = document.getElementById('error');
-  const beepSound = document.getElementById('beep');
-  const staticSound = document.getElementById('static');
-  const glitchSound = document.getElementById('glitch');
+  const mask = document.getElementById('mask');
+  const hacked = document.getElementById('hacked');
+  const flash = document.getElementById('flash');
+  const alarm = document.getElementById('alarm');
+  const glitch = document.getElementById('glitch');
 
-  const introText = '@mhmtxaslan\n\n';
-  const scaryLines = [
-    "GÜVENLİK İHLALİ TESPİT EDİLDİ!",
-    "SİSTEMİNİZE YABANCI BİR GİRİŞ OLDU!",
-    "VERİLERİNİZ ŞİFRELENDİ!",
-    "İZİN VERİLMEDİ!",
-    "HACKERLAR TARAFINDAN TAKİP EDİLİYORSUNUZ!",
-    "VERİLER SİLİNİYOR...",
-    "SİSTEM ÇÖKÜYOR...",
-    "ACİL DURUM PROTOKOLÜ DEVREDE!",
-    "YENİ BİR GİRİŞ SAĞLANIYOR...",
-    "İZİN VERİLMEYEN BAĞLANTI TESİS EDİLDİ!",
-    "KÖK ERİŞİM KAYBI!",
+  // Çok hızlı ve rastgele korkutucu metinler
+  const scaryTexts = [
+    "KABUS BAŞLADI...",
     "SİSTEM ELE GEÇİRİLDİ!",
-    "VERİ TABANI PATLATILIYOR!",
-    "ANTİVİRÜS KAPANDI!",
-    "SUNUCUYA ZARAR VERİLİYOR!",
-    "GİZLİ BİLGİLER ELE GEÇİRİLDİ!",
-    "BU BİR DENEME DEĞİL!",
-    "DERHAL KAPAT!",
-    "KORUNMAZSANİZ YENİ SALDIRILAR GELECEK!",
+    "VERİLERİNİZ KORUNMUYOR!",
+    "GİRİŞ İZNİ YOK!",
+    "UYARI: HACKLENDİNİZ!",
+    "SİSTEM ÇÖKÜYOR!",
+    "VERİLERİNİZ ŞİFRELENDİ!",
+    "ANTİVİRÜS DEVRE DIŞI!",
+    "KÖK ERİŞİM KAYBI!",
+    "SUNUCU ELE GEÇİRİLDİ!",
+    "YENİ SALDIRI GELİYOR!",
+    "ACİL DURUM PROTOKOLÜ!",
+    "BAĞLANTI KESİLİYOR!",
+    "İNTERNET KOPUYOR!",
+    "DOSYA SİLİNİYOR!",
+    "SİSTEM 1% KALDI!",
+    "GÜVENLİK İHLALİ!",
+    "TÜM VERİLER ELE GEÇTİ!",
+    "BİLGİLERİNİZ TEHLİKEDE!",
+    "KARANLIK GELİYOR!",
+    "BİLGİLER KARA AÇAĞA AKIYOR!",
   ];
 
-  let index = 0;
-  let pos = 0;
-  let speed = 80;
-  let blinking = false;
+  let intervalId;
+  let chars = "█▓▒░#%$@!~^&*+=";
 
-  // Yazıyı yavaş yavaş yazan fonksiyon
-  function typeWriter(text, callback) {
-    if (pos < text.length) {
-      textEl.textContent += text.charAt(pos);
-      pos++;
-      setTimeout(() => typeWriter(text, callback), speed);
-    } else {
-      if (callback) callback();
+  // Terminal ekranına hızlı metin yazma fonksiyonu
+  function fastWrite() {
+    let output = "";
+    for(let i=0; i<1000; i++){
+      output += chars.charAt(Math.floor(Math.random()*chars.length));
+    }
+    textEl.textContent = output + "\n";
+
+    // Arada korkutucu metin ekle
+    if(Math.random() < 0.07){
+      const scary = scaryTexts[Math.floor(Math.random()*scaryTexts.length)];
+      textEl.textContent += "\n>>> " + scary + "\n";
+      glitch.play();
     }
   }
 
-  // Korkutucu yazıları tek tek yazdır
-  function writeScaryLines(i = 0) {
-    if (i >= scaryLines.length) {
-      // Final efektlere geç
-      finalScare();
-      return;
-    }
-    typeWriter(scaryLines[i] + "\n", () => {
-      // Satır satır yavaşça kaydır
-      textEl.scrollTop = textEl.scrollHeight;
-      setTimeout(() => {
-        pos = 0;
-        writeScaryLines(i + 1);
-      }, 500);
-    });
-  }
+  // Yanıp sönme ve alarm efekti
+  function flickerFlash() {
+    let flashes = 0;
+    const maxFlashes = 20;
 
-  // Yanıp sönme efekti hızlandırma ve sesleri açma
-  function startFlicker() {
-    let flickCount = 0;
-    const flickInterval = setInterval(() => {
-      if (flickCount > 30) {
-        clearInterval(flickInterval);
-        maskEl.style.opacity = 0;
-        errorEl.style.opacity = 1;
-        beepSound.play();
-        return;
+    intervalId = setInterval(() => {
+      fastWrite();
+      flash.style.opacity = flashes % 2 === 0 ? 0.7 : 0;
+      flashes++;
+
+      if(flashes === 5){
+        alarm.play();
       }
-      maskEl.style.opacity = flickCount % 2 === 0 ? 1 : 0;
-      glitchSound.play();
-      flickCount++;
+      if(flashes > maxFlashes){
+        clearInterval(intervalId);
+        hacked.style.opacity = 1;
+      }
     }, 80);
   }
 
-  // Final korku efektleri
-  function finalScare() {
-    // Karanlık ve yanıp sönme
-    let flashes = 0;
-    const flashInterval = setInterval(() => {
-      if (flashes > 12) {
-        clearInterval(flashInterval);
-        // Sonunda "SYSTEM BREACH DETECTED" kalacak
-        errorEl.style.opacity = 1;
-        beepSound.play();
-        return;
-      }
-      if (flashes % 2 === 0) {
-        document.body.style.background = 'red';
-        errorEl.style.color = 'black';
-        errorEl.style.textShadow = 'none';
-      } else {
-        document.body.style.background = 'black';
-        errorEl.style.color = 'red';
-        errorEl.style.textShadow =
-          '0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 30px #ff0000';
-      }
-      flashes++;
-    }, 300);
-
-    // Ünlem işaretleri yanıp sönme efektleri
-    const exclamations = ['!', '‼', '⚠', '⚡', '✱', '✶'];
-    const exclamationContainer = document.createElement('div');
-    exclamationContainer.style.position = 'fixed';
-    exclamationContainer.style.top = '0';
-    exclamationContainer.style.left = '0';
-    exclamationContainer.style.width = '100vw';
-    exclamationContainer.style.height = '100vh';
-    exclamationContainer.style.pointerEvents = 'none';
-    document.body.appendChild(exclamationContainer);
-
-    let exclamCount = 0;
-    const exclamInterval = setInterval(() => {
-      if (exclamCount > 60) {
-        clearInterval(exclamInterval);
-        return;
-      }
-      const exclam = document.createElement('div');
-      exclam.textContent = exclamations[Math.floor(Math.random() * exclamations.length)];
-      exclam.style.position = 'absolute';
-      exclam.style.color = 'red';
-      exclam.style.fontSize = `${20 + Math.random() * 40}px`;
-      exclam.style.top = `${Math.random() * 100}vh`;
-      exclam.style.left = `${Math.random() * 100}vw`;
-      exclam.style.opacity = Math.random();
-      exclamationContainer.appendChild(exclam);
-
-      setTimeout(() => {
-        exclam.remove();
-      }, 1000);
-
-      exclamCount++;
-    }, 150);
-  }
-
-  // Ana akış
-  function start() {
-    // 1. @mhmtxaslan yeşil yazı
-    textEl.style.color = '#00ff00';
-    typeWriter(introText, () => {
-      // 2. yazıyı kırmızı yap, hızlı yanıp sönmeye başla
-      textEl.style.color = 'red';
-      flickerEffect();
-
-      // 3. Korkutucu yazılar
-      setTimeout(() => {
-        writeScaryLines();
-      }, 2000);
-    });
-  }
-
-  // Hızlı yanıp sönme efekti
-  function flickerEffect() {
-    let count = 0;
-    const maxCount = 20;
-    const flickerInterval = setInterval(() => {
-      if (count >= maxCount) {
-        clearInterval(flickerInterval);
-        textEl.style.color = 'red';
-        speed = 80;
-        return;
-      }
-      textEl.style.color = count % 2 === 0 ? 'darkred' : 'red';
-      speed = count < 10 ? 200 : 30;
-      count++;
-    }, 100);
-  }
-
   // Başlat
-  start();
+  flickerFlash();
+
+  // 15 saniye sonra terminal duracak, "HACKED" kalacak
+  setTimeout(() => {
+    clearInterval(intervalId);
+    textEl.style.color = '#ff3300';
+    textEl.style.fontWeight = 'bold';
+    hacked.style.opacity = 1;
+  }, 15000);
 </script>
 </body>
 </html>
