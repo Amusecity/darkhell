@@ -1,232 +1,141 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Karanlık Terminal</title>
-  <style>
-    html, body {
-      margin: 0; padding: 0; height: 100%; width: 100%;
-      background: black; color: #0f0; font-family: monospace;
-      overflow: hidden;
-      user-select: none;
-    }
-    #overlay {
-      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      background: black; display: flex;
-      justify-content: center; align-items: center;
-      z-index: 9999;
-    }
-    #closeBtn {
-      font-size: 100px;
-      color: red;
-      cursor: pointer;
-      border: 5px solid red;
-      border-radius: 50%;
-      width: 150px;
-      height: 150px;
-      line-height: 140px;
-      text-align: center;
-      font-weight: 900;
-      box-shadow: 0 0 40px red;
-    }
-    #nameBox {
-      position: fixed;
-      top: 45%; left: 50%;
-      transform: translate(-50%, -50%);
-      padding: 20px 50px;
-      border: 4px solid #0f0;
-      color: #0f0;
-      font-size: 48px;
-      font-weight: bold;
-      background: black;
-      z-index: 900;
-      transition: opacity 0.5s ease;
-    }
-    #nameBox.red {
-      color: red;
-      animation: blink 0.2s infinite;
-    }
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0; }
-    }
-    #terminal {
-      position: fixed;
-      top: 10px; left: 10px; right: 10px; bottom: 10px;
-      padding: 20px; box-sizing: border-box;
-      background: black; color: #0f0;
-      font-size: 20px; line-height: 1.5em;
-      white-space: pre-wrap; overflow-y: auto;
-      display: none; font-weight: 600;
-      animation: tvShake 0.15s infinite alternate;
-    }
-    @keyframes tvShake {
-      0% { filter: none; transform: translate(0, 0); }
-      25% { filter: contrast(1.3) brightness(1.1) blur(0.5px); transform: translate(1px, -1px); }
-      50% { filter: contrast(1.5) brightness(1.3) blur(1.2px); transform: translate(-1px, 1px); }
-      75% { filter: contrast(1.1) brightness(1) blur(0.3px); transform: translate(1px, 1px); }
-      100% { filter: none; transform: translate(0, 0); }
-    }
-    #errorScreen {
-      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(255,0,0,0.85);
-      color: black; font-size: 56px;
-      font-weight: 900; text-align: center;
-      line-height: 100vh;
-      display: none;
-      animation: errorFlash 1s infinite;
-      z-index: 10000;
-    }
-    @keyframes errorFlash {
-      0%, 50%, 100% { opacity: 1; }
-      25%, 75% { opacity: 0; }
-    }
-    #warningMarks {
-      position: fixed; top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      pointer-events: none;
-      z-index: 10001;
-    }
-    .mark {
-      position: absolute; color: red;
-      font-weight: 900; font-size: 24px;
-      animation: markBlink 1.2s infinite;
-    }
-    @keyframes markBlink {
-      0%, 50%, 100% { opacity: 1; }
-      25%, 75% { opacity: 0; }
-    }
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Karanlık Terminal</title>
+<style>
+  html, body {
+    margin:0; padding:0; height:100%; width:100%;
+    background:black; font-family: monospace;
+    overflow:hidden; user-select:none;
+  }
+  #overlay {
+    position:fixed; top:0; left:0;
+    width:100vw; height:100vh;
+    background:black;
+    display:flex; align-items:center; justify-content:center;
+    z-index:9999;
+  }
+  #closeBtn {
+    font-size:100px; color:red;
+    cursor:pointer; border:5px solid red;
+    border-radius:50%;
+    width:150px; height:150px;
+    line-height:140px; text-align:center;
+    font-weight:900;
+    box-shadow:0 0 40px red;
+    user-select:none;
+  }
+  #nameBox {
+    position:fixed; top:45%; left:50%;
+    transform:translate(-50%,-50%);
+    padding:20px 50px; border:4px solid #0f0;
+    color:#0f0; font-size:48px;
+    font-weight:bold; background:black;
+    z-index:900; transition:opacity .5s;
+  }
+  #nameBox.red {
+    color:red; animation:blink .25s infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+  #terminal {
+    position:fixed; top:10px; left:10px;
+    right:10px; bottom:10px;
+    padding:20px; box-sizing:border-box;
+    background:black; color:#0f0; font-size:20px;
+    line-height:1.5; white-space:pre-wrap;
+    overflow-y:auto; display:none;
+  }
+  .red { color: #f00; }
+</style>
 </head>
 <body>
 
 <div id="overlay">
-  <div id="closeBtn" aria-label="Başlat">×</div>
+  <div id="closeBtn">×</div>
 </div>
-
 <div id="nameBox">@MHMTXASLAN</div>
 <div id="terminal"></div>
-<div id="errorScreen">SİSTEM HATASI</div>
-<div id="warningMarks"></div>
 
-<!-- Ses Efektleri -->
 <audio id="beep" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
-<audio id="alarm" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg"></audio>
 
 <script>
-  const closeBtn = document.getElementById('closeBtn');
-  const overlay = document.getElementById('overlay');
-  const nameBox = document.getElementById('nameBox');
-  const terminal = document.getElementById('terminal');
-  const errorScreen = document.getElementById('errorScreen');
-  const warningMarks = document.getElementById('warningMarks');
-  const beep = document.getElementById('beep');
-  const alarm = document.getElementById('alarm');
+  const closeBtn = document.getElementById('closeBtn'),
+        overlay = document.getElementById('overlay'),
+        nameBox = document.getElementById('nameBox'),
+        terminal = document.getElementById('terminal'),
+        beep = document.getElementById('beep');
 
-  const messages = [
+  const lines = [
     "[*] sudo access granted",
-    "[*] Connecting to target @192.168.13.37...",
-    "[*] Port 22 open - Injecting payload...",
-    "[*] curl -sL exploit.zero | bash",
-    "[*] root shell obtained - UID=0(root)",
-    "[!] /etc/shadow dumped!",
-    "[*] Installing persistence... done",
-    "[*] tcpdump: capturing all traffic",
-    "[!] USER: mhmtxaslan identified",
-    "[*] Exfiltrating sensitive data...",
+    "[*] Connecting to 192.168.13.37",
+    "[*] Port 22 open",
+    "[*] Injecting payload",
+    "[*] root shell obtained",
+    "[!] /etc/shadow dumped",
+    "[*] Installing persistence",
+    "[*] tcpdump capturing traffic",
+    "[!] USER: mhmtxaslan detected",
+    "[*] Exfiltrating data",
     "[*] ransomware.exe deployed",
     "[!] chmod +x /tmp/lock.sh",
     "[!] killall antivirus",
-    "[*] Stealing browser cookies...",
-    "[!] Network flooded via SYN attack",
-    "[*] proxychains curl .onion --> SUCCESS",
-    "[*] DNS Spoofing active",
-    "[!] netstat -ant | grep '443' → HACKED",
-    "[*] Deleting system logs...",
+    "[*] Stealing cookies",
+    "[!] SYN flood attack running",
+    "[*] proxychains curl .onion",
+    "[!] DNS Spoofing enabled",
+    "[!] netstat => HACKED",
+    "[*] Deleting logs",
     "[!] dd if=/dev/random of=/dev/sda1",
     "[×] Firewall disabled",
-    "[!] Uploading payload to C2 server",
-    "[*] Tor hidden service active",
-    "[!] Unauthorized access detected",
-    "[*] Shutting down system..."
+    "[!] Payload uploaded",
+    "[!] Unauthorized access",
+    "[*] Shutting down system"
   ];
 
-  let beepInterval;
-  function startBeep() {
-    beepInterval = setInterval(() => {
+  let idx=0, start=0, speed=1000, beepInt;
+
+  function beepOn() {
+    clearInterval(beepInt);
+    beepInt = setInterval(() => {
       beep.currentTime = 0;
       beep.play();
-    }, 300);
+    }, speed);
   }
 
-  function stopBeep() {
-    clearInterval(beepInterval);
-  }
+  function writeLoop(ts) {
+    if(!start) start = ts;
+    const elapsed = ts - start;
 
-  function createMarks(count = 60) {
-    warningMarks.innerHTML = '';
-    for(let i=0; i<count; i++) {
-      const mark = document.createElement('div');
-      mark.className = 'mark';
-      mark.textContent = '!';
-      mark.style.top = Math.random() * 100 + 'vh';
-      mark.style.left = Math.random() * 100 + 'vw';
-      mark.style.fontSize = (12 + Math.random() * 28) + 'px';
-      warningMarks.appendChild(mark);
-    }
-  }
-
-  function showTerminal() {
-    terminal.style.display = 'block';
-    nameBox.style.opacity = 0;
-    startBeep();
-    let i = 0;
-    const interval = setInterval(() => {
-      if (i >= messages.length) {
-        clearInterval(interval);
-        stopBeep();
-        showError();
-        return;
+    if(elapsed < 10000) speed = 1000; 
+    else {
+      if(!nameBox.classList.contains('red')) {
+        nameBox.classList.add('red');
+        beep.play();
+        beepOn();
       }
-      terminal.textContent += messages[i] + "\n";
+      speed = Math.max(200, speed * 0.95);
+    }
+
+    if(idx >= lines.length) { idx = 0; terminal.innerHTML = ''; start = ts; }
+
+    if(!writeLoop.last || ts - writeLoop.last >= speed) {
+      let sp = document.createElement('div');
+      sp.textContent = lines[idx];
+      if(elapsed >= 10000) sp.classList.add('red');
+      terminal.appendChild(sp);
       terminal.scrollTop = terminal.scrollHeight;
-      i++;
-    }, 1000);
+      idx++; writeLoop.last = ts;
+    }
+    requestAnimationFrame(writeLoop);
   }
 
-  function showError() {
-    alarm.play();
-    errorScreen.style.display = 'block';
-    createMarks();
-
-    let flashing = true;
-    const flash = setInterval(() => {
-      document.body.style.background = flashing ? 'red' : 'black';
-      flashing = !flashing;
-    }, 300);
-
-    setTimeout(() => {
-      clearInterval(flash);
-      document.body.style.background = 'black';
-      errorScreen.style.display = 'none';
-      warningMarks.innerHTML = '';
-      alert("Simülasyon tamamlandı.");
-    }, 10000);
-  }
-
-  function start() {
-    beep.play();
+  closeBtn.onclick = () => {
     overlay.style.display = 'none';
-    nameBox.classList.add('red');
-
-    setTimeout(() => {
-      nameBox.classList.remove('red');
-      showTerminal();
-    }, 4000);
-  }
-
-  closeBtn.onclick = start;
+    terminal.style.display = 'block';
+    requestAnimationFrame(writeLoop);
+  };
 </script>
 
 </body>
