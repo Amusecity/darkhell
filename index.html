@@ -1,141 +1,154 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Karanlık Terminal</title>
 <style>
   html, body {
     margin:0; padding:0; height:100%; width:100%;
-    background:black; font-family: monospace;
-    overflow:hidden; user-select:none;
-  }
-  #overlay {
-    position:fixed; top:0; left:0;
-    width:100vw; height:100vh;
-    background:black;
-    display:flex; align-items:center; justify-content:center;
-    z-index:9999;
-  }
-  #closeBtn {
-    font-size:100px; color:red;
-    cursor:pointer; border:5px solid red;
-    border-radius:50%;
-    width:150px; height:150px;
-    line-height:140px; text-align:center;
-    font-weight:900;
-    box-shadow:0 0 40px red;
-    user-select:none;
+    background: black; color: #0f0; font-family: monospace;
+    overflow: hidden;
+    user-select: none;
   }
   #nameBox {
-    position:fixed; top:45%; left:50%;
-    transform:translate(-50%,-50%);
-    padding:20px 50px; border:4px solid #0f0;
-    color:#0f0; font-size:48px;
-    font-weight:bold; background:black;
-    z-index:900; transition:opacity .5s;
+    position: fixed;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px 50px;
+    border: 4px solid #0f0;
+    color: #0f0;
+    font-size: 48px;
+    font-weight: bold;
+    background: black;
+    z-index: 900;
+    user-select:none;
+    opacity: 1;
+    transition: color 0.5s ease;
   }
   #nameBox.red {
-    color:red; animation:blink .25s infinite;
+    color: red;
+    animation: fastBlink 0.25s infinite;
   }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+  @keyframes fastBlink {
+    0%, 50%, 100% { opacity: 1; }
+    25%, 75% { opacity: 0; }
+  }
   #terminal {
-    position:fixed; top:10px; left:10px;
-    right:10px; bottom:10px;
-    padding:20px; box-sizing:border-box;
-    background:black; color:#0f0; font-size:20px;
-    line-height:1.5; white-space:pre-wrap;
-    overflow-y:auto; display:none;
+    position: fixed;
+    top: 10px; left: 10px;
+    right: 10px; bottom: 10px;
+    padding: 20px;
+    box-sizing: border-box;
+    background: black;
+    color: red; /* Kırmızı yapıldı */
+    font-size: 20px;
+    line-height: 1.5em;
+    white-space: pre-wrap;
+    overflow-y: auto;
+    display: none;
+    user-select:none;
+    font-weight: 600;
+    filter: none;
   }
-  .red { color: #f00; }
 </style>
 </head>
 <body>
 
-<div id="overlay">
-  <div id="closeBtn">×</div>
-</div>
 <div id="nameBox">@MHMTXASLAN</div>
+
 <div id="terminal"></div>
 
+<!-- Ses -->
 <audio id="beep" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
 
 <script>
-  const closeBtn = document.getElementById('closeBtn'),
-        overlay = document.getElementById('overlay'),
-        nameBox = document.getElementById('nameBox'),
-        terminal = document.getElementById('terminal'),
-        beep = document.getElementById('beep');
+  const nameBox = document.getElementById('nameBox');
+  const terminal = document.getElementById('terminal');
+  const beepSound = document.getElementById('beep');
 
-  const lines = [
-    "[*] sudo access granted",
-    "[*] Connecting to 192.168.13.37",
-    "[*] Port 22 open",
-    "[*] Injecting payload",
-    "[*] root shell obtained",
-    "[!] /etc/shadow dumped",
-    "[*] Installing persistence",
-    "[*] tcpdump capturing traffic",
-    "[!] USER: mhmtxaslan detected",
-    "[*] Exfiltrating data",
-    "[*] ransomware.exe deployed",
-    "[!] chmod +x /tmp/lock.sh",
-    "[!] killall antivirus",
-    "[*] Stealing cookies",
-    "[!] SYN flood attack running",
-    "[*] proxychains curl .onion",
-    "[!] DNS Spoofing enabled",
-    "[!] netstat => HACKED",
-    "[*] Deleting logs",
-    "[!] dd if=/dev/random of=/dev/sda1",
-    "[×] Firewall disabled",
-    "[!] Payload uploaded",
-    "[!] Unauthorized access",
-    "[*] Shutting down system"
+  // Hacker mesajları, hızlı yazacak kırmızı olarak
+  const terminalMessages = [
+    "SİSTEM TARANIYOR...",
+    "VERİLER ANALİZ EDİLİYOR...",
+    "GÜVENLİK AÇIĞI BULUNDU...",
+    "KÖK ERİŞİM SAĞLANDI...",
+    "SUNUCU ELE GEÇİRİLDİ...",
+    "FIREWALL BAYPAS EDİLİYOR...",
+    "VERİLER ŞİFRELİLENİYOR...",
+    "İŞLEM TAMAMLANIYOR...",
+    "KODLAR DEŞİFRE EDİLİYOR...",
+    "AĞ TRAFİĞİ İZLENİYOR...",
+    "ŞİFRELER KIRILIYOR...",
+    "ROOTKIT YÜKLENİYOR...",
+    "SİSTEM LOGLARI SİLİNİYOR...",
+    "ARAYÜZ KAPANDI...",
+    "KULLANICI HESABI ELE GEÇİRİLDİ...",
+    "GİZLİ DOSYALAR AÇILIYOR...",
+    "ŞİFRE KORUMALARI BAYPAS EDİLİYOR...",
+    "VERİLER ÇALINIYOR...",
+    "SUNUCUYA GERİ DÖNÜŞ YOK...",
+    "İŞLEM BAŞARILI...",
+    "GÜVENLİK DUVARI ÇÖKTÜ...",
+    "KOMUT SATIRI ELDE EDİLDİ...",
+    "VERİ TABANI ELE GEÇİRİLDİ...",
+    "BİLGİLER İNDİRİLİYOR...",
+    "HACKER GİRİŞİ ONAYLANDI...",
+    "TEHDİT SEVİYESİ: KRİTİK...",
+    "KAMERA KAPANDI...",
+    "SES KAYDI ALINIYOR...",
+    "TÜM PORTLAR AÇIK...",
+    "YENİ GİRİŞLER ENGELLENDİ...",
+    "SİSTEM ELE GEÇİRİLDİ..."
   ];
 
-  let idx=0, start=0, speed=1000, beepInt;
+  // İlk 10 saniye yavaş @MHMTXASLAN yeşil yazı kalacak
+  // 10 saniye sonra kırmızıya dönüp hızlanacak ve bip sesi artacak,
+  // terminal mesajları hızlıca akacak.
 
-  function beepOn() {
-    clearInterval(beepInt);
-    beepInt = setInterval(() => {
-      beep.currentTime = 0;
-      beep.play();
-    }, speed);
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  function writeLoop(ts) {
-    if(!start) start = ts;
-    const elapsed = ts - start;
+  async function showNameBox() {
+    // Başlangıçta yeşil ve sabit
+    nameBox.style.color = '#0f0';
+    nameBox.style.opacity = '1';
 
-    if(elapsed < 10000) speed = 1000; 
-    else {
-      if(!nameBox.classList.contains('red')) {
-        nameBox.classList.add('red');
-        beep.play();
-        beepOn();
-      }
-      speed = Math.max(200, speed * 0.95);
-    }
+    // 10 saniye bekle (burada yavaş yazma veya efekt koymak istersen ekleyebilirsin)
+    await sleep(10000);
 
-    if(idx >= lines.length) { idx = 0; terminal.innerHTML = ''; start = ts; }
+    // Rengi kırmızı yap ve hızlı yanıp sönme animasyonu ekle
+    nameBox.classList.add('red');
 
-    if(!writeLoop.last || ts - writeLoop.last >= speed) {
-      let sp = document.createElement('div');
-      sp.textContent = lines[idx];
-      if(elapsed >= 10000) sp.classList.add('red');
-      terminal.appendChild(sp);
-      terminal.scrollTop = terminal.scrollHeight;
-      idx++; writeLoop.last = ts;
-    }
-    requestAnimationFrame(writeLoop);
-  }
+    // Bip sesi hızını artıran fonksiyon
+    let beepInterval = 500;
+    const beepTimer = setInterval(() => {
+      beepSound.currentTime = 0;
+      beepSound.play();
+      beepInterval -= 50;
+      if (beepInterval < 100) beepInterval = 100;
+      clearInterval(beepTimer);
+      setInterval(() => {
+        beepSound.currentTime = 0;
+        beepSound.play();
+      }, beepInterval);
+    }, beepInterval);
 
-  closeBtn.onclick = () => {
-    overlay.style.display = 'none';
+    // nameBox görünür kalacak, terminal görünür olacak
     terminal.style.display = 'block';
-    requestAnimationFrame(writeLoop);
-  };
+    terminal.innerText = '';
+
+    // Terminal mesajlarını hızlı hızlı yaz
+    for (let i = 0; i < terminalMessages.length; i++) {
+      terminal.innerText += terminalMessages[i] + "\n\n";
+      terminal.scrollTop = terminal.scrollHeight;
+      await sleep(200); // Burada hızlı yazma hızı
+    }
+  }
+
+  showNameBox();
 </script>
 
 </body>
