@@ -6,7 +6,7 @@
 <title>Zero-Day Sim</title>
 <style>
   html, body {
-    margin: 0; padding: 0; height: 100%;
+    margin:0; padding:0; height:100%;
     background: black;
     font-family: monospace;
     overflow: hidden;
@@ -16,45 +16,47 @@
     position: fixed;
     top:0; left:0; right:0; bottom:0;
     background: black;
-    z-index: 99999;
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
     user-select: none;
+    z-index: 9999;
+    flex-direction: column;
   }
   #startName {
-    font-size: 60px;
+    font-size: 70px;
     border: 3px solid #0f0;
     padding: 30px 60px;
-    margin-bottom: 40px;
+    margin-bottom: 30px;
     animation: blink 1.2s infinite;
-    color: #0f0;
-    user-select: none;
   }
   @keyframes blink {
     0%,100% {opacity:1;}
     50% {opacity: 0.3;}
   }
   #startBtn {
-    width: 100px; height: 100px;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 70px;
+    height: 70px;
+    font-size: 48px;
     border: 3px solid #0f0;
-    border-radius: 50%;
-    font-size: 72px;
-    color: #0f0;
     background: black;
+    color: #0f0;
+    border-radius: 50%;
     cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     user-select: none;
-    transition: background-color 0.3s;
+    line-height: 70px;
+    text-align: center;
+    font-weight: bold;
+    transition: background-color 0.3s, color 0.3s;
+    z-index: 10000;
   }
   #startBtn:hover {
     background: #0f0;
     color: black;
   }
-
   #mainBox {
     position: fixed;
     top: 5vh;
@@ -66,16 +68,13 @@
     background: black;
     border: 2px solid #0f0;
     color: #0f0;
-    font-size: 18px;
+    font-size: 20px;
     overflow-y: auto;
-    padding: 15px;
+    padding: 20px;
     white-space: pre-wrap;
-    z-index: 10000;
     display: none;
-    user-select: none;
   }
-
-  .boxes-container {
+  #boxesContainer {
     position: fixed;
     bottom: 5vh;
     left: 50%;
@@ -85,49 +84,36 @@
     display: flex;
     justify-content: space-between;
     gap: 12px;
-    z-index: 10000;
     display: none;
+    user-select: none;
   }
   .box {
     background: black;
     border: 2px solid;
-    color: #0f0;
     width: 23%;
-    height: 38vh;
+    height: 40vh;
     font-size: 16px;
     overflow-y: auto;
     padding: 12px;
     white-space: pre-wrap;
     font-weight: 700;
-    user-select: none;
   }
-  .box.red {
-    border-color: #f00;
-    color: #f00;
-  }
-  .box.green {
-    border-color: #0f0;
-    color: #0f0;
-  }
-  .box.white {
-    border-color: #fff;
-    color: #fff;
-  }
-
+  .box.red { border-color: #f00; color: #f00; }
+  .box.green { border-color: #0f0; color: #0f0; }
+  .box.white { border-color: #fff; color: #fff; }
   #errorScreen {
     position: fixed;
-    top: 0; left:0; right:0; bottom:0;
+    top:0; left:0; right:0; bottom:0;
     background: black;
     color: red;
-    font-size: 96px;
+    font-size: 90px;
     font-weight: 900;
-    display: flex;
+    display: none;
     justify-content: center;
     align-items: center;
     user-select: none;
-    z-index: 20000;
-    display: none;
-    animation: flashError 0.3s infinite alternate;
+    animation: flashError 0.4s infinite alternate;
+    z-index: 11000;
   }
   @keyframes flashError {
     0% {color: red; background: black;}
@@ -145,7 +131,7 @@
 
 <div id="mainBox"></div>
 
-<div class="boxes-container" id="boxesContainer">
+<div id="boxesContainer">
   <div class="box red" id="box1"></div>
   <div class="box green" id="box2"></div>
   <div class="box white" id="box3"></div>
@@ -155,11 +141,11 @@
 <div id="errorScreen">!!! ERROR !!!</div>
 
 <audio id="alarmSound" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg"></audio>
-<audio id="beepSound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
 
 <script>
   const overlay = document.getElementById('overlay');
   const startBtn = document.getElementById('startBtn');
+  const startName = document.getElementById('startName');
   const mainBox = document.getElementById('mainBox');
   const boxesContainer = document.getElementById('boxesContainer');
   const boxes = [
@@ -170,9 +156,8 @@
   ];
   const errorScreen = document.getElementById('errorScreen');
   const alarmSound = document.getElementById('alarmSound');
-  const beepSound = document.getElementById('beepSound');
 
-  // İlk 10 saniyede cmd stilde yazılar:
+  // Komutlar:
   const initialTexts = [
     "Sistem kontrol ediliyor...",
     "Yapay Zekâ aktif durumda.",
@@ -186,7 +171,6 @@
     "İşlem tamamlandı.",
   ];
 
-  // Kutularda farklı yazılar:
   const boxTexts = [
     "ALERT: Saldırı tespit edildi.",
     "Giriş denemeleri: Başarısız.",
@@ -200,75 +184,92 @@
     "Sistem çökertiliyor...",
   ];
 
-  let mainInterval;
-  let boxIntervals = [];
-  const boxScrollSpeeds = [40, 30, 20, 15]; // hızlar ms cinsinden
-  const boxColors = ['red', 'green', 'white', 'red'];
-
-  // Yazı harf harf yazma fonksiyonu:
+  // Harf harf yazdırma fonksiyonu:
   function typeWriter(element, text, speed, callback) {
     let i = 0;
     element.textContent = "";
     function typing() {
-      if(i < text.length) {
+      if (i < text.length) {
         element.textContent += text.charAt(i);
         element.scrollTop = element.scrollHeight;
         i++;
         setTimeout(typing, speed);
       } else {
-        if(callback) callback();
+        if (callback) callback();
       }
     }
     typing();
   }
 
-  // Başlangıç cmd yazısı dizisini yazdır, 10 saniyede tamamlasın:
-  function typeInitialTexts(callback) {
+  // İlk 10 satırı 10 saniyede yaz:
+  function writeInitialTexts(callback) {
     let idx = 0;
-    function next() {
-      if(idx >= initialTexts.length) {
-        if(callback) callback();
+    function nextLine() {
+      if (idx >= initialTexts.length) {
+        callback();
         return;
       }
-      typeWriter(mainBox, initialTexts[idx] + "\n", 40, () => {
+      typeWriter(mainBox, initialTexts[idx] + "\n", 60, () => {
         idx++;
-        setTimeout(next, 100);
+        setTimeout(nextLine, 300);
       });
     }
-    next();
+    nextLine();
   }
 
-  // Kutularda hızlı sürekli yazı ekleme ve aşağı kaydırma:
+  // Kutularda hızlı rastgele yazılar
+  let boxIntervals = [];
+  const boxScrollSpeeds = [40, 30, 20, 15]; // ms
+
   function startBoxScroll() {
     boxesContainer.style.display = "flex";
     boxes.forEach((box, i) => {
-      box.className = "box " + boxColors[i];
       box.textContent = "";
-      // Her kutu için interval:
       boxIntervals[i] = setInterval(() => {
-        let newText = boxTexts[Math.floor(Math.random() * boxTexts.length)] + " " + Math.random().toString(36).substring(2,7);
-        box.textContent += newText + "\n";
+        const rndText = boxTexts[Math.floor(Math.random() * boxTexts.length)];
+        const rndTail = Math.random().toString(36).substring(2, 7);
+        box.textContent += rndText + " " + rndTail + "\n";
         box.scrollTop = box.scrollHeight;
-        // Küçük scroll kontrolü: çok büyürse kes:
-        if(box.textContent.length > 3000) {
-          box.textContent = box.textContent.slice(box.textContent.length - 2500);
+        if (box.textContent.length > 2000) {
+          box.textContent = box.textContent.slice(box.textContent.length - 1500);
         }
       }, boxScrollSpeeds[i]);
     });
   }
 
-  // Tüm kutu scrollları durdur:
   function stopBoxScroll() {
-    boxIntervals.forEach(i => clearInterval(i));
+    boxIntervals.forEach(interval => clearInterval(interval));
   }
 
-  // ERROR ekranını göster, yanıp sönmesini başlat:
-  function showErrorScreen() {
+  function showError() {
     errorScreen.style.display = "flex";
     alarmSound.loop = true;
     alarmSound.play();
   }
 
-  startBtn.addEventListener('click', () => {
-    // Başlangıçta overlay gizle
-    overlay.style
+  // Olaylar:
+  startBtn.onclick = () => {
+    // Alarm sesi başlat
+    alarmSound.play();
+    // Başlangıç ekranını gizle
+    overlay.style.display = "none";
+    // Ana kutuyu göster ve yazıları yaz
+    mainBox.style.display = "block";
+    writeInitialTexts(() => {
+      // Yazı bittikten sonra 4 kutu göster
+      mainBox.style.display = "none";
+      boxesContainer.style.display = "flex";
+      startBoxScroll();
+
+      // 1 dakika sonra ERROR ekranı göster
+      setTimeout(() => {
+        stopBoxScroll();
+        boxesContainer.style.display = "none";
+        showError();
+      }, 60000);
+    });
+  };
+</script>
+
+</body>
+</html>
