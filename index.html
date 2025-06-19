@@ -3,331 +3,194 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>CRITICAL SYSTEM ERROR</title>
+<title>DELİRTEN SİSTEM ÇÖKMESİ</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
   html, body {
-    margin: 0; padding: 0; height: 100%;
-    background: black;
-    color: #00ff00;
-    font-family: 'Share Tech Mono', monospace;
+    margin:0; padding:0; height:100%; width:100%;
+    background: black; color: #0f0; font-family: monospace;
     overflow: hidden;
-    user-select: none;
+    user-select:none;
   }
   #overlay {
-    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    position: fixed; top:0; left:0; width:100vw; height:100vh;
     background: black;
-    display: flex; justify-content: center; align-items: center;
-    z-index: 9999;
+    display:flex; justify-content:center; align-items:center;
+    z-index:9999;
   }
   #startBtn {
     font-size: 120px;
-    color: #ff0000;
-    cursor: pointer;
-    border: 8px solid #ff0000;
+    color: red;
+    border: 5px solid red;
     border-radius: 50%;
     width: 180px;
     height: 180px;
-    line-height: 180px;
+    line-height: 170px;
     text-align: center;
     font-weight: 900;
-    box-shadow: 0 0 50px #ff0000;
+    cursor:pointer;
+    box-shadow: 0 0 60px red;
     user-select:none;
-    transition: transform 0.3s ease;
+    transition: all 0.3s ease;
   }
   #startBtn:hover {
-    transform: scale(1.15);
+    box-shadow: 0 0 100px #ff0000;
+    transform: scale(1.1);
   }
   #terminal {
     position: fixed;
-    top: 10px; left: 10px; right: 10px; bottom: 10px;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
     background: black;
-    color: #00ff00;
+    color: #0f0;
+    font-family: monospace;
     font-size: 18px;
     line-height: 1.4em;
-    padding: 20px;
+    padding: 15px;
     box-sizing: border-box;
-    white-space: pre-wrap;
-    overflow-y: auto;
-    font-weight: 700;
+    overflow-y: scroll;
     user-select:none;
-    filter: drop-shadow(0 0 3px #00ff00);
-    display: none;
-    text-shadow:
-      0 0 5px #00ff00,
-      0 0 10px #00ff00;
+    display:none;
+    white-space: pre-wrap;
+    text-shadow: 0 0 5px #0f0;
   }
   #errorScreen {
     position: fixed;
-    top: 0; left: 0;
+    top:0; left:0;
     width: 100vw; height: 100vh;
-    background: #ff0000;
+    background: rgba(255,0,0,0.9);
     color: black;
-    font-size: 64px;
+    font-size: 72px;
     font-weight: 900;
     text-align: center;
     line-height: 100vh;
     user-select:none;
-    display: none;
-    animation: errorFlash 1s infinite alternate;
+    display:none;
+    animation: flashRed 1s infinite;
     z-index: 10000;
-    text-shadow:
-      0 0 20px black,
-      0 0 40px black;
+    text-shadow: 0 0 15px black;
   }
-  @keyframes errorFlash {
-    0% { opacity: 1; }
-    100% { opacity: 0.2; }
-  }
-  #warningSymbols {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw; height: 100vh;
-    pointer-events: none;
-    user-select:none;
-    overflow: hidden;
-    z-index: 10001;
-  }
-  .warnMark {
-    position: absolute;
-    color: #ff0000;
-    font-weight: 900;
-    font-size: 30px;
-    animation: warnBlink 1.3s infinite;
-    user-select:none;
-    text-shadow: 0 0 8px red;
-  }
-  @keyframes warnBlink {
-    0%, 50%, 100% { opacity: 1; }
-    25%, 75% { opacity: 0; }
-  }
-  /* Screen glitch effect */
-  @keyframes glitch {
-    0% {
-      clip-path: inset(20% 0 70% 0);
-      transform: translate(-3px, -3px);
-    }
-    20% {
-      clip-path: inset(30% 0 60% 0);
-      transform: translate(3px, 3px);
-    }
-    40% {
-      clip-path: inset(10% 0 80% 0);
-      transform: translate(-3px, 3px);
-    }
-    60% {
-      clip-path: inset(40% 0 50% 0);
-      transform: translate(3px, -3px);
-    }
-    80% {
-      clip-path: inset(20% 0 70% 0);
-      transform: translate(-3px, -3px);
-    }
-    100% {
-      clip-path: inset(30% 0 60% 0);
-      transform: translate(0, 0);
-    }
-  }
-  #glitchOverlay {
-    position: fixed;
-    top:0; left:0;
-    width: 100vw; height: 100vh;
-    pointer-events: none;
-    user-select:none;
-    mix-blend-mode: screen;
-    background: black;
-    display: none;
-    z-index: 9998;
-  }
-  .glitch-layer {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%;
-    height: 100%;
-    background: transparent;
-    color: #00ff00;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 20px;
-    white-space: pre-wrap;
-    overflow: hidden;
-    animation: glitch 2s infinite;
-    user-select:none;
-    opacity: 0.3;
-  }
-  .glitch-layer:nth-child(1) {
-    animation-delay: 0s;
-    color: #0f0;
-    clip-path: inset(0 0 0 0);
-  }
-  .glitch-layer:nth-child(2) {
-    animation-delay: 0.1s;
-    color: #0ff;
-    clip-path: inset(10% 0 50% 0);
-  }
-  .glitch-layer:nth-child(3) {
-    animation-delay: 0.2s;
-    color: #f0f;
-    clip-path: inset(50% 0 10% 0);
+  @keyframes flashRed {
+    0%, 50%, 100% {opacity: 1;}
+    25%, 75% {opacity: 0;}
   }
 </style>
 </head>
 <body>
 
-<div id="overlay" role="button" aria-label="Başlat">
-  <div id="startBtn" tabindex="0">×</div>
-</div>
-
-<div id="terminal" aria-live="polite" aria-atomic="true"></div>
-
-<div id="errorScreen" role="alert">Kritik Sistem Hatası</div>
-
-<div id="warningSymbols"></div>
-
-<div id="glitchOverlay">
-  <div class="glitch-layer" id="glitch1"></div>
-  <div class="glitch-layer" id="glitch2"></div>
-  <div class="glitch-layer" id="glitch3"></div>
-</div>
+<div id="overlay"><div id="startBtn" aria-label="Başlat">×</div></div>
+<div id="terminal"></div>
+<div id="errorScreen">!!! SİSTEM ÇÖKTÜ !!!</div>
 
 <audio id="beep" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto"></audio>
 <audio id="alarm" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" preload="auto"></audio>
-<audio id="errorSound" src="https://actions.google.com/sounds/v1/alarms/bugle_tune.ogg" preload="auto"></audio>
+<audio id="crash" src="https://actions.google.com/sounds/v1/impacts/metal_crash.ogg" preload="auto"></audio>
 
 <script>
   const startBtn = document.getElementById('startBtn');
   const overlay = document.getElementById('overlay');
   const terminal = document.getElementById('terminal');
   const errorScreen = document.getElementById('errorScreen');
-  const warningSymbols = document.getElementById('warningSymbols');
-  const glitchOverlay = document.getElementById('glitchOverlay');
+  const beep = document.getElementById('beep');
+  const alarm = document.getElementById('alarm');
+  const crash = document.getElementById('crash');
 
-  const beepSound = document.getElementById('beep');
-  const alarmSound = document.getElementById('alarm');
-  const errorSound = document.getElementById('errorSound');
-
-  let beepInterval, terminalInterval, warningInterval, glitchInterval;
-  let terminalLines = [
-    "[SYSTEM INIT] Başlatılıyor...",
-    "YAPAY ZEKA MODÜLÜ YÜKLENİYOR...",
-    "VERİ AKIŞI BAŞLADI...",
-    "GÜVENLİK PROTOKOLÜ KONTROL EDİLİYOR...",
-    "KÖK YETKİLERİ TALEP EDİLİYOR...",
-    "VERİ ŞİFRELEME BAŞLATILDI...",
-    "VERİ ŞİFRELEME HATASI: 0x5A9F3B",
-    "İZİNSİZ ERİŞİM TESPİT EDİLDİ",
-    "GÜVENLİK İHLALİ: KULLANICI ENGELLENDİ",
-    "SİSTEM UYARI: CRITICAL ERROR",
-    "YENİ KOD ENJEKSİYONU ALGILANDI",
-    "KULLANICI İŞLEMİ REDDEDİLDİ",
-    "SİSTEM DURUMU: HATA MODU",
-    "İŞLEM SONLANDIRILIYOR...",
-    "SİSTEM ÇÖKÜYOR..."
+  const messages = [
+    "YAPAY ZEKA: İŞLEM BAŞLATILIYOR...",
+    "VERİ AKIŞI: KONTROL DIŞI İŞLEMLER TESPİT EDİLDİ!",
+    "GÜVENLİK: ŞİFRELER KIRILIYOR...",
+    "SİSTEM: KÖK YETKİLERİ ALINIYOR...",
+    "YAZILIM: HATA AYIKLAMA MODU DEVRE DIŞI",
+    "DONANIM: ANİ BAĞLANTI KESİLDİ",
+    "YAPAY ZEKA: KONTROL KAYBI!",
+    "VERİ TABANI: BOZUK KAYITLAR BULUNDU",
+    "SİSTEM: ANİ ÇÖKME TETİKLENDİ",
+    "KERNEL: PANİK DURUMU AKTİF",
+    "DOSYA SİSTEMİ: HATALI SEKTÖRLER OKUNAMADI",
+    "BELLEK: TAŞMA HATASI!",
+    "İŞLEMCI: AŞIRI ISINMA ALGILANDI",
+    "GÜVENLİK: İZİNSİZ ERİŞİM KAYDI",
+    "SİSTEM: ÇÖKME GERÇEKLEŞTİRİLİYOR",
+    "YAPAY ZEKA: İNSAN MÜDAHALESİ REDDEDİLDİ",
+    "VERİ: BOZULMA HATASI TESPİT EDİLDİ",
+    "SİSTEM: ACİL DURUM MODU AKTİF",
+    "YAZILIM: SON DURUM RAPORU OLUŞTURULUYOR",
+    "SİSTEM: FATAL HATA, KAPANIYOR..."
   ];
 
-  function randomPosition(maxWidth, maxHeight) {
-    return {
-      x: Math.random() * maxWidth,
-      y: Math.random() * maxHeight
-    };
-  }
+  let intervalId;
+  let index = 0;
+  let beepIntervalId;
 
-  function createWarningSymbols(count = 40) {
-    warningSymbols.innerHTML = '';
-    for(let i = 0; i < count; i++) {
-      const mark = document.createElement('div');
-      mark.classList.add('warnMark');
-      mark.textContent = '!';
-      const pos = randomPosition(window.innerWidth, window.innerHeight);
-      mark.style.left = pos.x + 'px';
-      mark.style.top = pos.y + 'px';
-      mark.style.animationDelay = (Math.random() * 1.3) + 's';
-      mark.style.fontSize = (15 + Math.random() * 25) + 'px';
-      warningSymbols.appendChild(mark);
+  function printMessage() {
+    if(index >= messages.length) {
+      clearInterval(intervalId);
+      stopBeep();
+      showErrorScreen();
+      return;
     }
+    terminal.textContent += messages[index] + "\n";
+    terminal.scrollTop = terminal.scrollHeight;
+    index++;
   }
 
-  function playBeep(frequency) {
-    beepSound.currentTime = 0;
-    beepSound.play();
-    if(frequency > 150) {
-      setTimeout(() => playBeep(frequency - 50), frequency);
-    }
+  function startBeep() {
+    beep.play();
+    beepIntervalId = setInterval(() => {
+      beep.currentTime = 0;
+      beep.play();
+    }, 400);
   }
 
-  function startBeeping() {
-    let freq = 700;
-    beepInterval = setInterval(() => {
-      beepSound.currentTime = 0;
-      beepSound.play();
-      freq -= 20;
-      if(freq < 200) freq = 700;
-    }, freq);
+  function stopBeep() {
+    clearInterval(beepIntervalId);
   }
 
-  function stopBeeping() {
-    clearInterval(beepInterval);
-  }
-
-  function startTerminal() {
-    terminal.style.display = 'block';
-    terminal.innerText = '';
-    let index = 0;
-
-    terminalInterval = setInterval(() => {
-      if(index >= terminalLines.length) {
-        clearInterval(terminalInterval);
-        stopBeeping();
-        triggerErrorScreen();
-        return;
+  function shakeScreen() {
+    let pos = 0;
+    let maxShake = 10;
+    let shakeInterval = setInterval(() => {
+      const x = (Math.random() - 0.5) * maxShake;
+      const y = (Math.random() - 0.5) * maxShake;
+      document.body.style.transform = `translate(${x}px,${y}px)`;
+      pos++;
+      if(pos > 60) {
+        clearInterval(shakeInterval);
+        document.body.style.transform = 'none';
       }
-      terminal.innerText += terminalLines[index] + "\n";
-      terminal.scrollTop = terminal.scrollHeight;
-      index++;
-    }, 1200);
+    }, 30);
   }
 
-  function triggerErrorScreen() {
+  function showErrorScreen() {
     errorScreen.style.display = 'block';
-    createWarningSymbols(80);
-    glitchOverlay.style.display = 'block';
-    alarmSound.loop = true;
-    alarmSound.currentTime = 0;
-    alarmSound.play();
-
-    // Glitch animasyonunu random hareket ettir
-    glitchInterval = setInterval(() => {
-      glitchOverlay.style.top = (Math.random() * 5 - 2.5) + 'px';
-      glitchOverlay.style.left = (Math.random() * 5 - 2.5) + 'px';
-      glitchOverlay.style.opacity = 0.5 + Math.random() * 0.5;
-    }, 120);
-
-    // 15 saniye sonra tüm efekti kapat
+    alarm.loop = true;
+    alarm.play();
+    shakeScreen();
     setTimeout(() => {
-      alarmSound.pause();
-      glitchOverlay.style.display = 'none';
-      errorScreen.style.display = 'none';
-      warningSymbols.innerHTML = '';
-    }, 15000);
+      alarm.pause();
+      alarm.currentTime = 0;
+      playCrashSound();
+    }, 12000);
+    setTimeout(() => {
+      // son çarpıcı mesaj
+      terminal.textContent += "\nCRITICAL FAILURE. SYSTEM SHUTDOWN IMMINENT.\n";
+      terminal.scrollTop = terminal.scrollHeight;
+    }, 13000);
   }
 
-  startBtn.addEventListener('click', () => {
-    // İlk click ile ses oynatımı için izin sağla
-    beepSound.play().then(() => {
-      overlay.style.display = 'none';
-      startTerminal();
-      startBeeping();
-    }).catch(() => {
-      alert('Ses oynatma izni reddedildi!');
-    });
-  });
+  function playCrashSound() {
+    crash.play();
+  }
 
-  // Klavye erişimi için enter ile başlat
-  startBtn.addEventListener('keydown', (e) => {
-    if(e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      startBtn.click();
-    }
-  });
+  startBtn.onclick = () => {
+    beep.play().then(() => {
+      overlay.style.display = 'none';
+      terminal.style.display = 'block';
+      startBeep();
+      intervalId = setInterval(printMessage, 1500);
+    }).catch(() => {
+      alert("Ses çalma izni gerekiyor, lütfen sayfayla etkileşime geçin.");
+    });
+  };
 </script>
 
 </body>
