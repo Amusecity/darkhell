@@ -161,7 +161,7 @@
     "SUNUCU ELE GEÇİRİLDİ...",
     "FIREWALL BAYPAS EDİLİYOR...",
     "VERİLER ŞİFRELİLENİYOR...",
-    "İŞLEM TAMAMLANIYOR..."
+    "İŞLEM TAMAMLANIYOR...",
     "SİSTEM TARANIYOR...",
     "VERİLER ANALİZ EDİLİYOR...",
     "GÜVENLİK AÇIĞI BULUNDU...",
@@ -236,79 +236,4 @@
     clearInterval(beepInterval);
   }
 
-  function startTerminal() {
-    terminal.style.display = 'block';
-    terminal.classList.add('tv-effect');
-    terminal.innerText = '';
-    terminalIdx = 0;
-    startBeep();
-
-    // Kutu kaybolsun
-    nameBox.style.opacity = 0;
-
-    let interval = setInterval(() => {
-      if(terminalIdx >= terminalMessages.length){
-        clearInterval(interval);
-        stopBeep();
-        startError();
-        return;
-      }
-      terminal.innerText += terminalMessages[terminalIdx] + "\n\n";
-      terminal.scrollTop = terminal.scrollHeight;
-      terminalIdx++;
-    }, intervalSpeed);
-  }
-
-  function startRedBlink() {
-    nameBox.classList.add('red');
-  }
-
-  function stopRedBlink() {
-    nameBox.classList.remove('red');
-  }
-
-  function startError() {
-    alarmSound.currentTime = 0;
-    alarmSound.play();
-
-    errorScreen.style.display = 'block';
-    createWarningMarks(60);
-
-    // Kırmızı ışık yanıp sönmesi
-    let lightOn = true;
-    const redFlash = setInterval(() => {
-      if(lightOn){
-        document.body.style.background = 'rgba(255,0,0,0.7)';
-      } else {
-        document.body.style.background = 'black';
-      }
-      lightOn = !lightOn;
-    }, 500);
-
-    // Sistem hatası yanıp sönen animasyon (errorScreen zaten animasyonlu)
-    setTimeout(() => {
-      clearInterval(redFlash);
-      document.body.style.background = 'black';
-      errorScreen.style.display = 'none';
-      warningMarks.innerHTML = '';
-      alert("Sistem Hatası Tamamlandı."); // İstersen burayı kaldırabilirsin
-    }, 10000); // 10 saniye sonra kapansın
-  }
-
-  closeBtn.onclick = () => {
-    beepSound.currentTime = 0;
-    beepSound.play();
-    overlay.style.display = 'none';
-    // Kutu yeşilken 3 saniye sonra kırmızı yanıp sönecek
-    let timer1 = setTimeout(() => {
-      startRedBlink();
-    }, 2000);
-    let timer2 = setTimeout(() => {
-      stopRedBlink();
-      startTerminal();
-    }, 5000);
-  };
-</script>
-
-</body>
-</html>
+  function startTerminal()
