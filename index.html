@@ -1,169 +1,153 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Son Terminal Kabusu - @MHMTXASLAN</title>
+<meta charset="UTF-8">
+<title>@mhmtxaslan - Dark Terminal</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-  html,body {
-    margin:0; padding:0; height:100%;
-    background:black; overflow:hidden;
-    font-family:'Share Tech Mono', monospace;
-    user-select:none;
-  }
-  #overlay {
-    position:fixed;top:0;left:0;
-    width:100vw;height:100vh;
-    background:black;
-    display:flex;align-items:center;justify-content:center;
-    z-index:10;
-  }
-  #startBtn {
-    font-size:72px;color:red;
-    cursor:pointer;
-    border:5px solid red;
-    border-radius:50%;
-    width:120px;height:120px;
-    line-height:120px;
-    text-align:center;
-    font-weight:900;
-    box-shadow:0 0 20px red;
-  }
-  #terminal {
-    display:none;
-    padding:20px;
-    height:100vh;
-    overflow-y:auto;
-    box-sizing:border-box;
-    color:#0f0;
-    font-size:16px;
-    line-height:1.2em;
-  }
-  #line1 {
-    font-size:24px;
-    font-weight:900;
-    margin-bottom:10px;
-    opacity:0;
-  }
-  #mask {
-    display:none;
-    position:fixed;
-    top:40%;left:50%;
-    transform:translate(-50%,-50%);
-    color:red;
-    font-size:200px;
-    font-weight:900;
-    text-align:center;
-    z-index:5;
-    mix-blend-mode:screen;
-    user-select:none;
-    pointer-events:none;
-  }
-  #errorMsg {
-    display:none;
-    position:fixed;
-    bottom:10%;
-    width:100%;
-    text-align:center;
-    color:red;
-    font-size:32px;
-    font-weight:900;
-    text-shadow:0 0 10px red;
-    user-select:none;
-  }
-  .flicker {
-    animation:flickerAnim 0.1s infinite;
-  }
-  @keyframes flickerAnim {
-    0%,100%{opacity:1;}
-    50%{opacity:0.2;}
-  }
+    html, body {
+        margin: 0;
+        padding: 0;
+        background: black;
+        color: red;
+        font-family: monospace;
+        font-size: 1.2em;
+        overflow: hidden;
+    }
+    #overlay {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: black;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+    }
+    #close-btn {
+        color: red;
+        font-size: 2em;
+        cursor: pointer;
+        position: absolute;
+        top: 10px;
+        right: 20px;
+        transition: transform 0.2s;
+    }
+    #close-btn:hover {
+        transform: scale(1.3);
+    }
+    #starter {
+        font-size: 2em;
+        color: #00ff00;
+        animation: flicker 1s infinite alternate;
+    }
+    @keyframes flicker {
+        0% {opacity: 1;}
+        100% {opacity: 0.4;}
+    }
+    #terminal {
+        padding: 20px;
+        white-space: pre-wrap;
+        height: 100vh;
+        overflow-y: auto;
+        display: none;
+    }
+    .flash {
+        animation: flash-bg 0.2s alternate infinite;
+    }
+    @keyframes flash-bg {
+        0% { background: black; }
+        100% { background: red; }
+    }
+    #final {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 3em;
+        font-weight: bold;
+        text-shadow: 2px 2px 10px red;
+        color: red;
+        display: none;
+        z-index: 99999;
+        background-color: black;
+        padding: 20px 40px;
+        border: 4px solid red;
+    }
 </style>
 </head>
 <body>
-
-<div id="overlay"><div id="startBtn">×</div></div>
-<div id="terminal">
-  <div id="line1">@MHMTXASLAN</div>
-  <div id="content"></div>
+<div id="overlay">
+    <div id="close-btn">×</div>
+    <div id="starter">@mhmtxaslan</div>
 </div>
-<div id="mask">
-  ▄▀▄ █░█ █▀▄▐█▄  
-  ▀▄▀ ▀▄▀ █▄▀░█░
-</div>
-<div id="errorMsg">SİSTEM HATASI</div>
+<div id="terminal"></div>
+<div id="final">SİSTEM ELE GEÇİRİLDİ</div>
 
-<audio id="beep" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto"></audio>
+<audio id="bipSound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto"></audio>
 
 <script>
-  const startBtn = document.getElementById('startBtn');
-  const overlay = document.getElementById('overlay');
-  const terminal = document.getElementById('terminal');
-  const line1 = document.getElementById('line1');
-  const content = document.getElementById('content');
-  const mask = document.getElementById('mask');
-  const errorMsg = document.getElementById('errorMsg');
-  const beep = document.getElementById('beep');
+    const overlay = document.getElementById('overlay');
+    const closeBtn = document.getElementById('close-btn');
+    const starter = document.getElementById('starter');
+    const terminal = document.getElementById('terminal');
+    const final = document.getElementById('final');
+    const bip = document.getElementById('bipSound');
 
-  const chars = "0123456789ABCDEF!@#$%^&*()-_=+[]{};:'\",.<>/?\\|";
-  const msgs = [
-    "SİSTEM İZLENİYOR...",
-    "VERİLER ŞİFRELENDİ...",
-    "FIREWALL BAYPAS EDİLDİ...",
-    "KÖK ERİŞİM SAĞLANDI...",
-    "GÜVENLİK İHLALİ TESPİT EDİLDİ...",
-    "BAĞLANTI KESİLİYOR...",
-    "SUNUCU ELE GEÇİRİLDİ...",
-    "YENİ SALDIRI GELİYOR..."
-  ];
+    const scaryLines = [
+        "Veriler sızdırılıyor...",
+        "Proxy bağlantısı kırıldı!",
+        "Root erişimi sağlandı.",
+        "Sistem dosyaları tehlikede!",
+        "IP maskesi çözüldü.",
+        "Ana sistem kilidi kırılıyor...",
+        "Zamanlayıcı başlatıldı...",
+        "Kritik hata!",
+        "Firewall çöktü!",
+        "Terminal açılıyor >>>"
+    ];
 
-  let elapsed = 0, intervalId, beepInterval;
+    closeBtn.addEventListener('click', () => {
+        overlay.style.display = 'none';
+        terminal.style.display = 'block';
+        starter.style.animation = 'none';
+        starter.style.color = 'red';
 
-  function randomLine() {
-    let s="";
-    for(let i=0;i<60;i++) s+=chars.charAt(Math.floor(Math.random()*chars.length));
-    return s;
-  }
+        setTimeout(() => starterFlicker(), 1000);
+        startTerminal();
+    });
 
-  function writeBurst() {
-    content.textContent += randomLine()+"\n";
-    if(Math.random()<0.1) {
-      content.textContent += ">>> "+msgs[Math.floor(Math.random()*msgs.length)]+"\n";
+    function starterFlicker() {
+        let flashes = 0;
+        const interval = setInterval(() => {
+            starter.style.visibility = (starter.style.visibility === 'hidden') ? 'visible' : 'hidden';
+            flashes++;
+            if (flashes >= 10) {
+                clearInterval(interval);
+                starter.style.display = 'none';
+            }
+        }, 100);
     }
-    content.scrollTop=content.scrollHeight;
-  }
 
-  startBtn.onclick = () => {
-    overlay.style.display="none";
-    terminal.style.display="block";
-    line1.style.opacity=1;
-    setTimeout(() => {
-      line1.style.color="green";
-      line1.classList.add('flicker');
-    }, 500);
-    setTimeout(() => {
-      line1.style.color="red";
-    }, 4500);
-    setTimeout(() => {
-      line1.classList.remove('flicker');
-      intervalId = setInterval(() => {
-        elapsed += 100;
-        writeBurst();
-        if(elapsed === 15000) {
-          beep.play();
-          beepInterval = setInterval(() => beep.play(),800);
-        }
-        if(elapsed === 30000) {
-          clearInterval(intervalId);
-          clearInterval(beepInterval);
-          mask.style.display="block";
-          errorMsg.style.display="block";
-        }
-      }, 100);
-    }, 6000);
-  };
+    function startTerminal() {
+        let i = 0;
+        const print = setInterval(() => {
+            const line = scaryLines[Math.floor(Math.random() * scaryLines.length)];
+            terminal.innerHTML += line + '\\n';
+            terminal.scrollTop = terminal.scrollHeight;
+            i++;
+            if (i > 40) clearInterval(print);
+        }, 300);
+
+        // 15. saniyede bip sesi başlasın
+        setTimeout(() => bip.play(), 15000);
+
+        // 30. saniyede ekran yanıp sönecek ve sistem çöktü yazısı çıkacak
+        setTimeout(() => {
+            document.body.classList.add('flash');
+            final.style.display = 'block';
+        }, 30000);
+    }
 </script>
-
 </body>
 </html>
