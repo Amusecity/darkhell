@@ -7,27 +7,46 @@
     body {
       margin: 0;
       background: black;
-      color: lime;
       font-family: monospace;
       overflow: hidden;
     }
 
+    #startScreen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: black;
+      z-index: 10000;
+    }
+
+    #closeBtn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 30px;
+      color: red;
+      cursor: pointer;
+      border: none;
+      background: none;
+    }
+
     #mhmtxaslanBox {
+      display: none;
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
+      font-size: 28px;
       padding: 30px 60px;
       border: 2px solid lime;
       color: lime;
-      font-size: 28px;
       animation: blink 1s infinite;
-      z-index: 1000;
     }
 
     @keyframes blink {
       0%, 100% { opacity: 1; }
-      50% { opacity: 0.1; }
+      50% { opacity: 0.4; }
     }
 
     .terminal {
@@ -39,13 +58,21 @@
       padding: 10px;
       overflow: hidden;
       font-size: 16px;
-      color: white;
-      display: none;
       white-space: pre-wrap;
+      display: none;
     }
 
-    #terminalTop { top: 0; left: 5%; }
-    #terminalBottom { bottom: 0; left: 5%; }
+    #terminalTop {
+      top: 0;
+      left: 5%;
+      color: white;
+    }
+
+    #terminalBottom {
+      bottom: 0;
+      left: 5%;
+      color: lime;
+    }
 
     .error {
       position: absolute;
@@ -79,7 +106,10 @@
 </head>
 <body>
 
-<div id="mhmtxaslanBox">@mhmtxaslan</div>
+<div id="startScreen">
+  <button id="closeBtn">X</button>
+  <div id="mhmtxaslanBox">@mhmtxaslan</div>
+</div>
 
 <div id="terminalTop" class="terminal"></div>
 <div id="terminalBottom" class="terminal"></div>
@@ -90,79 +120,81 @@
 </audio>
 
 <script>
+  const startScreen = document.getElementById("startScreen");
+  const closeBtn = document.getElementById("closeBtn");
   const mhmtBox = document.getElementById("mhmtxaslanBox");
   const termTop = document.getElementById("terminalTop");
   const termBottom = document.getElementById("terminalBottom");
   const errorText = document.getElementById("error");
   const alarm = document.getElementById("alarm");
 
-  // Renk değiştirme (yeşilden kırmızıya)
-  setTimeout(() => {
-    mhmtBox.style.color = 'red';
-    mhmtBox.style.borderColor = 'red';
-  }, 3000);
+  closeBtn.addEventListener("click", () => {
+    closeBtn.style.display = "none";
+    mhmtBox.style.display = "block";
 
-  // Kutuyu gizle
-  setTimeout(() => {
-    mhmtBox.style.display = 'none';
-    startTerminalTyping();
-  }, 5000);
+    // 3 saniyede kırmızıya dön
+    setTimeout(() => {
+      mhmtBox.style.color = 'red';
+      mhmtBox.style.borderColor = 'red';
+    }, 3000);
 
-  const terminalLines = [
-    "[~] Sunucu bağlantısı başlatılıyor...",
-    "[~] Erişim doğrulanıyor...",
-    "[~] Yetkisiz giriş tespit edildi!",
-    "[!] Sistem çökmek üzere...",
-    "[#] Kod dizisi aktarılıyor...",
-    "[!] Güvenlik duvarı atlandı...",
-    "[#] IP takibi başlatıldı...",
-    "[#] Kullanıcı verisi ele geçiriliyor...",
-    "[!] Kritik hata: Yığın taşması...",
-    "[#] Sistem hatası artıyor...",
-    "[!] Tehlikeli işlem: root yetkisi alındı!",
-    "[#] Kernel hatası: 0x0000DEAD",
-    "[!] Tehdit algılandı! Kaçınılmaz!",
-    "[#] Sistem kontrolü ele geçirildi.",
-    "[!] ERROR ERROR ERROR ERROR",
-  ];
+    // 5 saniye sonra mhmtxaslan kaybolur
+    setTimeout(() => {
+      mhmtBox.style.display = "none";
+      startScreen.style.display = "none";
+      startSequence();
+    }, 5000);
+  });
 
-  let lineIndex = 0;
+  function startSequence() {
+    setTimeout(() => {
+      termTop.style.display = "block";
+      termBottom.style.display = "block";
+    }, 500);
 
-  function startTerminalTyping() {
+    let lines = [
+      "[+] Port 443 açık.",
+      "[*] Sunucu yanıt veriyor...",
+      "[!] Root erişimi tespit edildi!",
+      "[#] Paket aktarımı başladı...",
+      "[!] Güvenlik duvarı devre dışı bırakıldı.",
+      "[!] Giriş bilgileri çekiliyor...",
+      "[!] ERROR: Erişim reddedildi!",
+      "[!] ERROR: Erişim reddedildi!",
+      "[!] Sistem çöküyor...",
+    ];
+
+    let count = 0;
     const interval = setInterval(() => {
-      const line = terminalLines[Math.floor(Math.random() * terminalLines.length)];
-      if (termTop.innerText.split('\n').length < 30) {
-        termTop.innerText += line + "\n";
+      const l = lines[Math.floor(Math.random() * lines.length)];
+      if (termTop.innerText.split('\n').length < 25) {
+        termTop.innerText += l + "\n";
+        termBottom.innerText += l + "\n";
       } else {
-        termTop.innerText = termTop.innerText.split('\n').slice(1).join('\n') + "\n" + line;
+        termTop.innerText = termTop.innerText.split('\n').slice(1).join('\n') + "\n" + l;
+        termBottom.innerText = termBottom.innerText.split('\n').slice(1).join('\n') + "\n" + l;
       }
-      termBottom.innerText = termTop.innerText;
+      count++;
 
-      lineIndex++;
-      if (lineIndex >= 50) clearInterval(interval);
-    }, 100);
+      // Renk geçişi
+      if (count === 20) termBottom.style.color = "red";
+      if (count >= 60) clearInterval(interval);
+    }, 250);
+
+    // 10. saniyede ses başlasın
+    setTimeout(() => {
+      alarm.play();
+    }, 10000);
+
+    // 15. saniyede ERROR ve ünlemler
+    setTimeout(() => {
+      errorText.style.display = "block";
+      spawnExclamations();
+    }, 15000);
   }
 
-  // Kutular 10. saniyede görünür
-  setTimeout(() => {
-    termTop.style.display = "block";
-    termBottom.style.display = "block";
-  }, 10000);
-
-  // Alarm sesi 25. saniyede başlar
-  setTimeout(() => {
-    alarm.volume = 1;
-    alarm.play();
-  }, 25000);
-
-  // ERROR mesajı ve ünlemler 30. saniyede çıkar
-  setTimeout(() => {
-    errorText.style.display = "block";
-    spawnExclamations();
-  }, 30000);
-
   function spawnExclamations() {
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < 25; i++) {
       const ex = document.createElement("div");
       ex.className = "exclamation";
       ex.innerText = "!";
