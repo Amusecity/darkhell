@@ -14,48 +14,10 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    user-select: none;
-    position: relative;
-  }
-  #container {
-    width: 90vw;
-    max-width: 900px;
-    height: 80vh;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-  }
-  #overlay {
-    position: absolute;
-    top:0; left:0; right:0; bottom:0;
-    background: black;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    user-select: none;
-    z-index: 9999;
-    flex-direction: column;
-  }
-  #startName {
-    font-size: 70px;
-    border: 3px solid #0f0;
-    padding: 30px 60px;
-    margin-bottom: 30px;
-    animation: blink 1.2s infinite;
-    user-select:none;
-  }
-  @keyframes blink {
-    0%,100% {opacity:1;}
-    50% {opacity: 0.3;}
   }
   #startBtn {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    width: 70px;
-    height: 70px;
+    width: 80px;
+    height: 80px;
     font-size: 48px;
     border: 3px solid #0f0;
     background: black;
@@ -63,7 +25,7 @@
     border-radius: 50%;
     cursor: pointer;
     user-select: none;
-    line-height: 70px;
+    line-height: 80px;
     text-align: center;
     font-weight: bold;
     transition: background-color 0.3s, color 0.3s;
@@ -73,179 +35,73 @@
     background: #0f0;
     color: black;
   }
-  #mainBox {
-    width: 100%;
-    height: 40vh;
-    background: black;
-    border: 2px solid #0f0;
-    color: #0f0;
-    font-size: 20px;
-    overflow-y: auto;
-    padding: 20px;
-    white-space: pre-wrap;
+  #container {
+    width: 90vw;
+    max-width: 900px;
+    height: 80vh;
+    position: relative;
     display: none;
-    box-sizing: border-box;
-  }
-  #boxesContainer {
-    width: 100%;
-    height: 35vh;
-    display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    margin-top: 15px;
-    display: none;
-    user-select: none;
-  }
-  .box {
-    background: black;
-    border: 2px solid;
-    font-size: 18px;
-    overflow-y: auto;
-    padding: 15px;
-    white-space: pre-wrap;
-    font-weight: 700;
-    box-sizing: border-box;
-    animation: upDown 3s ease-in-out infinite;
-  }
-  .box.top {
-    border-color: #0f0;
-    color: #0f0;
-    height: 60%;
-  }
-  .box.bottom {
-    border-color: #f00;
-    color: #f00;
-    height: 35%;
-  }
-  @keyframes upDown {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(10px); }
-  }
-  #errorScreen {
-    position: fixed;
-    top:0; left:0; right:0; bottom:0;
-    background: black;
-    color: red;
-    font-size: 90px;
-    font-weight: 900;
-    display: none;
     justify-content: center;
-    align-items: center;
-    user-select: none;
-    animation: flashError 0.4s infinite alternate;
-    z-index: 11000;
-  }
-  @keyframes flashError {
-    0% {color: red; background: black;}
-    50% {color: black; background: red;}
-    100% {color: red; background: black;}
-  }
-
-  /* Ünlem işaretleri */
-  .exclamation {
-    position: fixed;
-    top: -50px;
-    font-size: 32px;
-    font-weight: 900;
-    color: red;
-    user-select:none;
-    animation-timing-function: linear;
-    z-index: 12000;
-  }
-  .leftSide {
-    left: 10px;
-    animation-name: fallLeft;
-  }
-  .rightSide {
-    right: 10px;
-    animation-name: fallRight;
-  }
-  @keyframes fallLeft {
-    0% {top: -50px; opacity: 1; transform: rotate(0deg);}
-    100% {top: 110vh; opacity: 0; transform: rotate(360deg);}
-  }
-  @keyframes fallRight {
-    0% {top: -50px; opacity: 1; transform: rotate(0deg);}
-    100% {top: 110vh; opacity: 0; transform: rotate(-360deg);}
+    align-items: flex-start;
+    color: #0f0;
+    font-size: 24px;
+    white-space: pre-wrap;
+    overflow-y: auto;
+    border: 2px solid #0f0;
+    padding: 20px;
+    box-sizing: border-box;
   }
 </style>
 </head>
 <body>
 
-<div id="container">
-
-  <div id="overlay">
-    <div id="startName">@mhmtxaslan</div>
-    <button id="startBtn">X</button>
-  </div>
-
-  <div id="mainBox"></div>
-
-  <div id="boxesContainer">
-    <div class="box top" id="boxTop"></div>
-    <div class="box bottom" id="boxBottom"></div>
-  </div>
-
-</div>
-
-<div id="errorScreen">!!! ERROR !!!</div>
-
-<audio id="alarmSound" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg"></audio>
-<audio id="beepSound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
+<button id="startBtn">X</button>
+<div id="container"></div>
 
 <script>
-  const overlay = document.getElementById('overlay');
   const startBtn = document.getElementById('startBtn');
-  const startName = document.getElementById('startName');
-  const mainBox = document.getElementById('mainBox');
-  const boxesContainer = document.getElementById('boxesContainer');
-  const boxTop = document.getElementById('boxTop');
-  const boxBottom = document.getElementById('boxBottom');
-  const errorScreen = document.getElementById('errorScreen');
-  const alarmSound = document.getElementById('alarmSound');
-  const beepSound = document.getElementById('beepSound');
+  const container = document.getElementById('container');
 
-  let beepInterval = null;
-  let beepVolume = 0;
-
-  // Başlangıç metinleri (harf harf yazı için)
-  const initialTexts = [
-    "Sistem kontrol ediliyor...",
-    "Yapay Zekâ aktif durumda.",
-    "Güvenlik duvarı atlatılıyor...",
-    "Hedef siber ağı tespit etme...",
-    "Veri paketleri izleniyor...",
-    "Sistem açığı bulunuyor...",
-    "İzin alınmadan erişim sağlanıyor...",
-    "İşlemciler aşırı yükleniyor...",
-    "Saldırı başlatılıyor...",
-    "İşlem tamamlandı."
-  ];
-
-  // Kutularda akacak yazılar (rastgele seçilecek)
-  const boxTexts = [
-    "ALERT: Saldırı tespit edildi.",
-    "Giriş denemeleri: Başarısız.",
-    "Firewall devre dışı bırakıldı.",
-    "Root erişimi sağlanıyor...",
-    "Veriler kopyalanıyor...",
-    "Şifre çözücü aktif...",
-    "Backdoor yerleştiriliyor...",
-    "İz bırakmadan ilerleniyor...",
-    "Portlar açılıyor...",
-    "Sistem çökertiliyor..."
-  ];
-
-  // Harf harf yazdırma fonksiyonu
-  function typeWriter(element, text, speed, callback) {
+  // Yazdırma fonksiyonu (harf harf)
+  function typeWriter(text, speed = 50, onDone = null) {
+    container.textContent = "";
     let i = 0;
-    element.textContent = "";
-    function typing() {
+    function type() {
       if (i < text.length) {
-        element.textContent += text.charAt(i);
-        element.scrollTop = element.scrollHeight;
+        container.textContent += text.charAt(i);
+        container.scrollTop = container.scrollHeight;
         i++;
-        setTimeout(typing, speed);
-      } else {
-        if (callback) callback();
-     
+        setTimeout(type, speed);
+      } else if (onDone) {
+        onDone();
+      }
+    }
+    type();
+  }
+
+  startBtn.addEventListener('click', () => {
+    startBtn.style.display = 'none';
+    container.style.display = 'flex';
+
+    const firstText = 
+`@mhmtxaslan
+Sistem kontrol ediliyor...
+Yapay Zekâ aktif durumda.
+Güvenlik duvarı atlatılıyor...
+Hedef siber ağı tespit etme...
+Veri paketleri izleniyor...
+Sistem açığı bulunuyor...
+İzin alınmadan erişim sağlanıyor...
+İşlemciler aşırı yükleniyor...
+Saldırı başlatılıyor...
+İşlem tamamlandı.`;
+
+    typeWriter(firstText, 50, () => {
+      container.textContent += "\n\n>> İşlem bitti.";
+    });
+  });
+</script>
+
+</body>
+</html>
