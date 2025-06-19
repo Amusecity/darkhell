@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>Korku Efekti</title>
+  <title>Korku Zamanı</title>
   <style>
     html, body {
       margin: 0; padding: 0;
@@ -24,12 +24,23 @@
       position: absolute;
     }
 
+    #mhmtBox {
+      display: none;
+      font-size: 3rem;
+      color: #0f0;
+      border: 2px solid #0f0;
+      padding: 1rem 2rem;
+      z-index: 20;
+      background: black;
+      position: absolute;
+    }
+
     #videoContainer {
       display: none;
       position: fixed;
       top: 0; left: 0;
       width: 100vw; height: 100vh;
-      z-index: 100;
+      z-index: 999;
       background: black;
     }
 
@@ -37,17 +48,6 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-    }
-
-    #mhmtBox {
-      display: none;
-      position: absolute;
-      font-size: 3rem;
-      color: #0f0;
-      border: 2px solid #0f0;
-      padding: 1rem 2rem;
-      z-index: 20;
-      background: black;
     }
   </style>
 </head>
@@ -57,8 +57,8 @@
 <div id="mhmtBox">@mhmtxaslan</div>
 
 <div id="videoContainer">
-  <video id="scareVideo" preload="auto">
-    <source src="https://cdn.pixabay.com/video/2023/10/30/185603-877591174_large.mp4" type="video/mp4">
+  <video id="scareVideo" muted playsinline preload="auto">
+    <source src="https://cdn.pixabay.com/video/2024/03/02/204150-915969059_large.mp4" type="video/mp4">
     Tarayıcınız video etiketini desteklemiyor.
   </video>
 </div>
@@ -66,30 +66,28 @@
 <script>
   const startBtn = document.getElementById('startBtn');
   const mhmtBox = document.getElementById('mhmtBox');
-  const scareVideo = document.getElementById('scareVideo');
   const videoContainer = document.getElementById('videoContainer');
+  const scareVideo = document.getElementById('scareVideo');
 
-  // Çığlık sesi
-  const scream = new Audio('https://www.myinstants.com/media/sounds/scream.mp3');
+  const scream = new Audio("https://www.myinstants.com/media/sounds/scream.mp3");
 
-  startBtn.addEventListener('click', async () => {
-    startBtn.style.display = 'none';
-    mhmtBox.style.display = 'block';
+  startBtn.addEventListener("click", async () => {
+    startBtn.style.display = "none";
+    mhmtBox.style.display = "block";
 
-    // Kutu birkaç saniye sabit dursun
     setTimeout(async () => {
-      mhmtBox.style.display = 'none';
-      videoContainer.style.display = 'block';
+      mhmtBox.style.display = "none";
+      videoContainer.style.display = "block";
 
       try {
-        scream.play();
+        // İlk tıklamada çığlık + video
+        await scream.play();
         await scareVideo.play();
       } catch (e) {
-        alert("Tarayıcı ses/video engelledi. Sayfayı yenileyip tekrar dene.");
+        alert("Video oynatılamadı. Lütfen yeniden X'e tıkla.");
         console.error(e);
       }
-
-    }, 3000); // 3 saniye sonra korku başlar
+    }, 3000);
   });
 </script>
 
