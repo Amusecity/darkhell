@@ -1,213 +1,74 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <title>mhmtxaslan - Terminal</title>
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      background: black;
-      color: white;
-      overflow: hidden;
-      font-family: monospace;
-    }
-    #startOverlay {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      background: black;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-    }
-    #startButton {
-      font-size: 30px;
-      padding: 20px 40px;
-      color: red;
-      background: none;
-      border: 2px solid red;
-      cursor: pointer;
-    }
-    #mhmtxaslanBox {
-      position: absolute;
-      top: 40%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      color: white;
-      border: 2px solid red;
-      padding: 20px;
-      display: none;
-      font-size: 30px;
-      z-index: 999;
-    }
-    .terminalBox {
-      position: absolute;
-      width: 45%;
-      height: 45%;
-      background: rgba(0,0,0,0.9);
-      border: 2px solid white;
-      overflow: hidden;
-      white-space: pre-wrap;
-      padding: 10px;
-      font-size: 14px;
-    }
-    #boxTop {
-      top: 5%;
-      left: 5%;
-      border-color: white;
-      color: white;
-    }
-    #boxBottom {
-      bottom: 5%;
-      right: 5%;
-      border-color: lime;
-      color: lime;
-    }
-    #error {
-      position: absolute;
-      bottom: 10%;
-      left: 50%;
-      transform: translateX(-50%);
-      color: red;
-      font-size: 40px;
-      font-weight: bold;
-      display: none;
-      animation: blink 0.4s infinite;
-      z-index: 1000;
-    }
-    @keyframes blink {
-      0% { opacity: 1; }
-      50% { opacity: 0.1; }
-      100% { opacity: 1; }
-    }
-    .exclamations {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      font-size: 30px;
-      color: red;
-    }
-    .exclamations span {
-      position: absolute;
-      animation: float 2s infinite linear;
-    }
-    @keyframes float {
-      0% { transform: translateY(0); opacity: 1; }
-      100% { transform: translateY(-100vh); opacity: 0; }
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Ses Erişimli X Butonu</title>
+<style>
+  body, html {
+    margin: 0; padding: 0; height: 100vh; background: #000; color: #0f0; font-family: monospace;
+    display: flex; justify-content: center; align-items: center;
+    overflow: hidden;
+  }
+  #xButton {
+    font-size: 5rem;
+    color: red;
+    cursor: pointer;
+    user-select: none;
+    background: transparent;
+    border: none;
+  }
+  #status {
+    position: fixed;
+    top: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #0f0;
+    font-size: 1.5rem;
+    user-select: none;
+  }
+</style>
 </head>
 <body>
-  <div id="startOverlay">
-    <button id="startButton">X</button>
-  </div>
 
-  <div id="mhmtxaslanBox">mhmtxaslan</div>
-  <div id="boxTop" class="terminalBox"></div>
-  <div id="boxBottom" class="terminalBox"></div>
-  <div id="error">ERROR</div>
-  <div class="exclamations" id="exclamations"></div>
+<button id="xButton">✖</button>
+<div id="status"></div>
 
-  <audio id="alarmSound" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" loop></audio>
-  <audio id="beep" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" loop></audio>
+<script>
+  const xButton = document.getElementById('xButton');
+  const status = document.getElementById('status');
 
-  <script>
-    const startBtn = document.getElementById('startButton');
-    const overlay = document.getElementById('startOverlay');
-    const mhmBox = document.getElementById('mhmtxaslanBox');
-    const boxTop = document.getElementById('boxTop');
-    const boxBottom = document.getElementById('boxBottom');
-    const errorText = document.getElementById('error');
-    const alarmSound = document.getElementById('alarmSound');
-    const beepSound = document.getElementById('beep');
-    const exclamations = document.getElementById('exclamations');
+  // Örnek alarm sesi için küçük bir audio
+  const alarmAudio = new Audio('https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg');
+  alarmAudio.loop = true;
 
-    const lines = [
-      "Connecting to root@longlong.earth...",
-      "curl --trace-ascii hack.localhost --upload-file...",
-      "ping 127.0.0.1 - flood starting...",
-      "bruteforcing /etc/passwd",
-      "proxychains -q nmap -T4 -A -v 192.168.0.1",
-      "TOR SOCK5 initiating",
-      "encrypted payload >> received",
-      "SYS_WRITE_ERROR",
-      "firewall bypassed",
-      "malware injected >>>",
-      "flag.txt --> /root/capture",
-      "DNS override initiated",
-      "access granted [root]",
-      "system overloaded...",
-      "cracking AES-256...",
-      "injecting: 0xdeadbeef",
-      "kernel panic incoming...",
-      "reverse shell active",
-      "establishing persistence...",
-      "system hijacked..."
-    ];
+  xButton.addEventListener('click', async () => {
+    try {
+      // Kullanıcı etkileşimiyle ses oynatmayı dene
+      await alarmAudio.play();
 
-    function randomLine() {
-      return lines[Math.floor(Math.random() * lines.length)];
+      // Butonu gizle
+      xButton.style.display = 'none';
+      status.textContent = "Ses oynatılıyor, animasyonlar başlıyor...";
+
+      // Burada diğer animasyonları tetikle (örnek: yazı fırtınası, terminal kutuları vs.)
+      startAnimations();
+
+    } catch (err) {
+      status.textContent = "Ses oynatılamadı. Lütfen tarayıcı ayarlarını kontrol et.";
+      console.error(err);
     }
+  });
 
-    function startSimulation() {
-      overlay.style.display = 'none';
-      mhmBox.style.display = 'block';
+  function startAnimations() {
+    // Buraya animasyon kodlarını ekle
+    console.log("Animasyonlar başlıyor...");
+    // Örnek: 3 saniye sonra mesaj
+    setTimeout(() => {
+      status.textContent = "Yazı fırtınası ve terminal kutuları başlatıldı.";
+    }, 3000);
+  }
+</script>
 
-      // 1. MHMTXASLAN kutusu 3 saniyede kırmızıya dönecek
-      setTimeout(() => {
-        mhmBox.style.color = 'red';
-      }, 3000);
-
-      // 2. 5 saniyede kutu kaybolur, terminal kutular başlar
-      setTimeout(() => {
-        mhmBox.style.display = 'none';
-        boxTop.style.display = 'block';
-        boxBottom.style.display = 'block';
-
-        let topContent = '';
-        let bottomContent = '';
-        let count = 0;
-
-        const interval = setInterval(() => {
-          if (count < 50) {
-            topContent += randomLine() + '\n';
-            boxTop.textContent = topContent;
-          } else if (count < 100) {
-            bottomContent += randomLine() + '\n';
-            boxBottom.textContent = bottomContent;
-          } else {
-            clearInterval(interval);
-          }
-          count++;
-        }, 100); // daha hızlı akış
-
-        // Bip sesi kutularla birlikte başlar
-        beepSound.play();
-
-      }, 5000);
-
-      // 25. saniyede ERROR + Alarm + ünlem animasyonu
-      setTimeout(() => {
-        errorText.style.display = 'block';
-        alarmSound.play();
-        createExclamations();
-      }, 25000);
-    }
-
-    function createExclamations() {
-      for (let i = 0; i < 50; i++) {
-        const span = document.createElement('span');
-        span.textContent = '!';
-        span.style.left = Math.random() * 100 + 'vw';
-        span.style.top = Math.random() * 100 + 'vh';
-        exclamations.appendChild(span);
-      }
-    }
-
-    startBtn.addEventListener('click', startSimulation);
-  </script>
 </body>
 </html>
