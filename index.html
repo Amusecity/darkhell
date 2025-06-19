@@ -2,11 +2,13 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>Korku Zamanı</title>
+  <title>mhmtxaslan Terminal Hack</title>
   <style>
     html, body {
       margin: 0; padding: 0;
       background: black;
+      color: #0f0;
+      font-family: monospace;
       overflow: hidden;
       height: 100vh;
       display: flex;
@@ -27,27 +29,47 @@
     #mhmtBox {
       display: none;
       font-size: 3rem;
-      color: #0f0;
       border: 2px solid #0f0;
       padding: 1rem 2rem;
-      z-index: 20;
-      background: black;
       position: absolute;
+      z-index: 20;
     }
 
-    #videoContainer {
+    #terminal {
+      display: none;
+      position: absolute;
+      width: 90vw;
+      height: 80vh;
+      background: black;
+      color: #0f0;
+      font-size: 1.1rem;
+      padding: 1rem;
+      overflow-y: auto;
+      border: 1px solid #0f0;
+      z-index: 30;
+    }
+
+    #errorScreen {
       display: none;
       position: fixed;
       top: 0; left: 0;
       width: 100vw; height: 100vh;
-      z-index: 999;
-      background: black;
+      background: red;
+      color: white;
+      font-size: 3rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      animation: glitch 0.3s infinite;
     }
 
-    #scareVideo {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+    @keyframes glitch {
+      0% { transform: translate(0, 0); }
+      25% { transform: translate(-5px, 2px); }
+      50% { transform: translate(3px, -3px); }
+      75% { transform: translate(-2px, 5px); }
+      100% { transform: translate(0, 0); }
     }
   </style>
 </head>
@@ -55,39 +77,66 @@
 
 <button id="startBtn">✖</button>
 <div id="mhmtBox">@mhmtxaslan</div>
-
-<div id="videoContainer">
-  <video id="scareVideo" muted playsinline preload="auto">
-    <source src="https://cdn.pixabay.com/video/2024/03/02/204150-915969059_large.mp4" type="video/mp4">
-    Tarayıcınız video etiketini desteklemiyor.
-  </video>
-</div>
+<div id="terminal"></div>
+<div id="errorScreen">SİSTEM ÇÖKTÜ - mhmtxaslan</div>
 
 <script>
-  const startBtn = document.getElementById('startBtn');
-  const mhmtBox = document.getElementById('mhmtBox');
-  const videoContainer = document.getElementById('videoContainer');
-  const scareVideo = document.getElementById('scareVideo');
+  const startBtn = document.getElementById("startBtn");
+  const mhmtBox = document.getElementById("mhmtBox");
+  const terminal = document.getElementById("terminal");
+  const errorScreen = document.getElementById("errorScreen");
 
-  const scream = new Audio("https://www.myinstants.com/media/sounds/scream.mp3");
+  const keySound = new Audio("https://cdn.pixabay.com/audio/2022/03/15/audio_c13b0c7dd5.mp3");
+  const crashSound = new Audio("https://cdn.pixabay.com/audio/2023/10/08/audio_70a46a7e96.mp3"); // patlama gibi bir crash sesi
 
-  startBtn.addEventListener("click", async () => {
+  const fakeCommands = [
+    "Initializing mhmtOS...",
+    "Verifying root access...",
+    "Loading @mhmtxaslan core...",
+    "Injecting terminal payload...",
+    "HACK DETECTED",
+    "System files compromised.",
+    "Writing to /dev/null",
+    "Overwriting kernel...",
+    "█ █ █ █ █ █ █ █ █ █ █ █ █",
+    "SYSTEM OVERRIDE ACTIVATED",
+    "Critical error detected.",
+    "STACK DUMP...",
+    "STACK DUMP...",
+    "FATAL ERROR 0xDEADDEAD"
+  ];
+
+  async function typeLines(lines, index = 0) {
+    if (index >= lines.length) return;
+
+    terminal.innerHTML += `<div>> ${lines[index]}</div>`;
+    terminal.scrollTop = terminal.scrollHeight;
+
+    keySound.currentTime = 0;
+    keySound.play();
+
+    const delay = lines[index].includes("█") ? 200 : 800;
+    setTimeout(() => typeLines(lines, index + 1), delay);
+  }
+
+  startBtn.addEventListener("click", () => {
     startBtn.style.display = "none";
     mhmtBox.style.display = "block";
 
-    setTimeout(async () => {
+    setTimeout(() => {
       mhmtBox.style.display = "none";
-      videoContainer.style.display = "block";
+      terminal.style.display = "block";
 
-      try {
-        // İlk tıklamada çığlık + video
-        await scream.play();
-        await scareVideo.play();
-      } catch (e) {
-        alert("Video oynatılamadı. Lütfen yeniden X'e tıkla.");
-        console.error(e);
-      }
-    }, 3000);
+      typeLines(fakeCommands);
+
+      // 20 saniye sonra hata ekranı
+      setTimeout(() => {
+        terminal.style.display = "none";
+        errorScreen.style.display = "flex";
+        crashSound.play();
+      }, 20000);
+
+    }, 3000); // Başlangıçta 3 sn bekletme
   });
 </script>
 
