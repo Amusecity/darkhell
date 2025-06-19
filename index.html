@@ -3,145 +3,157 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Terminal Yazı Hızı</title>
+<title>Zero Day Sim</title>
 <style>
-  html, body {
-    margin:0; padding:0; height:100%; width:100%;
-    background: black; font-family: monospace;
-    overflow: hidden;
-    user-select: none;
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+  body {
+    margin: 0; background: black; color: #0f0; font-family: 'Share Tech Mono', monospace;
+    overflow: hidden; user-select: none;
   }
-  #closeBtn {
-    position: fixed;
-    top: 10px;
-    right: 15px;
-    font-size: 30px;
-    color: white;
-    cursor: pointer;
-    user-select:none;
-    z-index: 1000;
+  #overlay {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: black; display: flex; justify-content: center; align-items: center;
+  }
+  #startBox {
+    border: 2px solid #0f0; padding: 30px 60px; font-size: 3rem; color: #0f0;
+    user-select: none; cursor: default;
   }
   #terminal {
-    position: fixed;
-    top: 50px; left: 10px; right: 10px; bottom: 10px;
-    padding: 20px;
-    box-sizing: border-box;
-    background: black;
-    font-size: 20px;
-    line-height: 1.5em;
-    white-space: pre-wrap;
-    overflow-y: auto;
-    font-weight: 600;
-    user-select:none;
-    display:none;
+    display: none; padding: 10px 20px; color: #0f0; height: 90vh; width: 90vw;
+    overflow-y: auto; white-space: pre-wrap; font-size: 1.1rem; line-height: 1.3rem;
+    background: black; border: none; outline: none;
   }
-  .green {
-    color: #0f0;
+  .redText { color: #f00; }
+  .blink {
+    animation: blinkRed 1s infinite;
   }
-  .red {
-    color: #f00;
+  @keyframes blinkRed {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
+  #warning {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(255,0,0,0.7); color: white; font-size: 4rem; font-weight: bold;
+    display: none; justify-content: center; align-items: center; user-select: none;
+    text-shadow: 0 0 10px red;
+  }
+  .exclamations {
+    position: fixed; user-select: none; pointer-events: none;
+    font-size: 3rem; font-weight: bold; color: red;
+    animation: blinkExcl 1.5s infinite alternate;
+  }
+  @keyframes blinkExcl {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
   }
 </style>
 </head>
 <body>
-
-<div id="closeBtn">×</div>
-<div id="terminal"></div>
+  <div id="overlay">
+    <div id="startBox">@MHMTXASLAN</div>
+  </div>
+  <pre id="terminal"></pre>
+  <div id="warning">!!! SİSTEM HATASI !!!</div>
 
 <script>
-  const closeBtn = document.getElementById('closeBtn');
-  const terminal = document.getElementById('terminal');
+const overlay = document.getElementById('overlay');
+const startBox = document.getElementById('startBox');
+const terminal = document.getElementById('terminal');
+const warning = document.getElementById('warning');
 
-  // 100 hacker tarzı satır
-  let messages = [];
-  for(let i=1; i<=100; i++){
-    messages.push(`HACKER SATIRI ${i} - sistem güvenlik taraması devam ediyor...`);
+let lines = [];
+for(let i=1; i<=100; i++) {
+  let text = i <= 20 
+    ? `Satır ${i} - Yeşil HACKER mesajı...`
+    : `Satır ${i} - KIRMIZI HACKER saldırısı! !!!`;
+  lines.push(text);
+}
+
+let index = 0;
+let speed = 150; // yazma hızı ms
+let redPhaseStarted = false;
+
+function addExclamations() {
+  for(let i=0; i<10; i++) {
+    let excl = document.createElement('div');
+    excl.textContent = '!';
+    excl.className = 'exclamations';
+    excl.style.top = `${Math.random()*100}vh`;
+    excl.style.left = `${Math.random()*100}vw`;
+    excl.style.animationDuration = (0.5 + Math.random()) + 's';
+    document.body.appendChild(excl);
   }
+}
 
-  // Ses için bip oluşturma
-  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function beep(freq, duration) {
+  const context = new AudioContext();
+  const oscillator = context.createOscillator();
+  const gainNode = context.createGain();
+  oscillator.frequency.value = freq;
+  oscillator.type = 'square';
+  oscillator.connect(gainNode);
+  gainNode.connect(context.destination);
+  oscillator.start();
+  gainNode.gain.setValueAtTime(0.1, context.currentTime);
+  gainNode.gain.exponentialRampToValueAtTime(0.00001, context.currentTime + duration / 1000);
+  oscillator.stop(context.currentTime + duration / 1000);
+}
 
-  function playBeep(duration = 100, frequency = 440, volume = 0.2) {
-    const oscillator = audioCtx.createOscillator();
-    const gainNode = audioCtx.createGain();
-
-    oscillator.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
-
-    gainNode.gain.value = volume;
-    oscillator.frequency.value = frequency;
-    oscillator.type = "square";
-
-    oscillator.start();
-    setTimeout(() => oscillator.stop(), duration);
-  }
-
-  let started = false;
-  let currentLine = 0;
-  let lastBeep = 0;
-  let startTime = null;
-
-  function writeNextLine(timestamp){
-    if (!startTime) startTime = timestamp;
-
-    if(currentLine >= messages.length){
-      // 100 satır tamamlandı, temizle ve devam
-      currentLine = 0;
-      terminal.innerHTML = "";
-      startTime = timestamp;
-    }
-
-    // Renk ve hız ayarları
-    let interval, colorClass;
-    if(currentLine < 20){
-      interval = 300;
-      colorClass = "green";
+function playBipSequence() {
+  let beepSpeed = 500;
+  let count = 0;
+  const interval = setInterval(() => {
+    if(warning.style.display !== 'flex') {
+      beep(440, 100);
+      count++;
+      beepSpeed *= 0.85; // hızlanma
+      if(beepSpeed < 100) beepSpeed = 100;
     } else {
-      interval = 50;
-      colorClass = "red";
+      clearInterval(interval);
     }
+  }, beepSpeed);
+}
 
-    // Bip sesi kontrolü:
-    // Yeşil (ilk 20 satır) sessiz,
-    // Kırmızı satır başlayınca bip hızlanarak devam ediyor.
-    if(colorClass === "red" && audioCtx.state === 'running'){
-      // Bip hızı intervale göre artacak
-      if(!lastBeep || (timestamp - lastBeep) > interval){
-        playBeep(50, 800, 0.15);
-        lastBeep = timestamp;
-      }
-    }
-
-    if(!writeNextLine.last || (timestamp - writeNextLine.last) >= interval){
-      const line = document.createElement("div");
-      line.textContent = messages[currentLine];
-      line.className = colorClass;
-      terminal.appendChild(line);
-      terminal.scrollTop = terminal.scrollHeight;
-      currentLine++;
-      writeNextLine.last = timestamp;
-    }
-
-    if(started) requestAnimationFrame(writeNextLine);
+function typeLine() {
+  if(index >= lines.length) {
+    // bitince alarm ve uyarı göster
+    warning.style.display = 'flex';
+    addExclamations();
+    playAlarm();
+    return;
   }
-
-  function startTerminal(){
-    if(started) return;
-    started = true;
-    terminal.style.display = "block";
-    currentLine = 0;
-    writeNextLine.last = null;
-    startTime = null;
-    // Bip sesi - çarpıya basınca kırmızı yanıp sönme anında 1 bip
-    if(audioCtx.state === 'suspended') audioCtx.resume();
-    playBeep(100, 800, 0.3);
-    requestAnimationFrame(writeNextLine);
+  let line = lines[index];
+  let span = document.createElement('span');
+  if(index >= 20) {
+    span.classList.add('redText');
+    if(!redPhaseStarted) {
+      redPhaseStarted = true;
+      playBipSequence();
+    }
   }
+  span.textContent = line + '\n';
+  terminal.appendChild(span);
+  terminal.scrollTop = terminal.scrollHeight;
+  index++;
+  setTimeout(typeLine, speed);
+}
 
-  closeBtn.addEventListener('click', ()=>{
-    startTerminal();
-  });
+function playAlarm() {
+  const context = new AudioContext();
+  const oscillator = context.createOscillator();
+  oscillator.frequency.value = 200;
+  oscillator.type = 'sawtooth';
+  oscillator.connect(context.destination);
+  oscillator.start();
+  setTimeout(() => oscillator.stop(), 3000);
+}
+
+startBox.addEventListener('click', () => {
+  beep(440, 200); // ilk bip
+  overlay.style.display = 'none';
+  terminal.style.display = 'block';
+  typeLine();
+});
 </script>
-
 </body>
 </html>
