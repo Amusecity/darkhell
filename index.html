@@ -11,9 +11,19 @@
     overflow: hidden;
     user-select: none;
   }
+  #closeBtn {
+    position: fixed;
+    top: 10px;
+    right: 15px;
+    font-size: 30px;
+    color: white;
+    cursor: pointer;
+    user-select:none;
+    z-index: 1000;
+  }
   #terminal {
     position: fixed;
-    top: 10px; left: 10px; right: 10px; bottom: 10px;
+    top: 50px; left: 10px; right: 10px; bottom: 10px;
     padding: 20px;
     box-sizing: border-box;
     background: black;
@@ -23,6 +33,7 @@
     overflow-y: auto;
     font-weight: 600;
     user-select:none;
+    display:none;
   }
   .green {
     color: #0f0;
@@ -34,22 +45,20 @@
 </head>
 <body>
 
+<div id="closeBtn">×</div>
 <div id="terminal"></div>
 
 <script>
+  const closeBtn = document.getElementById('closeBtn');
   const terminal = document.getElementById('terminal');
 
-  // 100 satırlık yazı dizisi
+  // 100 hacker tarzı satır
   let messages = [];
   for(let i=1; i<=100; i++){
-    messages.push(`Satır numarası ${i} - sistem kontrolü yapılıyor...`);
+    messages.push(`HACKER SATIRI ${i} - sistem güvenlik taraması devam ediyor...`);
   }
 
-  let startTime = null;
-  let currentLine = 0;
-  let totalLines = messages.length;
-
-  // Ses için bip sesi oluşturma
+  // Ses için bip oluşturma
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
   function playBeep(duration = 100, frequency = 440, volume = 0.2) {
@@ -67,14 +76,22 @@
     setTimeout(() => oscillator.stop(), duration);
   }
 
+  let started = false;
+  let currentLine = 0;
   let lastBeep = 0;
+  let startTime = null;
 
   function writeNextLine(timestamp){
     if (!startTime) startTime = timestamp;
-    let elapsed = timestamp - startTime;
 
-    // İlk 20 satır için yavaş (300ms), sonraki 80 satır için hızlı (50ms)
-    // Satır hızını süreye göre değil satır numarasına göre ayarlıyoruz
+    if(currentLine >= messages.length){
+      // 100 satır tamamlandı, temizle ve devam
+      currentLine = 0;
+      terminal.innerHTML = "";
+      startTime = timestamp;
+    }
+
+    // Renk ve hız ayarları
     let interval, colorClass;
     if(currentLine < 20){
       interval = 300;
@@ -84,41 +101,46 @@
       colorClass = "red";
     }
 
-    if(currentLine < totalLines){
-      if(!writeNextLine.last || (timestamp - writeNextLine.last) >= interval){
-        // Yeni satır için span ile renk sınıfı ver
-        const line = document.createElement("div");
-        line.textContent = messages[currentLine];
-        line.className = colorClass;
-        terminal.appendChild(line);
-
-        // Scroll aşağıya kaydır
-        terminal.scrollTop = terminal.scrollHeight;
-
-        // Bip sesi hızlandırma
-        if(audioCtx.state === 'suspended') {
-          audioCtx.resume();
-        }
-        if(timestamp - lastBeep > interval){
-          playBeep(50, 600, 0.1);
-          lastBeep = timestamp;
-        }
-
-        currentLine++;
-        writeNextLine.last = timestamp;
+    // Bip sesi kontrolü:
+    // Yeşil (ilk 20 satır) sessiz,
+    // Kırmızı satır başlayınca bip hızlanarak devam ediyor.
+    if(colorClass === "red" && audioCtx.state === 'running'){
+      // Bip hızı intervale göre artacak
+      if(!lastBeep || (timestamp - lastBeep) > interval){
+        playBeep(50, 800, 0.15);
+        lastBeep = timestamp;
       }
-      requestAnimationFrame(writeNextLine);
-    } else {
-      // 100 satır bitince sıfırla, devam etsin sonsuz döngü
-      currentLine = 0;
-      terminal.innerHTML = "";
-      writeNextLine.last = null;
-      startTime = timestamp;
-      requestAnimationFrame(writeNextLine);
     }
+
+    if(!writeNextLine.last || (timestamp - writeNextLine.last) >= interval){
+      const line = document.createElement("div");
+      line.textContent = messages[currentLine];
+      line.className = colorClass;
+      terminal.appendChild(line);
+      terminal.scrollTop = terminal.scrollHeight;
+      currentLine++;
+      writeNextLine.last = timestamp;
+    }
+
+    if(started) requestAnimationFrame(writeNextLine);
   }
 
-  requestAnimationFrame(writeNextLine);
+  function startTerminal(){
+    if(started) return;
+    started = true;
+    terminal.style.display = "block";
+    currentLine = 0;
+    writeNextLine.last = null;
+    startTime = null;
+    // Bip sesi - çarpıya basınca kırmızı yanıp sönme anında 1 bip
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+    playBeep(100, 800, 0.3);
+    requestAnimationFrame(writeNextLine);
+  }
+
+  closeBtn.addEventListener('click', ()=>{
+    startTerminal();
+  });
 </script>
 
 </body>
