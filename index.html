@@ -1,106 +1,176 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Zero-Day Sim</title>
-<style>
-  html, body {
-    margin:0; padding:0; height:100%;
-    background: black;
-    font-family: monospace;
-    overflow: hidden;
-    color: #0f0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  #startBtn {
-    width: 80px;
-    height: 80px;
-    font-size: 48px;
-    border: 3px solid #0f0;
-    background: black;
-    color: #0f0;
-    border-radius: 50%;
-    cursor: pointer;
-    user-select: none;
-    line-height: 80px;
-    text-align: center;
-    font-weight: bold;
-    transition: background-color 0.3s, color 0.3s;
-    z-index: 10000;
-  }
-  #startBtn:hover {
-    background: #0f0;
-    color: black;
-  }
-  #container {
-    width: 90vw;
-    max-width: 900px;
-    height: 80vh;
-    position: relative;
-    display: none;
-    flex-direction: column;
-    justify-content: center;
-    align-items: flex-start;
-    color: #0f0;
-    font-size: 24px;
-    white-space: pre-wrap;
-    overflow-y: auto;
-    border: 2px solid #0f0;
-    padding: 20px;
-    box-sizing: border-box;
-  }
-</style>
+  <meta charset="UTF-8">
+  <title>Korku Terminali</title>
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      color: lime;
+      font-family: monospace;
+      overflow: hidden;
+    }
+
+    #mhmtxaslanBox {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 30px 60px;
+      border: 2px solid lime;
+      color: lime;
+      font-size: 28px;
+      animation: blink 1s infinite;
+      z-index: 1000;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.1; }
+    }
+
+    .terminal {
+      position: absolute;
+      width: 90%;
+      height: 40%;
+      background: #000;
+      border: 2px solid white;
+      padding: 10px;
+      overflow: hidden;
+      font-size: 16px;
+      color: white;
+      display: none;
+      white-space: pre-wrap;
+    }
+
+    #terminalTop { top: 0; left: 5%; }
+    #terminalBottom { bottom: 0; left: 5%; }
+
+    .error {
+      position: absolute;
+      font-size: 50px;
+      color: red;
+      left: 50%;
+      transform: translateX(-50%);
+      animation: bounce 1s infinite alternate;
+      z-index: 999;
+      display: none;
+    }
+
+    @keyframes bounce {
+      0% { top: 30%; }
+      100% { top: 60%; }
+    }
+
+    .exclamation {
+      position: absolute;
+      font-size: 30px;
+      color: red;
+      animation: flash 0.3s infinite;
+      z-index: 999;
+    }
+
+    @keyframes flash {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+  </style>
 </head>
 <body>
 
-<button id="startBtn">X</button>
-<div id="container"></div>
+<div id="mhmtxaslanBox">@mhmtxaslan</div>
+
+<div id="terminalTop" class="terminal"></div>
+<div id="terminalBottom" class="terminal"></div>
+<div id="error" class="error">!!! ERROR !!!</div>
+
+<audio id="alarm" loop>
+  <source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg">
+</audio>
 
 <script>
-  const startBtn = document.getElementById('startBtn');
-  const container = document.getElementById('container');
+  const mhmtBox = document.getElementById("mhmtxaslanBox");
+  const termTop = document.getElementById("terminalTop");
+  const termBottom = document.getElementById("terminalBottom");
+  const errorText = document.getElementById("error");
+  const alarm = document.getElementById("alarm");
 
-  // Yazdırma fonksiyonu (harf harf)
-  function typeWriter(text, speed = 50, onDone = null) {
-    container.textContent = "";
-    let i = 0;
-    function type() {
-      if (i < text.length) {
-        container.textContent += text.charAt(i);
-        container.scrollTop = container.scrollHeight;
-        i++;
-        setTimeout(type, speed);
-      } else if (onDone) {
-        onDone();
+  // Renk değiştirme (yeşilden kırmızıya)
+  setTimeout(() => {
+    mhmtBox.style.color = 'red';
+    mhmtBox.style.borderColor = 'red';
+  }, 3000);
+
+  // Kutuyu gizle
+  setTimeout(() => {
+    mhmtBox.style.display = 'none';
+    startTerminalTyping();
+  }, 5000);
+
+  const terminalLines = [
+    "[~] Sunucu bağlantısı başlatılıyor...",
+    "[~] Erişim doğrulanıyor...",
+    "[~] Yetkisiz giriş tespit edildi!",
+    "[!] Sistem çökmek üzere...",
+    "[#] Kod dizisi aktarılıyor...",
+    "[!] Güvenlik duvarı atlandı...",
+    "[#] IP takibi başlatıldı...",
+    "[#] Kullanıcı verisi ele geçiriliyor...",
+    "[!] Kritik hata: Yığın taşması...",
+    "[#] Sistem hatası artıyor...",
+    "[!] Tehlikeli işlem: root yetkisi alındı!",
+    "[#] Kernel hatası: 0x0000DEAD",
+    "[!] Tehdit algılandı! Kaçınılmaz!",
+    "[#] Sistem kontrolü ele geçirildi.",
+    "[!] ERROR ERROR ERROR ERROR",
+  ];
+
+  let lineIndex = 0;
+
+  function startTerminalTyping() {
+    const interval = setInterval(() => {
+      const line = terminalLines[Math.floor(Math.random() * terminalLines.length)];
+      if (termTop.innerText.split('\n').length < 30) {
+        termTop.innerText += line + "\n";
+      } else {
+        termTop.innerText = termTop.innerText.split('\n').slice(1).join('\n') + "\n" + line;
       }
-    }
-    type();
+      termBottom.innerText = termTop.innerText;
+
+      lineIndex++;
+      if (lineIndex >= 50) clearInterval(interval);
+    }, 100);
   }
 
-  startBtn.addEventListener('click', () => {
-    startBtn.style.display = 'none';
-    container.style.display = 'flex';
+  // Kutular 10. saniyede görünür
+  setTimeout(() => {
+    termTop.style.display = "block";
+    termBottom.style.display = "block";
+  }, 10000);
 
-    const firstText = 
-`@mhmtxaslan
-Sistem kontrol ediliyor...
-Yapay Zekâ aktif durumda.
-Güvenlik duvarı atlatılıyor...
-Hedef siber ağı tespit etme...
-Veri paketleri izleniyor...
-Sistem açığı bulunuyor...
-İzin alınmadan erişim sağlanıyor...
-İşlemciler aşırı yükleniyor...
-Saldırı başlatılıyor...
-İşlem tamamlandı.`;
+  // Alarm sesi 25. saniyede başlar
+  setTimeout(() => {
+    alarm.volume = 1;
+    alarm.play();
+  }, 25000);
 
-    typeWriter(firstText, 50, () => {
-      container.textContent += "\n\n>> İşlem bitti.";
-    });
-  });
+  // ERROR mesajı ve ünlemler 30. saniyede çıkar
+  setTimeout(() => {
+    errorText.style.display = "block";
+    spawnExclamations();
+  }, 30000);
+
+  function spawnExclamations() {
+    for (let i = 0; i < 30; i++) {
+      const ex = document.createElement("div");
+      ex.className = "exclamation";
+      ex.innerText = "!";
+      ex.style.top = Math.random() * window.innerHeight + "px";
+      ex.style.left = Math.random() * window.innerWidth + "px";
+      document.body.appendChild(ex);
+    }
+  }
 </script>
 
 </body>
