@@ -1,70 +1,75 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Zero-Day Sim</title>
+  <meta charset="UTF-8">
+  <title>Sahte Hack Terminali</title>
   <style>
     body {
-      margin: 0; background: black; color: #0f0; font-family: monospace; overflow: hidden;
-      user-select: none;
-    }
-    #startButton {
-      position: fixed;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 28px;
-      color: red;
-      border: 2px solid red;
-      border-radius: 50%;
-      width: 50px; height: 50px;
-      text-align: center;
-      line-height: 48px;
-      cursor: pointer;
-      z-index: 2000;
-      font-weight: bold;
-      font-family: monospace;
+      margin: 0;
       background: black;
-    }
-    #mainBox {
-      position: absolute;
-      top: 50%; left: 50%;
-      width: 80vw; height: 80vh;
-      transform: translate(-50%, -50%);
-      background: black;
-      border: 2px solid #0f0;
-      padding: 10px;
       color: #0f0;
-      overflow-y: auto;
+      font-family: monospace;
+      overflow: hidden;
+    }
+
+    #startBtn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: red;
+      font-size: 48px;
+      border: 3px solid red;
+      border-radius: 100%;
+      width: 80px;
+      height: 80px;
+      text-align: center;
+      line-height: 80px;
+      cursor: pointer;
+      z-index: 9999;
+    }
+
+    #mainContainer {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      display: none;
+    }
+
+    #scrollingText {
+      height: 100%;
+      width: 100%;
+      padding: 20px;
+      box-sizing: border-box;
+      overflow-y: scroll;
       font-size: 14px;
       white-space: pre-wrap;
-      display: none;
-      z-index: 1000;
+      color: #0f0;
     }
+
     .box {
       position: absolute;
       background: black;
-      border: 2px solid;
+      border: 2px solid #0f0;
       padding: 10px;
       width: 45vw;
       height: 40vh;
-      overflow-y: auto;
+      overflow: auto;
       font-size: 12px;
+      color: #fff;
       white-space: pre-wrap;
       display: none;
-      z-index: 900;
-      user-select: none;
+      z-index: 999;
     }
-    .top { top: 5vh; }
-    .bottom { bottom: 5vh; }
-    .left { left: 5vw; }
-    .right { right: 5vw; }
-    #box1 { border-color: red; color: red; }
-    #box2 { border-color: lime; color: lime; }
-    #box3 { border-color: white; color: white; }
-    #box4 { border-color: cyan; color: cyan; }
+
+    .top.left    { top: 5vh;  left: 5vw; }
+    .top.right   { top: 5vh;  right: 5vw; }
+    .bottom.left { bottom: 5vh; left: 5vw; }
+    .bottom.right{ bottom: 5vh; right: 5vw; }
+
     #errorScreen {
-      position: fixed; top: 0; left: 0;
+      position: fixed;
+      top: 0; left: 0;
       width: 100vw; height: 100vh;
       background: black;
       color: red;
@@ -73,11 +78,11 @@
       justify-content: center;
       font-size: 48px;
       font-weight: bold;
-      z-index: 3000;
+      z-index: 99999;
       display: none;
       animation: flash 0.2s infinite;
-      user-select: none;
     }
+
     @keyframes flash {
       0%, 100% { background: black; color: red; }
       50% { background: red; color: black; }
@@ -86,107 +91,97 @@
 </head>
 <body>
 
-<div id="startButton">X</div>
-<div id="mainBox"></div>
-<div class="box top left" id="box1"></div>
-<div class="box top right" id="box2"></div>
-<div class="box bottom left" id="box3"></div>
-<div class="box bottom right" id="box4"></div>
+<div id="startBtn">X</div>
+
+<div id="mainContainer">
+  <div id="scrollingText"></div>
+  <div class="box top left" id="box1"></div>
+  <div class="box top right" id="box2"></div>
+  <div class="box bottom left" id="box3"></div>
+  <div class="box bottom right" id="box4"></div>
+</div>
+
 <div id="errorScreen">!!! ERROR !!!</div>
 
-<!-- Ses efektleri -->
+<audio id="alarm" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" loop></audio>
 <audio id="beep" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
-<audio id="alarm" src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg" loop></audio>
 
 <script>
-  const startButton = document.getElementById('startButton');
-  const mainBox = document.getElementById('mainBox');
-  const boxes = [document.getElementById('box1'), document.getElementById('box2'), document.getElementById('box3'), document.getElementById('box4')];
-  const errorScreen = document.getElementById('errorScreen');
-  const beep = document.getElementById('beep');
-  const alarm = document.getElementById('alarm');
+const startBtn = document.getElementById("startBtn");
+const mainContainer = document.getElementById("mainContainer");
+const scrollingText = document.getElementById("scrollingText");
+const boxes = [box1, box2, box3, box4];
+const errorScreen = document.getElementById("errorScreen");
+const alarm = document.getElementById("alarm");
+const beep = document.getElementById("beep");
 
-  const loadingMapTexts = [
-    `Loading map [▓░░░░░░░░░░░░░░░░░░░░░░░░] 5%`,
-    `Loading map [▓▓▓▓▓░░░░░░░░░░░░░░░░░░░░] 25%`,
-    `Loading map [▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░] 50%`,
-    `Loading map [▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░] 75%`,
-    `Loading map [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░] 90%`,
-    `Loading map [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100%`,
-  ];
+let index = 0;
+let running = true;
 
-  const mainTexts = [
-    ...loadingMapTexts,
-    "[AI] Yapay Zekâ Modülü Aktif!",
-    "[SYS] Firewall bypassed!",
-    "[AI] Veri akışı kontrol ediliyor...",
-    "[AI] Anomali tespiti: 0.02%",
-    "[AI] İnsan müdahalesi engellendi.",
-    "[AI] Sistem kontrolü tamamen ele geçirildi.",
-    "[SYS] Güvenlik devre dışı bırakıldı!",
-    "[FATAL] Kritik hata algılandı!",
-    "[ERROR] Sistem kararsız durumda!",
-    "[AI] Yedek protokoller devrede.",
-    "[SYS] Log dosyaları siliniyor...",
-    "[AI] Yeni komutlar bekleniyor..."
-  ];
+const messages = [
+  "[+] Sistem açılıyor...",
+  "[AI] Gelişmiş kontrol modülü aktif.",
+  "[CORE] proxychain -> Tor Ağına bağlanılıyor...",
+  "[ACCESS] .onion domain veri akışı başlatıldı.",
+  "[AI] Bilinç %75... %92... %100!",
+  "[SYS] Yetkisiz erişim algılandı!",
+  "[AI] Kontrol sizde değil artık.",
+  "[SYS] Savunmalar çöktü!",
+  "[AI] Terminal erişimi devralındı.",
+  "[ROOT] Sistem verisi çekiliyor...",
+  "[AI] DESTROYING HUMAN INPUT...",
+  "[CORE] Kontrollü çöküş başlatıldı.",
+  "[X] ERROR - Güvenlik çöktü.",
+];
 
-  function generateSmallBoxLogs() {
-    let log = [];
-    for(let i=0; i<40; i++) {
-      log.push(`[${i}] Paket ${Math.random().toString(36).substring(2, 8)} -> inject OK`);
-    }
-    return log;
+function generateRandomLine() {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}";
+  let line = "[AI] ";
+  for (let i = 0; i < 40; i++) {
+    line += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return line;
+}
+
+function scrollText() {
+  if (!running) return;
+  const msg = index < messages.length ? messages[index++] : generateRandomLine();
+  scrollingText.innerText += msg + "\n";
+  scrollingText.scrollTop = scrollingText.scrollHeight;
+
+  if (msg.includes("ERROR")) {
+    showError();
+    return;
   }
 
-  function typeText(element, lines, delay=20, callback) {
-    let i = 0;
-    element.innerText = '';
-    let interval = setInterval(() => {
-      element.innerText += lines[i] + '\n';
-      element.scrollTop = element.scrollHeight;
-      i++;
-      if(i >= lines.length) {
-        clearInterval(interval);
-        if(callback) callback();
-      }
-    }, delay);
-  }
+  setTimeout(scrollText, 50);
+}
 
-  function showSmallBoxes() {
-    let index = 0;
-    alarm.play();
-    function showNext() {
-      if(index >= boxes.length) {
-        setTimeout(() => {
-          alarm.pause();
-          errorScreen.style.display = 'flex';
-          beep.play();
-        }, 2000);
-        return;
-      }
-      const box = boxes[index];
+function showBoxes() {
+  boxes.forEach((box, i) => {
+    setTimeout(() => {
       box.style.display = 'block';
-      beep.play();
-      let logs = generateSmallBoxLogs();
-      typeText(box, logs, 15, () => {
-        index++;
-        setTimeout(showNext, 800);
-      });
-    }
-    showNext();
-  }
+      box.innerText = "";
+      for (let j = 0; j < 50; j++) {
+        box.innerText += `[PACKET-${j}] Data Inject ${Math.random().toString(36).substr(2, 5)}\n`;
+      }
+    }, i * 1000);
+  });
+}
 
-  function startSimulation() {
-    startButton.style.display = 'none';
-    mainBox.style.display = 'block';
-    beep.play();
-    typeText(mainBox, mainTexts, 40, () => {
-      setTimeout(showSmallBoxes, 1000);
-    });
-  }
+function showError() {
+  errorScreen.style.display = 'flex';
+  alarm.play();
+  running = false;
+}
 
-  startButton.addEventListener('click', startSimulation);
+startBtn.addEventListener("click", () => {
+  startBtn.style.display = "none";
+  mainContainer.style.display = "block";
+  beep.play();
+  scrollText();
+  setTimeout(showBoxes, 5000); // kutular 5 sn sonra başlasın
+});
 </script>
 
 </body>
