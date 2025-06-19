@@ -3,176 +3,190 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Kabus Terminali</title>
+<title>Zero Day Terminal</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
   html, body {
-    margin: 0; padding: 0; height: 100%;
+    margin:0; padding:0; height:100%;
     background: black;
-    overflow: hidden;
+    color: #0f0;
     font-family: 'Share Tech Mono', monospace;
+    overflow: hidden;
+    user-select:none;
+    -webkit-user-select:none;
+    -moz-user-select:none;
+  }
+  #overlay {
+    position: fixed;
+    top:0; left:0;
+    width: 100vw; height: 100vh;
+    background: black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+  }
+  #startBtn {
+    font-size: 72px;
+    color: red;
+    cursor: pointer;
     user-select: none;
+    border: 5px solid red;
+    border-radius: 50%;
+    width: 120px; height: 120px;
+    line-height: 120px;
+    text-align: center;
+    font-weight: 900;
+    box-shadow: 0 0 20px red;
+    transition: all 0.3s ease;
+  }
+  #startBtn:hover {
+    background: red;
+    color: black;
   }
   #terminal {
-    width: 100vw;
-    height: 100vh;
     padding: 20px;
+    white-space: pre-wrap;
+    height: 100vh;
+    overflow-y: auto;
     box-sizing: border-box;
-    color: red;
-    font-size: 18px;
-    line-height: 1.1em;
-    overflow: hidden;
+    font-size: 16px;
+    line-height: 1.2em;
+    display: none;
     position: relative;
   }
-  #text {
-    white-space: pre-wrap;
-    max-height: 100%;
-    overflow-y: hidden;
+  #header {
+    font-size: 24px;
+    font-weight: 900;
+    color: red;
+    margin-bottom: 10px;
   }
-  #mask {
+  #hackedMask {
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     font-size: 200px;
-    color: #ff0000;
-    opacity: 0.1;
-    mix-blend-mode: screen;
-    animation: flicker 0.05s infinite;
-    user-select: none;
+    color: red;
+    opacity: 0;
     pointer-events: none;
+    mix-blend-mode: screen;
+    font-weight: 900;
+    user-select:none;
   }
-  #hacked {
+  #hackedText {
     position: fixed;
-    top: 40%;
+    top: 60%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 140px;
+    font-size: 48px;
     font-weight: 900;
-    color: #ff0000;
+    color: red;
     text-shadow:
-      0 0 10px #ff0000,
-      0 0 30px #ff0000,
-      0 0 50px #ff0000,
-      0 0 80px #ff0000;
-    opacity: 0;
-    user-select: none;
-    pointer-events: none;
-    animation: pulse 1s infinite alternate;
-  }
-  @keyframes flicker {
-    0%, 100% {opacity: 0.1;}
-    50% {opacity: 0.3;}
-  }
-  @keyframes pulse {
-    0% {opacity: 0;}
-    100% {opacity: 1;}
-  }
-  #flash {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw; height: 100vh;
-    background: red;
+      0 0 10px red,
+      0 0 20px red,
+      0 0 40px red;
     opacity: 0;
     pointer-events: none;
+    user-select:none;
   }
 </style>
 </head>
 <body>
-<div id="terminal">
-  <div id="text"></div>
-</div>
-<div id="mask">
-  █▀▄█ █▀█ █▄█ █▀█ █▄▀ █▀█ █ █▄░█ █▀▀ █▀▄
-</div>
-<div id="hacked">HACKED</div>
-<div id="flash"></div>
 
-<audio id="alarm" src="https://actions.google.com/sounds/v1/alarms/bugle_tune.ogg" preload="auto"></audio>
-<audio id="glitch" src="https://actions.google.com/sounds/v1/electronic/glitch.ogg" preload="auto"></audio>
+<div id="overlay">
+  <div id="startBtn">×</div>
+</div>
+
+<div id="terminal">
+  <div id="header">Zero Day Terminal</div>
+  <div id="content"></div>
+</div>
+
+<div id="hackedMask">😷</div>
+<div id="hackedText">SİSTEM ELE GEÇİRİLDİ</div>
 
 <script>
-  const textEl = document.getElementById('text');
-  const mask = document.getElementById('mask');
-  const hacked = document.getElementById('hacked');
-  const flash = document.getElementById('flash');
-  const alarm = document.getElementById('alarm');
-  const glitch = document.getElementById('glitch');
+  const startBtn = document.getElementById('startBtn');
+  const overlay = document.getElementById('overlay');
+  const terminal = document.getElementById('terminal');
+  const content = document.getElementById('content');
+  const hackedMask = document.getElementById('hackedMask');
+  const hackedText = document.getElementById('hackedText');
 
-  // Çok hızlı ve rastgele korkutucu metinler
-  const scaryTexts = [
-    "KABUS BAŞLADI...",
+  const chars = "0123456789ABCDEF!@#$%^&*()-_=+[]{};:'\",.<>/?\\|";
+  const scaryMsgs = [
+    "BAŞLATILIYOR...",
+    "SİSTEM İZLENİYOR...",
+    "HACK İZLERİ BULUNUYOR...",
+    "GÜVENLİK İHLALİ TESPİT EDİLDİ!",
+    "VERİLER ŞİFRELENİYOR!",
+    "KÖK ERİŞİM ELDE EDİLDİ!",
+    "FIREWALL BAYPAS EDİLDİ!",
+    "BAĞLANTI KESİLİYOR...",
     "SİSTEM ELE GEÇİRİLDİ!",
-    "VERİLERİNİZ KORUNMUYOR!",
-    "GİRİŞ İZNİ YOK!",
-    "UYARI: HACKLENDİNİZ!",
-    "SİSTEM ÇÖKÜYOR!",
-    "VERİLERİNİZ ŞİFRELENDİ!",
-    "ANTİVİRÜS DEVRE DIŞI!",
-    "KÖK ERİŞİM KAYBI!",
-    "SUNUCU ELE GEÇİRİLDİ!",
-    "YENİ SALDIRI GELİYOR!",
-    "ACİL DURUM PROTOKOLÜ!",
-    "BAĞLANTI KESİLİYOR!",
-    "İNTERNET KOPUYOR!",
-    "DOSYA SİLİNİYOR!",
-    "SİSTEM 1% KALDI!",
-    "GÜVENLİK İHLALİ!",
-    "TÜM VERİLER ELE GEÇTİ!",
-    "BİLGİLERİNİZ TEHLİKEDE!",
-    "KARANLIK GELİYOR!",
-    "BİLGİLER KARA AÇAĞA AKIYOR!",
   ];
 
-  let intervalId;
-  let chars = "█▓▒░#%$@!~^&*+=";
+  let interval, elapsed = 0;
 
-  // Terminal ekranına hızlı metin yazma fonksiyonu
-  function fastWrite() {
-    let output = "";
-    for(let i=0; i<1000; i++){
-      output += chars.charAt(Math.floor(Math.random()*chars.length));
-    }
-    textEl.textContent = output + "\n";
-
-    // Arada korkutucu metin ekle
-    if(Math.random() < 0.07){
-      const scary = scaryTexts[Math.floor(Math.random()*scaryTexts.length)];
-      textEl.textContent += "\n>>> " + scary + "\n";
-      glitch.play();
-    }
+  function randomChar() {
+    return chars.charAt(Math.floor(Math.random() * chars.length));
   }
 
-  // Yanıp sönme ve alarm efekti
-  function flickerFlash() {
-    let flashes = 0;
-    const maxFlashes = 20;
-
-    intervalId = setInterval(() => {
-      fastWrite();
-      flash.style.opacity = flashes % 2 === 0 ? 0.7 : 0;
-      flashes++;
-
-      if(flashes === 5){
-        alarm.play();
-      }
-      if(flashes > maxFlashes){
-        clearInterval(intervalId);
-        hacked.style.opacity = 1;
-      }
-    }, 80);
+  function writeRandomLine() {
+    let line = '';
+    for(let i=0; i<80; i++) {
+      line += randomChar();
+    }
+    content.textContent += line + '\n';
+    content.scrollTop = content.scrollHeight;
   }
 
-  // Başlat
-  flickerFlash();
+  function writeScaryMsg() {
+    const msg = scaryMsgs[Math.floor(Math.random() * scaryMsgs.length)];
+    content.textContent += "\n>>> " + msg + "\n\n";
+    content.scrollTop = content.scrollHeight;
+  }
 
-  // 15 saniye sonra terminal duracak, "HACKED" kalacak
-  setTimeout(() => {
-    clearInterval(intervalId);
-    textEl.style.color = '#ff3300';
-    textEl.style.fontWeight = 'bold';
-    hacked.style.opacity = 1;
-  }, 15000);
+  // Google Audio beep: kısa ses için URL
+  function playBeep() {
+    const beep = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
+    beep.play();
+  }
+
+  startBtn.onclick = () => {
+    overlay.style.display = "none";
+    terminal.style.display = "block";
+
+    interval = setInterval(() => {
+      elapsed += 100;
+      writeRandomLine();
+
+      if(elapsed % 1000 === 0){
+        writeScaryMsg();
+      }
+
+      // 15 saniyede bip ses başlat
+      if(elapsed === 15000){
+        playBeep();
+        beepInterval = setInterval(playBeep, 800);
+      }
+
+      // 30 saniyede son efektler
+      if(elapsed === 30000){
+        clearInterval(interval);
+        clearInterval(beepInterval);
+        hackedMask.style.opacity = "0.4";
+        hackedText.style.opacity = "1";
+        terminal.style.color = "red";
+        terminal.style.fontWeight = "900";
+        content.textContent += "\n\n!!! SİSTEM ELE GEÇİRİLDİ !!!\n\n";
+        content.scrollTop = content.scrollHeight;
+      }
+    }, 100);
+
+  };
 </script>
+
 </body>
 </html>
