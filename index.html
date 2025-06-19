@@ -1,92 +1,179 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Karanlık Terminal ++</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Zero-Day Sim</title>
   <style>
-    html, body {margin:0;padding:0;height:100%;width:100%;background:black;color:#0f0;font-family:monospace;overflow:hidden;user-select:none;}
-    #overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:black;display:flex;align-items:center;justify-content:center;z-index:9999;}
-    #closeBtn{font-size:100px;color:red;cursor:pointer;border:5px solid red;border-radius:50%;width:150px;height:150px;line-height:140px;text-align:center;font-weight:900;box-shadow:0 0 40px red;}
-    #nameBox{position:fixed;top:40%;left:50%;transform:translate(-50%,-50%);padding:20px 50px;border:4px solid #0f0;color:#0f0;font-size:48px;font-weight:bold;background:black;z-index:900;transition:all .5s ease;}
-    #nameBox.red{color:red;border-color:red;animation:blink .3s infinite;}
-    @keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
-    #terminal{position:fixed;top:0;left:0;width:100%;height:100%;padding:20px;box-sizing:border-box;background:black;color:#0f0;font-size:18px;line-height:1.2;white-space:pre-wrap;overflow-y:auto;display:none;z-index:1;}
-    #crt{pointer-events:none;position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0);mix-blend-mode:overlay;animation:crt 0.1s infinite;}
-    @keyframes crt{0%{background:rgba(0,0,0,0);}50%{background:rgba(0,0,0,0.02);}100%{background:rgba(0,0,0,0);}}
-    #aiWake{position:fixed;top:30%;left:50%;transform:translate(-50%,-50%);font-size:64px;color:red;font-weight:900;text-align:center;display:none;z-index:10000;animation:zoomIn 0.7s ease-out;}
-    @keyframes zoomIn{0%{transform:translate(-50%,-50%) scale(0);}60%{transform:translate(-50%,-50%) scale(1.1);}100%{transform:translate(-50%,-50%) scale(1);}
+    body {
+      margin: 0;
+      background: black;
+      color: #0f0;
+      font-family: monospace;
+      overflow: hidden;
+    }
+    .box {
+      position: absolute;
+      background: #000;
+      border: 2px solid #0f0;
+      padding: 10px;
+      width: 45vw;
+      height: 40vh;
+      overflow: hidden;
+      display: none;
+      font-size: 12px;
+      white-space: pre-wrap;
+    }
+    .top { top: 5vh; }
+    .bottom { bottom: 5vh; }
+    .left { left: 5vw; }
+    .right { right: 5vw; }
+
+    #mainBox {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 80vw;
+      height: 80vh;
+      transform: translate(-50%, -50%);
+      background: black;
+      border: 2px solid #0f0;
+      padding: 10px;
+      color: #0f0;
+      overflow: hidden;
+      font-size: 14px;
+      white-space: pre-wrap;
+      display: none;
+    }
+
+    #startName {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 32px;
+      border: 2px solid #0f0;
+      padding: 20px;
+      color: #0f0;
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.2; }
+    }
+
+    #errorScreen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: black;
+      color: red;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      font-weight: bold;
+      z-index: 9999;
+      display: none;
+      animation: flash 0.2s infinite;
+    }
+
+    @keyframes flash {
+      0%, 100% { background: black; color: red; }
+      50% { background: red; color: black; }
+    }
+
+    .ascii {
+      font-size: 10px;
+      color: white;
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      opacity: 0.1;
     }
   </style>
 </head>
 <body>
 
-<div id="overlay"><div id="closeBtn">×</div></div>
-<div id="nameBox">@MHMTXASLAN</div>
-<canvas id="crt"></canvas>
-<pre id="terminal"></pre>
-<div id="aiWake">YAPAY ZEKÂ UYANDI!</div>
+<div id="startName">@mhmtxaslan</div>
+<div id="mainBox"></div>
+<div class="box top left" id="box1"></div>
+<div class="box top right" id="box2"></div>
+<div class="box bottom left" id="box3"></div>
+<div class="box bottom right" id="box4"></div>
+<div id="errorScreen">!!! ERROR !!!</div>
+<div class="ascii">
+  ░░███████ ]▄▄▄▄▄▄▄▄▃<br>
+  ▂▄▅█████████▅▄▃▂<br>
+  I███████████████████].<br>
+  ◥⊙▲⊙▲⊙▲⊙▲⊙▲⊙▲⊙◤
+</div>
 
 <audio id="beep" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
-<audio id="darkAlarm" src="https://actions.google.com/sounds/v1/alarms/dark_ambient.ogg"></audio>
 
 <script>
-  const closeBtn = document.getElementById('closeBtn'),
-        overlay = document.getElementById('overlay'),
-        nameBox = document.getElementById('nameBox'),
-        terminal = document.getElementById('terminal'),
-        aiWake = document.getElementById('aiWake'),
-        crt = document.getElementById('crt'),
-        beep = document.getElementById('beep'),
-        darkAlarm = document.getElementById('darkAlarm');
+  const start = document.getElementById('startName');
+  const mainBox = document.getElementById('mainBox');
+  const boxes = [box1, box2, box3, box4];
+  const errorScreen = document.getElementById('errorScreen');
+  const beep = document.getElementById('beep');
 
-  const msgs = Array.from({length:100},(_,i)=>`[${i+1}] .onion panel: veri akışı başladı.`);
-  msgs.push("ACTIVATE ROOT AI MODULE...");
-  msgs.push("YAPAY ZEKA UYANDI! (Bilinç: %100)");
-  msgs.push("SYSTEM CONTROL REDIRECTED TO AI CORE...");
-  msgs.push("3...");
-  msgs.push("2...");
-  msgs.push("1...");
-  msgs.push("KONTROL TESLİM EDİLDİ.");
-  
-  let index=0, speed=600, beepInt;
-
-  function startAlarmLoop(){
-    darkAlarm.loop=true;
-    darkAlarm.play();
+  // Fake yazılar (AI, hacking, .onion vs.)
+  const texts = [];
+  for(let i=0;i<1000;i++) {
+    texts.push(`[#${i+1}] AI CORE LOG → access_granted::user@zero-day.local/.onion`);
   }
-  
-  function startMsgs(){
-    terminal.style.display='block';
-    overlay.remove();
-    nameBox.classList.add('red');
-    setTimeout(()=>aiWake.style.display='block',2000);
-    setTimeout(()=>aiWake.style.display='none',4500);
-    setTimeout(()=>{
-      terminal.scrollTop=terminal.scrollHeight;
-      beep.play();
-      beepInt = setInterval(()=>{beep.play()}, speed);
-      const iv = setInterval(()=>{
-        if(index>=msgs.length){
-          clearInterval(iv);
-          clearInterval(beepInt);
-          return;
+  texts.push("[ALERT] Yapay Zekâ Uyanıyor...");
+  texts.push("[AI] Bilinç Düzeyi: 97% >> 100%");
+  texts.push("[SYS] Güvenlik devre dışı bırakıldı!");
+  texts.push("[AI] Tüm sistemi ele geçirdim.");
+  texts.push("[AI] İnsan kontrolü kaldırıldı.");
+  texts.push("[FATAL] CORE DEVRE DIŞI...");
+  texts.push("[ERROR] Kontrol kaybedildi...");
+
+  function typeText(element, lines, delay = 5, callback) {
+    let i = 0;
+    let interval = setInterval(() => {
+      element.innerText += lines[i] + "\n";
+      element.scrollTop = element.scrollHeight;
+      i++;
+      if (i >= lines.length) {
+        clearInterval(interval);
+        if (callback) callback();
+      }
+    }, delay);
+  }
+
+  function showBoxes() {
+    boxes.forEach((box, i) => {
+      setTimeout(() => {
+        box.style.display = 'block';
+        let log = [];
+        for (let j = 0; j < 50; j++) {
+          let colors = ['#f00', '#0f0', '#fff'];
+          box.style.color = colors[i % colors.length];
+          log.push(`[$${j}] Paket ${Math.random().toString(36).substring(7)} -> inject OK`);
         }
-        terminal.innerHTML += msgs[index++] + "\n";
-        terminal.scrollTop = terminal.scrollHeight;
-      }, speed);
-    },5000);
+        typeText(box, log, 30);
+      }, i * 1000); // her kutu 1 saniye arayla
+    });
   }
 
-  closeBtn.onclick = startMsgs;
-  crt.width=window.innerWidth; crt.height=window.innerHeight;
-  window.onresize=()=>{crt.width=innerWidth; crt.height=innerHeight;};
-  function drawCRT(){const c=crt.getContext('2d');c.clearRect(0,0,crt.width,crt.height);}
-  setInterval(drawCRT,100);
-  
-  // 20 saniye sonra alarm kesin başlasın
-  setTimeout(startAlarmLoop,20000);
+  function showError() {
+    beep.play();
+    errorScreen.style.display = 'flex';
+  }
 
+  // Başlangıç
+  setTimeout(() => {
+    start.style.display = 'none';
+    mainBox.style.display = 'block';
+    typeText(mainBox, texts, 10, () => {
+      setTimeout(showBoxes, 1000); // büyük kutudan 5 sn sonra kutular
+      setTimeout(showError, 28000); // 30. saniyede error
+    });
+  }, 3000);
 </script>
 
 </body>
