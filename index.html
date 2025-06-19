@@ -1,14 +1,12 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <title>Karanlık Korku</title>
+  <meta charset="UTF-8">
+  <title>Korku Efekti</title>
   <style>
     html, body {
       margin: 0; padding: 0;
       background: black;
-      color: #0f0;
-      font-family: monospace;
       overflow: hidden;
       height: 100vh;
       display: flex;
@@ -23,32 +21,33 @@
       border: none;
       cursor: pointer;
       z-index: 10;
-      user-select: none;
+      position: absolute;
+    }
+
+    #videoContainer {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      z-index: 100;
+      background: black;
+    }
+
+    #scareVideo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
     #mhmtBox {
       display: none;
+      position: absolute;
       font-size: 3rem;
       color: #0f0;
       border: 2px solid #0f0;
       padding: 1rem 2rem;
-      z-index: 5;
-      position: absolute;
-    }
-
-    #scareImg {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      object-fit: cover;
-      display: none;
-      z-index: 9999;
-    }
-
-    @keyframes flicker {
-      0% {opacity: 1;}
-      50% {opacity: 0.3;}
-      100% {opacity: 1;}
+      z-index: 20;
+      background: black;
     }
   </style>
 </head>
@@ -56,53 +55,41 @@
 
 <button id="startBtn">✖</button>
 <div id="mhmtBox">@mhmtxaslan</div>
-<img id="scareImg" src="https://i.imgur.com/Zd0AjJR.jpg" alt="screamer" />
+
+<div id="videoContainer">
+  <video id="scareVideo" preload="auto">
+    <source src="https://cdn.pixabay.com/video/2023/10/30/185603-877591174_large.mp4" type="video/mp4">
+    Tarayıcınız video etiketini desteklemiyor.
+  </video>
+</div>
 
 <script>
   const startBtn = document.getElementById('startBtn');
   const mhmtBox = document.getElementById('mhmtBox');
-  const scareImg = document.getElementById('scareImg');
+  const scareVideo = document.getElementById('scareVideo');
+  const videoContainer = document.getElementById('videoContainer');
 
-  // Sesler
-  const ambient = new Audio('https://cdn.pixabay.com/download/audio/2023/03/15/audio_e5ae6aee4d.mp3?filename=deep-horror-drones-142778.mp3');
+  // Çığlık sesi
   const scream = new Audio('https://www.myinstants.com/media/sounds/scream.mp3');
 
-  ambient.loop = true;
-  ambient.volume = 0.5;
-
   startBtn.addEventListener('click', async () => {
-    try {
-      await ambient.play();
+    startBtn.style.display = 'none';
+    mhmtBox.style.display = 'block';
 
-      startBtn.style.display = 'none';
-      mhmtBox.style.display = 'block';
+    // Kutu birkaç saniye sabit dursun
+    setTimeout(async () => {
+      mhmtBox.style.display = 'none';
+      videoContainer.style.display = 'block';
 
-      // 10. saniyede ekran kararmaya başlar
-      setTimeout(() => {
-        document.body.style.background = "#111";
-        document.body.style.animation = "flicker 0.2s infinite";
-        mhmtBox.style.color = "red";
-      }, 10000);
-
-      // 25. saniyede ekran titrer, kutu silinir
-      setTimeout(() => {
-        mhmtBox.style.display = 'none';
-        document.body.style.background = "black";
-        document.body.style.animation = "none";
-      }, 25000);
-
-      // 29. saniyede aniden korku görüntüsü ve çığlık
-      setTimeout(() => {
-        ambient.pause();
-        scareImg.style.display = 'block';
+      try {
         scream.play();
-        document.body.style.background = "black";
-      }, 29000);
+        await scareVideo.play();
+      } catch (e) {
+        alert("Tarayıcı ses/video engelledi. Sayfayı yenileyip tekrar dene.");
+        console.error(e);
+      }
 
-    } catch (err) {
-      alert("Ses izni reddedildi. Lütfen tekrar tıkla.");
-      console.error(err);
-    }
+    }, 3000); // 3 saniye sonra korku başlar
   });
 </script>
 
