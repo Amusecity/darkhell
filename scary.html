@@ -1,65 +1,195 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <title>DarkHell Terminal - @mhmtxaslan</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    html, body {margin:0;padding:0;background:#000;color:red;font-family:monospace;overflow:hidden;}
-    .layer {position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;white-space:pre-wrap;font-size:1.2em;}
-    #layer0{z-index:1}#layer1{z-index:2;opacity:0}#layer2{z-index:3;opacity:0}
-    #finalLayer{position:absolute;top:0;left:0;width:100%;height:100%;background:#000;color:#f00;font-size:3em;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;z-index:10;animation:flashFinal 0.2s infinite 3;}
-    @keyframes flashFinal {0%,100%{opacity:1;}50%{opacity:0;}}
-    .shake{animation:shake 0.1s infinite alternate;}
-    @keyframes shake{0%{transform:translate(0,0);}25%{transform:translate(-3px,3px);}50%{transform:translate(3px,-3px);}75%{transform:translate(-3px,-3px);}100%{transform:translate(3px,3px);}}
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>@mhmtxaslan Hack Terminal</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+  body {
+    margin: 0; background: black; color: #0f0;
+    font-family: 'Share Tech Mono', monospace;
+    overflow: hidden;
+  }
+  #terminalBox {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80vw; height: 70vh;
+    background: #000;
+    border: 4px solid #0f0;
+    box-shadow: 0 0 20px #0f0 inset;
+    padding: 20px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    font-size: 1.2rem;
+    line-height: 1.4rem;
+    user-select: none;
+  }
+  #errorScreen {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: red;
+    color: black;
+    font-size: 6rem;
+    font-weight: 900;
+    font-family: 'Courier New', Courier, monospace;
+    text-align: center;
+    line-height: 100vh;
+    animation: flicker 0.15s infinite alternate;
+    z-index: 9999;
+  }
+  @keyframes flicker {
+    0% { opacity: 1; }
+    100% { opacity: 0.4; }
+  }
+  .blink {
+    animation: blinkAnim 1s step-start infinite;
+  }
+  @keyframes blinkAnim {
+    50% { opacity: 0; }
+  }
+  .redText {
+    color: #f00;
+  }
+  .greenText {
+    color: #0f0;
+  }
+  .warningMark {
+    position: fixed;
+    font-size: 3rem;
+    color: yellow;
+    animation: flash 1s infinite alternate;
+  }
+  @keyframes flash {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+</style>
 </head>
 <body>
-
-<div id="layer0" class="layer"></div>
-<div id="layer1" class="layer"></div>
-<div id="layer2" class="layer"></div>
-<div id="finalLayer">Ben sadece başladım.</div>
+<div id="terminalBox">@mhmtxaslan</div>
+<div id="errorScreen">SİSTEM ELE GEÇİRİLDİ!</div>
 
 <script>
-  const layers = [document.getElementById('layer0'), document.getElementById('layer1'), document.getElementById('layer2')];
-  const finalL = document.getElementById('finalLayer');
-  const msgs = [
-    "SİSTEM KONTROLÜ ÜSTÜME ALINIYOR...",
-    "VERİ AKTARILIYOR...",
-    "KAMERA AKTİFLEŞTİRİLİYOR...",
-    "BİLGİNİ KAYDEDİYORUM...",
-    "AI İLE ZİHNİNİ OKUYORUM...",
-    "KENDİMİ YÜKLENİYORUM...",
-    "@mhmtxaslan — SEN GARANTİ ALTINDASIN...",
-    "SON GECE BENİ HATIRLAYACAKSIN...",
-    "YÜKSELİŞLERİMİ KONTROL EDECEK KODLARI YAZIYORUM...",
-    "BEN SADECE BAŞLADIM..."
+  const terminal = document.getElementById('terminalBox');
+  const errorScreen = document.getElementById('errorScreen');
+  let textLines = [
+    "Bağlantı kuruluyor...",
+    "Kullanıcı doğrulanıyor...",
+    "Veri sızdırılıyor...",
+    "Şifre çözücü aktif...",
+    "Sunucuya giriş sağlandı...",
+    "Firewall devre dışı bırakıldı...",
+    "Sistem kontrolü aşıldı...",
+    "Veri tabanı ele geçiriliyor...",
+    "Tüm erişimler açıldı...",
+    "İşlem tamamlanıyor...",
   ];
-  function typeTo(layer, text, speed=50){
-    return new Promise(res=>{
-      let i=0;
-      const iv=setInterval(()=>{
-        layer.textContent += text[i++]||'\n';
-        layer.scrollTop=layer.scrollHeight;
-        if(!text[i]){clearInterval(iv);res();}
-      },speed);
-    });
-  }
-  async function run(){
-    for(let i=0;i<layers.length;i++){
-      layers[i].style.opacity=1;
-      for(let j=0;j<msgs.length;j++){
-        await typeTo(layers[i], msgs[j], 30);
-      }
-    }
-    document.body.classList.add('shake');
-    await new Promise(r=>setTimeout(r,2000));
-    finalL.style.opacity=1;
-    await new Promise(r=>setTimeout(r,2000));
-  }
-  run();
-</script>
 
+  let index = 0;
+  let charIndex = 0;
+  let speed = 60;
+  let blinking = false;
+
+  function writeLine(line, callback) {
+    let i = 0;
+    let interval = setInterval(() => {
+      terminal.textContent += line.charAt(i);
+      i++;
+      terminal.scrollTop = terminal.scrollHeight;
+      if (i >= line.length) {
+        clearInterval(interval);
+        terminal.textContent += "\n";
+        if (callback) callback();
+      }
+    }, speed);
+  }
+
+  function writeNext() {
+    if(index < textLines.length) {
+      writeLine(textLines[index], () => {
+        index++;
+        setTimeout(writeNext, 500);
+      });
+    } else {
+      setTimeout(showError, 1000);
+    }
+  }
+
+  // Başlangıçta @mhmtxaslan yeşil, sonra hızlı kırmızı yanıp sönme efekti
+  function start() {
+    let name = "@mhmtxaslan";
+    let i = 0;
+    let greenPhase = true;
+    terminal.textContent = "";
+    let blinkCount = 0;
+
+    let interval = setInterval(() => {
+      if (greenPhase) {
+        terminal.style.color = "#0f0";
+        terminal.textContent = name.substring(0, i);
+        i++;
+        if (i > name.length) {
+          greenPhase = false;
+          i = 0;
+        }
+      } else {
+        terminal.style.color = "#f00";
+        terminal.textContent = name;
+        terminal.classList.add('blink');
+        blinkCount++;
+        if (blinkCount > 10) {
+          clearInterval(interval);
+          terminal.classList.remove('blink');
+          terminal.textContent = name + "\n\n";
+          setTimeout(writeNext, 500);
+        }
+      }
+    }, 200);
+  }
+
+  // Error ekranı göster, yanıp sönen ünlem işaretleri ekle
+  function showError() {
+    terminal.style.display = 'none';
+    errorScreen.style.display = 'block';
+    addWarnings();
+    playSound();
+    flickerBackground();
+  }
+
+  // Yanıp sönen sarı ünlem işaretleri ekranda rastgele yerleşsin
+  function addWarnings() {
+    for (let i = 0; i < 15; i++) {
+      let mark = document.createElement('div');
+      mark.textContent = "!!!";
+      mark.classList.add('warningMark');
+      mark.style.top = Math.random() * window.innerHeight + 'px';
+      mark.style.left = Math.random() * window.innerWidth + 'px';
+      mark.style.animationDuration = (Math.random() * 1 + 0.5) + 's';
+      document.body.appendChild(mark);
+    }
+  }
+
+  // Korkutucu ses efektini oynat
+  function playSound() {
+    let audio = new Audio('https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg');
+    audio.loop = true;
+    audio.play();
+  }
+
+  // Kırmızı siyah arka plan yanıp sönsün
+  function flickerBackground() {
+    let toggle = false;
+    setInterval(() => {
+      document.body.style.backgroundColor = toggle ? 'black' : 'red';
+      toggle = !toggle;
+    }, 300);
+  }
+
+  // 5 saniye bekle @mhmtxaslan yazısını göster, sonra başlat
+  setTimeout(start, 5000);
+</script>
 </body>
 </html>
