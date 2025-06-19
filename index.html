@@ -3,38 +3,40 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>DELİRTEN SİSTEM ÇÖKMESİ</title>
+<title>GERÇEK KABUS: SİSTEM ÇÖKÜŞÜ</title>
 <style>
   html, body {
     margin:0; padding:0; height:100%; width:100%;
-    background: black; color: #0f0; font-family: monospace;
+    background: black; color: #0f0;
+    font-family: 'Courier New', Courier, monospace;
     overflow: hidden;
     user-select:none;
+    cursor:none;
   }
   #overlay {
     position: fixed; top:0; left:0; width:100vw; height:100vh;
     background: black;
     display:flex; justify-content:center; align-items:center;
-    z-index:9999;
+    z-index:99999;
   }
   #startBtn {
-    font-size: 120px;
+    font-size: 140px;
     color: red;
-    border: 5px solid red;
+    border: 7px solid red;
     border-radius: 50%;
-    width: 180px;
-    height: 180px;
-    line-height: 170px;
+    width: 200px;
+    height: 200px;
+    line-height: 190px;
     text-align: center;
     font-weight: 900;
     cursor:pointer;
-    box-shadow: 0 0 60px red;
+    box-shadow: 0 0 100px red;
     user-select:none;
     transition: all 0.3s ease;
   }
   #startBtn:hover {
-    box-shadow: 0 0 100px #ff0000;
-    transform: scale(1.1);
+    box-shadow: 0 0 140px #ff0000;
+    transform: scale(1.2);
   }
   #terminal {
     position: fixed;
@@ -43,155 +45,215 @@
     background: black;
     color: #0f0;
     font-family: monospace;
-    font-size: 18px;
-    line-height: 1.4em;
-    padding: 15px;
+    font-size: 22px;
+    line-height: 1.5em;
+    padding: 20px;
     box-sizing: border-box;
-    overflow-y: scroll;
+    overflow: hidden;
     user-select:none;
-    display:none;
     white-space: pre-wrap;
-    text-shadow: 0 0 5px #0f0;
+    text-shadow: 0 0 10px #0f0;
+  }
+  #glitchOverlay {
+    position: fixed;
+    top:0; left:0;
+    width: 100vw; height: 100vh;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    user-select:none;
+    z-index: 100000;
   }
   #errorScreen {
     position: fixed;
     top:0; left:0;
     width: 100vw; height: 100vh;
-    background: rgba(255,0,0,0.9);
+    background: rgba(255,0,0,0.92);
     color: black;
-    font-size: 72px;
+    font-size: 96px;
     font-weight: 900;
     text-align: center;
     line-height: 100vh;
     user-select:none;
     display:none;
-    animation: flashRed 1s infinite;
-    z-index: 10000;
-    text-shadow: 0 0 15px black;
+    animation: intenseFlash 0.7s infinite;
+    z-index: 100001;
+    text-shadow: 0 0 20px black;
   }
-  @keyframes flashRed {
+  @keyframes intenseFlash {
     0%, 50%, 100% {opacity: 1;}
     25%, 75% {opacity: 0;}
+  }
+  #cursorTrap {
+    position: fixed;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    pointer-events: none;
+    box-shadow: 0 0 25px 10px #f00 inset;
+    user-select:none;
+    mix-blend-mode: screen;
+    z-index: 100002;
+    animation: pulseCursor 1.2s infinite alternate;
+  }
+  @keyframes pulseCursor {
+    0% { box-shadow: 0 0 20px 5px #f00 inset; }
+    100% { box-shadow: 0 0 45px 18px #ff0000 inset; }
   }
 </style>
 </head>
 <body>
 
-<div id="overlay"><div id="startBtn" aria-label="Başlat">×</div></div>
+<div id="overlay">
+  <div id="startBtn" aria-label="Başlat">×</div>
+</div>
+
 <div id="terminal"></div>
-<div id="errorScreen">!!! SİSTEM ÇÖKTÜ !!!</div>
+<div id="glitchOverlay"></div>
+<div id="errorScreen">SYSTEM FAILURE<br>ACCESS DENIED</div>
+<div id="cursorTrap"></div>
 
 <audio id="beep" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto"></audio>
-<audio id="alarm" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" preload="auto"></audio>
+<audio id="highBeep" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" preload="auto"></audio>
+<audio id="distorted" src="https://actions.google.com/sounds/v1/foley/metal_stress.ogg" preload="auto"></audio>
 <audio id="crash" src="https://actions.google.com/sounds/v1/impacts/metal_crash.ogg" preload="auto"></audio>
 
 <script>
   const startBtn = document.getElementById('startBtn');
   const overlay = document.getElementById('overlay');
   const terminal = document.getElementById('terminal');
+  const glitchOverlay = document.getElementById('glitchOverlay');
   const errorScreen = document.getElementById('errorScreen');
+  const cursorTrap = document.getElementById('cursorTrap');
+
   const beep = document.getElementById('beep');
-  const alarm = document.getElementById('alarm');
+  const highBeep = document.getElementById('highBeep');
+  const distorted = document.getElementById('distorted');
   const crash = document.getElementById('crash');
 
-  const messages = [
-    "YAPAY ZEKA: İŞLEM BAŞLATILIYOR...",
-    "VERİ AKIŞI: KONTROL DIŞI İŞLEMLER TESPİT EDİLDİ!",
-    "GÜVENLİK: ŞİFRELER KIRILIYOR...",
-    "SİSTEM: KÖK YETKİLERİ ALINIYOR...",
-    "YAZILIM: HATA AYIKLAMA MODU DEVRE DIŞI",
-    "DONANIM: ANİ BAĞLANTI KESİLDİ",
-    "YAPAY ZEKA: KONTROL KAYBI!",
-    "VERİ TABANI: BOZUK KAYITLAR BULUNDU",
-    "SİSTEM: ANİ ÇÖKME TETİKLENDİ",
-    "KERNEL: PANİK DURUMU AKTİF",
-    "DOSYA SİSTEMİ: HATALI SEKTÖRLER OKUNAMADI",
-    "BELLEK: TAŞMA HATASI!",
-    "İŞLEMCI: AŞIRI ISINMA ALGILANDI",
-    "GÜVENLİK: İZİNSİZ ERİŞİM KAYDI",
-    "SİSTEM: ÇÖKME GERÇEKLEŞTİRİLİYOR",
-    "YAPAY ZEKA: İNSAN MÜDAHALESİ REDDEDİLDİ",
-    "VERİ: BOZULMA HATASI TESPİT EDİLDİ",
-    "SİSTEM: ACİL DURUM MODU AKTİF",
-    "YAZILIM: SON DURUM RAPORU OLUŞTURULUYOR",
-    "SİSTEM: FATAL HATA, KAPANIYOR..."
-  ];
+  const glitchChars = ['#','%','@','!','&','?','+','*','=',':',';'];
 
   let intervalId;
-  let index = 0;
+  let glitchIntervalId;
   let beepIntervalId;
+  let highBeepIntervalId;
+  let terminalText = "";
+  let terminalLines = [
+    "INITIALIZING SYSTEM...",
+    "LOADING CORE MODULES...",
+    "CHECKING MEMORY...",
+    "MEMORY OK",
+    "ACCESSING SECURE ZONE...",
+    "WARNING: UNAUTHORIZED ACCESS DETECTED!",
+    "ENCRYPTION BREACHED!",
+    "SYSTEM INTEGRITY COMPROMISED!",
+    "KERNEL PANIC IMMINENT!",
+    "RUNNING MALWARE SCAN...",
+    "ERROR: MALWARE FOUND!",
+    "FORCING SYSTEM SHUTDOWN...",
+    "SYSTEM FAILURE IMMINENT!",
+    "EMERGENCY PROTOCOL ACTIVATED!",
+    "TERMINAL LOCKDOWN ENGAGED!",
+    "ACCESS DENIED!",
+    "CRITICAL ERROR!",
+    "REBOOTING FAILED!",
+    "PLEASE CONTACT SUPPORT!",
+    "SYSTEM SHUTDOWN IN 10 SECONDS..."
+  ];
 
-  function printMessage() {
-    if(index >= messages.length) {
+  let lineIndex = 0;
+  let startTime;
+
+  function randomInt(min,max) {
+    return Math.floor(Math.random()*(max-min+1)) + min;
+  }
+
+  function glitchEffect() {
+    let glitchText = "";
+    for(let i=0; i<terminalText.length; i++) {
+      if(Math.random() < 0.1) {
+        glitchText += glitchChars[randomInt(0, glitchChars.length-1)];
+      } else {
+        glitchText += terminalText[i];
+      }
+    }
+    terminal.textContent = glitchText;
+  }
+
+  function printLine() {
+    if(lineIndex >= terminalLines.length) {
       clearInterval(intervalId);
-      stopBeep();
+      clearInterval(glitchIntervalId);
+      stopSounds();
       showErrorScreen();
       return;
     }
-    terminal.textContent += messages[index] + "\n";
+    terminalText += terminalLines[lineIndex] + "\n";
+    terminal.textContent = terminalText;
     terminal.scrollTop = terminal.scrollHeight;
-    index++;
-  }
 
-  function startBeep() {
-    beep.play();
-    beepIntervalId = setInterval(() => {
+    // Bazen yüksek bip
+    if(Math.random() < 0.25) {
+      highBeep.currentTime = 0;
+      highBeep.play();
+    } else {
       beep.currentTime = 0;
       beep.play();
-    }, 400);
+    }
+
+    lineIndex++;
   }
 
-  function stopBeep() {
-    clearInterval(beepIntervalId);
+  function startGlitch() {
+    glitchIntervalId = setInterval(glitchEffect, 80);
   }
 
-  function shakeScreen() {
-    let pos = 0;
-    let maxShake = 10;
-    let shakeInterval = setInterval(() => {
-      const x = (Math.random() - 0.5) * maxShake;
-      const y = (Math.random() - 0.5) * maxShake;
-      document.body.style.transform = `translate(${x}px,${y}px)`;
-      pos++;
-      if(pos > 60) {
-        clearInterval(shakeInterval);
-        document.body.style.transform = 'none';
-      }
-    }, 30);
+  function stopSounds() {
+    beep.pause();
+    highBeep.pause();
+    distorted.pause();
+    crash.pause();
   }
 
   function showErrorScreen() {
+    overlay.style.display = 'none';
+    terminal.style.display = 'none';
+    glitchOverlay.style.display = 'none';
     errorScreen.style.display = 'block';
-    alarm.loop = true;
-    alarm.play();
-    shakeScreen();
-    setTimeout(() => {
-      alarm.pause();
-      alarm.currentTime = 0;
-      playCrashSound();
-    }, 12000);
-    setTimeout(() => {
-      // son çarpıcı mesaj
-      terminal.textContent += "\nCRITICAL FAILURE. SYSTEM SHUTDOWN IMMINENT.\n";
-      terminal.scrollTop = terminal.scrollHeight;
-    }, 13000);
-  }
+    cursorTrap.style.display = 'block';
+    distorted.loop = true;
+    distorted.play();
 
-  function playCrashSound() {
-    crash.play();
+    // Fareyi engellemek için imleci gizleyip sabit kutu
+    document.body.style.cursor = 'none';
+
+    // 10 saniye sonra patlama sesi ve kapanış
+    setTimeout(() => {
+      distorted.pause();
+      crash.play();
+      errorScreen.style.opacity = 0;
+      setTimeout(() => {
+        document.body.style.background = 'black';
+        document.body.style.cursor = 'default';
+        errorScreen.style.display = 'none';
+        cursorTrap.style.display = 'none';
+        terminal.style.display = 'block';
+        terminal.textContent += "\n*** SYSTEM SHUTDOWN ***\n";
+      }, 2000);
+    }, 10000);
   }
 
   startBtn.onclick = () => {
-    beep.play().then(() => {
-      overlay.style.display = 'none';
-      terminal.style.display = 'block';
-      startBeep();
-      intervalId = setInterval(printMessage, 1500);
-    }).catch(() => {
-      alert("Ses çalma izni gerekiyor, lütfen sayfayla etkileşime geçin.");
-    });
-  };
-</script>
+    overlay.style.display = 'none';
+    terminal.style.display = 'block';
+    terminalText = "";
+    lineIndex = 0;
+    startTime = Date.now();
 
-</body>
-</html>
+    startGlitch();
+    intervalId = setInterval(printLine, 1500);
+  };
+
+  // Fare imlecini kutuya sabitleme
+  window.addEventListener('mousemove', e => {
+    if(cursorTrap.style.display === 'block') {
+      cursorTrap.style.top = (e.clientY - 20) + 'px';
