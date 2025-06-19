@@ -3,242 +3,239 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>En Korkunç Sistem Hatası</title>
+<title>Kabus Terminali</title>
 <style>
   html, body {
-    margin: 0; padding: 0;
-    width: 100%; height: 100%;
+    margin:0; padding:0; height:100%; width:100%;
     background: black;
     color: #0f0;
     font-family: monospace;
     overflow: hidden;
     user-select: none;
-    cursor: none;
   }
   #startBtn {
     position: fixed;
-    top: 50%; left: 50%;
+    top: 50%;
+    left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 160px;
+    background: transparent;
+    border: 5px solid red;
     color: red;
-    border: 6px solid red;
-    border-radius: 50%;
-    width: 220px;
-    height: 220px;
-    line-height: 210px;
-    text-align: center;
+    font-size: 80px;
     font-weight: 900;
+    width: 180px;
+    height: 180px;
+    border-radius: 90px;
     cursor: pointer;
-    box-shadow: 0 0 90px red;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 0 40px red;
+    text-align: center;
+    line-height: 170px;
     user-select: none;
+    transition: all 0.3s ease;
   }
   #startBtn:hover {
-    transform: translate(-50%, -50%) scale(1.3);
-    box-shadow: 0 0 150px #ff0000;
+    box-shadow: 0 0 80px #ff0000;
+    transform: translate(-50%, -50%) scale(1.1);
   }
   #terminal {
     position: fixed;
-    top: 0; left: 0;
-    width: 100vw; height: 100vh;
+    top: 5px;
+    left: 5px;
+    right: 5px;
+    bottom: 5px;
     background: black;
     color: #0f0;
-    font-size: 20px;
-    line-height: 1.5;
-    padding: 20px;
-    box-sizing: border-box;
-    white-space: pre-wrap;
+    font-size: 18px;
+    line-height: 1.4em;
     overflow-y: auto;
-    user-select: none;
-    text-shadow: 0 0 10px #0f0;
+    padding: 20px;
+    font-weight: 600;
     display: none;
+    text-shadow: 0 0 5px #0f0;
+  }
+  .glitch {
+    color: #f00;
+    animation: glitchAnim 0.3s infinite;
+  }
+  @keyframes glitchAnim {
+    0%, 100% { text-shadow: 2px 0 #f00, -2px 0 #0f0; }
+    50% { text-shadow: -2px 0 #f00, 2px 0 #0f0; }
   }
   #errorScreen {
     position: fixed;
-    top: 0; left: 0;
-    width: 100vw; height: 100vh;
-    background: rgba(255, 0, 0, 0.95);
+    top:0; left:0; width: 100vw; height: 100vh;
+    background: rgba(255,0,0,0.9);
     color: black;
-    font-size: 96px;
+    font-size: 72px;
     font-weight: 900;
     text-align: center;
     line-height: 100vh;
-    user-select: none;
     display: none;
+    user-select: none;
     animation: flashRed 1s infinite;
     z-index: 9999;
-    text-shadow: 0 0 20px black;
   }
   @keyframes flashRed {
-    0%, 50%, 100% { opacity: 1; }
-    25%, 75% { opacity: 0; }
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
   }
-  #glitchOverlay {
+  #warningMarks {
     position: fixed;
-    top: 0; left: 0;
-    width: 100vw; height: 100vh;
-    pointer-events: none;
-    mix-blend-mode: screen;
-    user-select: none;
-    z-index: 9998;
-  }
-  #cursorTrap {
-    position: fixed;
-    width: 40px; height: 40px;
-    border-radius: 50%;
-    box-shadow: 0 0 25px 12px #ff0000 inset;
+    top: 0; left: 0; width: 100vw; height: 100vh;
     pointer-events: none;
     user-select: none;
-    mix-blend-mode: screen;
+    overflow: hidden;
     z-index: 10000;
-    animation: pulseCursor 1.3s infinite alternate;
-    display: none;
   }
-  @keyframes pulseCursor {
-    0% { box-shadow: 0 0 15px 5px #ff0000 inset; }
-    100% { box-shadow: 0 0 45px 20px #ff0000 inset; }
+  .warningMark {
+    position: absolute;
+    color: red;
+    font-weight: 900;
+    font-size: 24px;
+    animation: blinkMark 1.5s infinite;
+    user-select: none;
+    text-shadow: 0 0 8px red;
+  }
+  @keyframes blinkMark {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
   }
 </style>
 </head>
 <body>
 
-<div id="startBtn" aria-label="Başlat">×</div>
+<button id="startBtn" aria-label="Başlat">×</button>
 <div id="terminal"></div>
-<div id="glitchOverlay"></div>
-<div id="errorScreen">SYSTEM FAILURE<br>ACCESS DENIED</div>
-<div id="cursorTrap"></div>
+<div id="errorScreen">SİSTEM ÇÖKTÜ</div>
+<div id="warningMarks"></div>
 
-<audio id="beep" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto"></audio>
-<audio id="highBeep" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" preload="auto"></audio>
-<audio id="distorted" src="https://actions.google.com/sounds/v1/foley/metal_stress.ogg" preload="auto"></audio>
-<audio id="crash" src="https://actions.google.com/sounds/v1/impacts/metal_crash.ogg" preload="auto"></audio>
+<audio id="beep" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
+<audio id="alarm" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg"></audio>
+<audio id="explosion" src="https://actions.google.com/sounds/v1/explosions/explosion.wav"></audio>
 
 <script>
   const startBtn = document.getElementById('startBtn');
   const terminal = document.getElementById('terminal');
-  const glitchOverlay = document.getElementById('glitchOverlay');
   const errorScreen = document.getElementById('errorScreen');
-  const cursorTrap = document.getElementById('cursorTrap');
+  const warningMarks = document.getElementById('warningMarks');
   const beep = document.getElementById('beep');
-  const highBeep = document.getElementById('highBeep');
-  const distorted = document.getElementById('distorted');
-  const crash = document.getElementById('crash');
+  const alarm = document.getElementById('alarm');
+  const explosion = document.getElementById('explosion');
 
-  const glitchChars = ['#','%','@','!','&','?','+','*','=',';',':'];
-  let terminalText = "";
-  let lines = [
-    "INITIALIZING SYSTEM...",
-    "LOADING CORE MODULES...",
-    "CHECKING MEMORY...",
-    "MEMORY OK",
-    "ACCESSING SECURE ZONE...",
-    "WARNING: UNAUTHORIZED ACCESS DETECTED!",
-    "ENCRYPTION BREACHED!",
-    "SYSTEM INTEGRITY COMPROMISED!",
-    "KERNEL PANIC IMMINENT!",
-    "RUNNING MALWARE SCAN...",
-    "ERROR: MALWARE FOUND!",
-    "FORCING SYSTEM SHUTDOWN...",
-    "SYSTEM FAILURE IMMINENT!",
-    "EMERGENCY PROTOCOL ACTIVATED!",
-    "TERMINAL LOCKDOWN ENGAGED!",
-    "ACCESS DENIED!",
-    "CRITICAL ERROR!",
-    "REBOOTING FAILED!",
-    "PLEASE CONTACT SUPPORT!",
-    "SYSTEM SHUTDOWN IN 10 SECONDS..."
-  ];
-
-  let idx = 0;
-  let intervalId, glitchIntervalId;
-
-  function randomInt(min,max) {
-    return Math.floor(Math.random()*(max-min+1)) + min;
+  let terminalLines = [];
+  for(let i=1; i<=200; i++){
+    if(i % 15 === 0) terminalLines.push(`GLİTCH: ÇÖZÜMSÜZ HATA KODU ${i}`);
+    else if(i % 13 === 0) terminalLines.push(`UYARI: İNTRÜZYON TESPİT EDİLDİ ${i}`);
+    else if(i % 11 === 0) terminalLines.push(`SİSTEM: VERİ KAYBI ALARMI ${i}`);
+    else if(i % 7 === 0) terminalLines.push(`GÜVENLİK: İZİN REDDEDİLDİ ${i}`);
+    else if(i % 5 === 0) terminalLines.push(`KULLANICI: İNFO SİSTEMİ GÜNCELLENİYOR ${i}`);
+    else if(i % 3 === 0) terminalLines.push(`HATA: KÖK YETKİLERİ KORRUPT ${i}`);
+    else terminalLines.push(`SİSTEM: KOD BLOĞU YÜRÜTÜLÜYOR ${i}`);
   }
 
-  function glitchEffect() {
-    let glitchText = "";
-    for(let i=0; i<terminalText.length; i++) {
-      if(Math.random() < 0.12) {
-        glitchText += glitchChars[randomInt(0, glitchChars.length-1)];
+  let intervalId;
+  let beepInterval;
+  let beepDelay = 700;
+  let lineIndex = 0;
+  let glitchActive = false;
+
+  function addWarningMarks(count = 80) {
+    warningMarks.innerHTML = '';
+    for(let i=0; i<count; i++){
+      const mark = document.createElement('div');
+      mark.className = 'warningMark';
+      mark.textContent = '!';
+      mark.style.top = Math.random() * 100 + 'vh';
+      mark.style.left = Math.random() * 100 + 'vw';
+      mark.style.fontSize = (10 + Math.random() * 30) + 'px';
+      mark.style.animationDelay = (Math.random() * 1.5) + 's';
+      warningMarks.appendChild(mark);
+    }
+  }
+
+  function glitchText(text) {
+    let result = '';
+    for(let c of text){
+      if(Math.random() < 0.1) {
+        // rastgele karakter karıştır
+        const randChar = String.fromCharCode(33 + Math.floor(Math.random()*94));
+        result += `<span style="color: red; font-weight: 900;">${randChar}</span>`;
       } else {
-        glitchText += terminalText[i];
+        result += c;
       }
     }
-    terminal.textContent = glitchText;
+    return result;
   }
 
-  function printLine() {
-    if(idx >= lines.length) {
-      clearInterval(intervalId);
-      clearInterval(glitchIntervalId);
-      stopSounds();
-      showErrorScreen();
-      return;
-    }
-    terminalText += lines[idx] + "\n";
-    terminal.textContent = terminalText;
-    terminal.scrollTop = terminal.scrollHeight;
-
-    if(Math.random() < 0.3) {
-      highBeep.currentTime = 0;
-      highBeep.play();
-    } else {
+  function startBeeping(){
+    beepDelay = 700;
+    beepInterval = setInterval(() => {
       beep.currentTime = 0;
       beep.play();
-    }
-    idx++;
+      beepDelay -= 50;
+      if(beepDelay < 120) beepDelay = 120;
+      clearInterval(beepInterval);
+      beepInterval = setInterval(() => {
+        beep.currentTime = 0;
+        beep.play();
+      }, beepDelay);
+    }, beepDelay);
   }
 
-  function startGlitch() {
-    glitchIntervalId = setInterval(glitchEffect, 80);
-  }
-  function stopSounds() {
-    beep.pause();
-    highBeep.pause();
-    distorted.pause();
-    crash.pause();
+  function stopBeeping(){
+    clearInterval(beepInterval);
   }
 
-  function showErrorScreen() {
-    terminal.style.display = 'none';
-    glitchOverlay.style.display = 'none';
-    errorScreen.style.display = 'block';
-    cursorTrap.style.display = 'block';
-    distorted.loop = true;
-    distorted.play();
-    document.body.style.cursor = 'none';
-
-    // Fare imlecini kutuya sabitle
-    window.addEventListener('mousemove', e => {
-      if(cursorTrap.style.display === 'block') {
-        cursorTrap.style.top = (e.clientY - 20) + 'px';
-        cursorTrap.style.left = (e.clientX - 20) + 'px';
+  function startTerminal() {
+    terminal.style.display = 'block';
+    lineIndex = 0;
+    terminal.innerHTML = '';
+    startBeeping();
+    intervalId = setInterval(() => {
+      if(lineIndex >= terminalLines.length){
+        clearInterval(intervalId);
+        stopBeeping();
+        showErrorScreen();
+        return;
       }
-    });
+      let line = terminalLines[lineIndex];
+      // Arada glitch efekt
+      if(Math.random() < 0.25){
+        line = glitchText(line);
+      }
+      terminal.innerHTML += line + "\n";
+      terminal.scrollTop = terminal.scrollHeight;
+      lineIndex++;
+    }, 150);
+  }
+
+  function showErrorScreen(){
+    errorScreen.style.display = 'block';
+    alarm.loop = true;
+    alarm.currentTime = 0;
+    alarm.play();
+    addWarningMarks(100);
+    let flash = true;
+    let flashInterval = setInterval(() => {
+      document.body.style.backgroundColor = flash ? 'rgba(255,0,0,0.85)' : 'black';
+      flash = !flash;
+    }, 300);
 
     setTimeout(() => {
-      distorted.pause();
-      crash.play();
-      errorScreen.style.opacity = 0;
-      setTimeout(() => {
-        document.body.style.background = 'black';
-        document.body.style.cursor = 'default';
-        errorScreen.style.display = 'none';
-        cursorTrap.style.display = 'none';
-        terminal.style.display = 'block';
-        terminal.textContent += "\n*** SYSTEM SHUTDOWN ***\n";
-      }, 2000);
-    }, 10000);
+      clearInterval(flashInterval);
+      explosion.play();
+      alarm.pause();
+      errorScreen.style.display = 'none';
+      document.body.style.backgroundColor = 'black';
+      terminal.innerHTML = '';
+      startTerminal();
+    }, 20000); // 20 saniye sistem hatası ekranı ve ses
+
   }
 
   startBtn.onclick = () => {
     startBtn.style.display = 'none';
-    terminal.style.display = 'block';
-    terminalText = "";
-    idx = 0;
-    startGlitch();
-    intervalId = setInterval(printLine, 1400);
+    startTerminal();
   };
 </script>
 
