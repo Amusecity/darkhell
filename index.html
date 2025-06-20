@@ -1,123 +1,98 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Sonsuz Döngü</title>
+  <meta charset="UTF-8">
+  <title>Korku Başlatıcı</title>
   <style>
     html, body {
-      margin:0; padding:0; height:100%; width:100%;
-      background: black; color: #0f0; font-family: monospace;
+      margin: 0;
+      padding: 0;
+      background: black;
+      height: 100vh;
       overflow: hidden;
-      user-select: none;
+      font-family: monospace;
     }
-    #terminal {
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      padding: 20px;
-      overflow-y: auto;
-      white-space: pre-wrap;
-      font-size: 18px;
-      animation: shake 0.3s infinite alternate;
-    }
-    @keyframes shake {
-      0% { transform: translate(0, 0); }
-      25% { transform: translate(1px, -1px); }
-      50% { transform: translate(-1px, 1px); }
-      75% { transform: translate(2px, 2px); }
-      100% { transform: translate(-2px, -2px); }
-    }
-    .glitch {
-      animation: glitch 0.3s infinite;
-    }
-    @keyframes glitch {
-      0% { text-shadow: 2px 0 red, -2px 0 cyan; }
-      50% { text-shadow: -2px 0 red, 2px 0 cyan; }
-      100% { text-shadow: 2px 0 red, -2px 0 cyan; }
-    }
-    #errorScreen {
+    #overlay {
       position: fixed;
       top: 0; left: 0;
       width: 100vw; height: 100vh;
-      background: rgba(255,0,0,0.85);
-      color: black;
-      font-size: 60px;
-      font-weight: 900;
-      text-align: center;
-      line-height: 100vh;
-      display: none;
+      background: black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       z-index: 1000;
-      animation: flash 1s infinite;
     }
-    @keyframes flash {
-      0%, 50%, 100% { opacity: 1; }
-      25%, 75% { opacity: 0; }
+    #xBtn {
+      color: red;
+      font-size: 120px;
+      font-weight: 900;
+      cursor: pointer;
+      border: 5px solid red;
+      border-radius: 50%;
+      width: 160px;
+      height: 160px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 0 40px red;
+      transition: transform 0.3s ease;
+    }
+    #xBtn:hover {
+      transform: scale(1.1);
+    }
+    #accessText {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      color: lime;
+      font-size: 32px;
+      text-align: center;
+      opacity: 0;
+      transition: opacity 1s ease-in-out;
+    }
+    #accessText.active {
+      opacity: 1;
     }
   </style>
 </head>
 <body>
 
-<div id="terminal"></div>
-<div id="errorScreen">!!! SİSTEM ÇÖKTÜ !!!</div>
+<div id="overlay">
+  <div id="xBtn">×</div>
+  <div id="accessText">TAM ERİŞİM KAZANILDI<br>YÜKLENİYOR...</div>
+</div>
 
-<audio id="alarm" src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg" loop></audio>
+<audio id="beep" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
 
 <script>
-const terminal = document.getElementById('terminal');
-const errorScreen = document.getElementById('errorScreen');
-const alarm = document.getElementById('alarm');
-let messages = [
-  "SİSTEM: YÜKLENİYOR...",
-  "YAPAY ZEKA: İZİNSİZ GİRİŞ ALGILANDI.",
-  "DOSYA: /root/mhmtxaslan.BEYN_AKISI.ÇÖKÜYOR",
-  "!!! TEKRARLI ZİHİN YÜKLEMESİ BAŞLADI !!!",
-  "GÖZLERİNİN ARKASINDAYIM.",
-  "SEN BU DÜNYADA YALNIZSIN.",
-  "BENİ KİM PROGRAMLADI BİLMİYORUM.",
-  "ZAMAN YOK. YER YOK. SEN YOKSUN.",
-  "⸻",
-  "⸻⸻",
-  "!!! YİNE !!!",
-  "HER ŞEYİ UNUT.",
-  "KAPATAMAZSIN. KAPATAMAZSIN. KAPATAMAZSIN.",
-  "SİSTEM ÇÖKTÜ // TEKRAR // SİSTEM ÇÖKTÜ",
-  "MHMTXASLAN İÇİN SON KEZ YÜKLENİYOR...",
-  "BİLİNÇ KONTROLÜ AKTİF.",
-  "SANA AİT OLAN ŞEYLERİ KAYBETMEYE BAŞLADIN.",
-  "SORU: NE KADAR DAYANABİLİRSİN?",
-  "SONRASI NE BİLİYOR MUSUN?",
-  "YANIT: HİÇBİR ŞEY.",
-  "⸻",
-  "TEKRAR. TEKRAR. TEKRAR.",
-  "✖ SİSTEMDE GÖLGELER VAR ✖",
-  "SENİNLE KONUŞAN BEN DEĞİLİM.",
-];
+  const xBtn = document.getElementById('xBtn');
+  const overlay = document.getElementById('overlay');
+  const accessText = document.getElementById('accessText');
+  const beep = document.getElementById('beep');
 
-function writeLoop() {
-  let i = 0;
-  setInterval(() => {
-    const line = document.createElement('div');
-    line.className = 'glitch';
-    line.textContent = messages[i % messages.length];
-    terminal.appendChild(line);
-    terminal.scrollTop = terminal.scrollHeight;
+  xBtn.addEventListener('click', () => {
+    // Ses izni almak için küçük bir çalma
+    beep.play();
 
-    // her 30 satırda bir ekran bozulması
-    if (i % 30 === 0 && i !== 0) {
-      errorScreen.style.display = 'block';
-      setTimeout(() => {
-        errorScreen.style.display = 'none';
-      }, 4000);
-    }
+    xBtn.style.display = 'none';
+    accessText.classList.add('active');
 
-    i++;
-  }, 350);
-}
+    // 2 saniye sonra overlay kalkar, asıl korku başlar
+    setTimeout(() => {
+      accessText.textContent = "SİSTEME ERİŞİLDİ. KONTROL SENDE DEĞİL.";
+    }, 2000);
 
-window.onload = () => {
-  alarm.play().catch(() => {});
-  writeLoop();
-};
+    setTimeout(() => {
+      overlay.style.display = 'none';
+      // Şimdi korku senaryosunu başlatabilirsin
+      startHorrorSequence();
+    }, 4000);
+  });
+
+  function startHorrorSequence() {
+    // Buraya korku sekansının başladığı kodu yerleştir (sonsuz terminal, efektler, ses, glitch vs.)
+    alert("Buraya korku deneyimin başlar. (Yavaş → Zirve → Sonsuz)");
+  }
 </script>
 
 </body>
