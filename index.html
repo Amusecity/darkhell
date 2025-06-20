@@ -2,19 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Hacker Animasyon</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hacked</title>
   <style>
     html, body {
-      margin: 0; padding: 0;
-      width: 100%; height: 100%;
+      margin: 0;
+      padding: 0;
       background: black;
-      display: flex; justify-content: center; align-items: center;
+      height: 100%;
+      width: 100%;
       font-family: monospace;
       overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
-    #start {
+    #startBtn {
       font-size: 100px;
       color: white;
       background: none;
@@ -23,14 +26,15 @@
       z-index: 10;
     }
 
-    #userDisplay {
+    #username {
       display: none;
       position: absolute;
-      top: 40%; left: 50%;
+      top: 40%;
+      left: 50%;
       transform: translate(-50%, -50%);
       color: red;
-      font-size: 48px;
-      text-shadow: 0 0 15px red;
+      font-size: 50px;
+      text-shadow: 0 0 20px red;
     }
 
     #terminal {
@@ -42,14 +46,13 @@
       height: 90%;
       padding: 20px;
       color: #00ff00;
-      background: #000;
-      border: 2px solid #00ff00;
+      background: black;
+      border: 1px solid #00ff00;
       overflow-y: auto;
-      white-space: pre-wrap;
       font-size: 16px;
     }
 
-    #crash {
+    #crashScreen {
       display: none;
       position: fixed;
       top: 0; left: 0;
@@ -57,83 +60,79 @@
       background: darkred;
       color: white;
       font-size: 3rem;
-      display: flex;
-      align-items: center;
       justify-content: center;
-      animation: flash 0.5s infinite alternate;
-      z-index: 99;
+      align-items: center;
+      animation: blink 0.5s infinite alternate;
+      z-index: 100;
     }
 
-    @keyframes flash {
+    @keyframes blink {
       0% { opacity: 1; }
-      100% { opacity: 0.3; }
+      100% { opacity: 0.2; }
     }
   </style>
 </head>
 <body>
 
-<button id="start">✖</button>
-<div id="userDisplay">@visitor</div>
+<button id="startBtn">✖</button>
+<div id="username">@mhmtxaslan</div>
 <div id="terminal"></div>
-<div id="crash">!!! SYSTEM FAILURE !!!</div>
+<div id="crashScreen">!!! SYSTEM FAILURE !!!</div>
 
 <audio id="bgMusic" src="https://files.catbox.moe/0wvxli.mp3" preload="auto" loop></audio>
 <audio id="crashSound" src="https://files.catbox.moe/nwwj6j.mp3" preload="auto"></audio>
 
 <script>
-  const start = document.getElementById("start");
-  const userDisplay = document.getElementById("userDisplay");
+  const startBtn = document.getElementById("startBtn");
+  const username = document.getElementById("username");
   const terminal = document.getElementById("terminal");
-  const crash = document.getElementById("crash");
+  const crashScreen = document.getElementById("crashScreen");
   const bgMusic = document.getElementById("bgMusic");
   const crashSound = document.getElementById("crashSound");
 
-  const params = new URLSearchParams(window.location.search);
-  const username = params.get("user") || "visitor";
-
-  const messages = [
-    `>> Connecting to @${username}...`,
-    ">> Connection established.",
-    ">> Extracting credentials...",
-    ">> Uploading data to dark web...",
-    ">> Bypassing firewalls...",
-    ">> Sending spam to contacts...",
-    ">> SYSTEM FAILURE IMMINENT",
+  const lines = [
+    ">> Hacking into Instagram...",
+    ">> Accessing user data...",
+    ">> Stealing credentials...",
+    ">> Uploading to dark web...",
+    ">> Encrypting files...",
+    ">> Spreading to contacts...",
+    ">> Initiating system crash...",
+    ">> SYSTEM FAILURE IMMINENT"
   ];
 
   let index = 0;
   let speed = 300;
 
-  function playMessages() {
-    if (index < messages.length) {
-      const line = document.createElement("div");
-      line.textContent = messages[index++];
-      terminal.appendChild(line);
+  function writeLines() {
+    if (index < lines.length) {
+      const div = document.createElement("div");
+      div.textContent = lines[index++];
+      terminal.appendChild(div);
       terminal.scrollTop = terminal.scrollHeight;
-      speed = Math.max(60, speed - 30); // hızlanma
-      setTimeout(playMessages, speed);
+      speed = Math.max(60, speed - 30);
+      setTimeout(writeLines, speed);
     } else {
+      terminal.style.display = "none";
       bgMusic.pause();
       crashSound.play();
-      terminal.style.display = "none";
-      crash.style.display = "flex";
+      crashScreen.style.display = "flex";
     }
   }
 
-  start.onclick = () => {
+  startBtn.onclick = () => {
     bgMusic.play().then(() => {
-      start.style.display = "none";
-      userDisplay.textContent = "@"+username;
-      userDisplay.style.display = "block";
+      startBtn.style.display = "none"; // X butonunu gizle
+      username.style.display = "block"; // Kullanıcı adı göster
 
       setTimeout(() => {
-        userDisplay.style.display = "none";
+        username.style.display = "none";
         terminal.style.display = "block";
-        playMessages();
+        writeLines();
       }, 5000);
-    }).catch((err) => {
-      alert("Ses erişimine izin vermen gerekiyor.");
-      console.error(err);
+
+    }).catch(() => {
+      alert("Lütfen sesi açın ve tekrar deneyin.");
     });
   };
 </script>
