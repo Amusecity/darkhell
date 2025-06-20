@@ -2,16 +2,15 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>Korku Başlatıcı</title>
+  <title>KORKU</title>
   <style>
     html, body {
-      margin: 0;
-      padding: 0;
+      margin: 0; padding: 0;
       background: black;
+      color: #0f0;
+      font-family: monospace;
       height: 100vh;
       overflow: hidden;
-      font-family: monospace;
-      color: #0f0;
     }
     #overlay {
       position: fixed;
@@ -21,153 +20,137 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      flex-direction: column;
-      z-index: 1000;
+      z-index: 9999;
     }
-    #xBtn {
+    #startBtn {
+      font-size: 80px;
       color: red;
-      font-size: 120px;
-      font-weight: 900;
-      cursor: pointer;
       border: 5px solid red;
       border-radius: 50%;
-      width: 160px;
-      height: 160px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      box-shadow: 0 0 40px red;
-    }
-    #accessText {
-      margin-top: 40px;
-      font-size: 32px;
-      color: lime;
-      opacity: 0;
-      transition: opacity 1s ease;
+      width: 160px; height: 160px;
       text-align: center;
+      line-height: 140px;
+      cursor: pointer;
+      box-shadow: 0 0 30px red;
     }
-    #accessText.active {
-      opacity: 1;
-    }
-    #terminal {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      padding: 20px;
+    #access {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
       background: black;
       color: #0f0;
-      font-size: 16px;
-      white-space: pre-wrap;
-      overflow-y: auto;
+      font-size: 36px;
+      text-align: center;
+      line-height: 100vh;
+      z-index: 9998;
       display: none;
-      z-index: 1;
+      animation: flash 2s linear infinite;
     }
-    #glitch {
-      animation: glitch 0.2s infinite alternate;
+    @keyframes flash {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    #terminal {
+      padding: 20px;
+      white-space: pre-wrap;
+      font-size: 18px;
+      display: none;
+    }
+    .glitch {
+      animation: glitch 0.2s infinite;
     }
     @keyframes glitch {
-      0% { text-shadow: 2px 0 red; }
-      100% { text-shadow: -2px 0 blue; }
+      0% { transform: translate(0); }
+      20% { transform: translate(-1px, 2px); }
+      40% { transform: translate(2px, -1px); }
+      60% { transform: translate(-3px, 1px); }
+      80% { transform: translate(1px, -2px); }
+      100% { transform: translate(0); }
+    }
+    #redOverlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(255, 0, 0, 0.8);
+      z-index: 9997;
+      display: none;
+      animation: flicker 0.4s infinite;
+    }
+    @keyframes flicker {
+      0%, 100% { opacity: 0.9; }
+      50% { opacity: 0.3; }
     }
   </style>
 </head>
 <body>
 
 <div id="overlay">
-  <div id="xBtn">×</div>
-  <div id="accessText">TAM ERİŞİM KAZANILDI</div>
+  <div id="startBtn">×</div>
 </div>
 
+<div id="access">TAM ERİŞİM KAZANILDI</div>
+
+<div id="redOverlay"></div>
 <div id="terminal"></div>
 
 <audio id="beep" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
-<audio id="alarm" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg"></audio>
+<audio id="alarm" src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg"></audio>
 
 <script>
-  const xBtn = document.getElementById('xBtn');
   const overlay = document.getElementById('overlay');
-  const accessText = document.getElementById('accessText');
+  const access = document.getElementById('access');
   const terminal = document.getElementById('terminal');
+  const redOverlay = document.getElementById('redOverlay');
   const beep = document.getElementById('beep');
   const alarm = document.getElementById('alarm');
+  const startBtn = document.getElementById('startBtn');
 
-  xBtn.addEventListener('click', () => {
-    beep.play();
-    xBtn.style.display = 'none';
-    accessText.classList.add('active');
-
-    setTimeout(() => {
-      accessText.innerText = "SİSTEME ERİŞİLDİ. KONTROL SENDE DEĞİL.";
-    }, 2000);
-
-    setTimeout(() => {
-      overlay.style.display = 'none';
-      startHorrorSequence();
-    }, 4000);
+  const terminalLines = Array.from({length: 200}, (_, i) => {
+    if (i % 20 === 0) return `[UYARI] BEYİN SİNYALİ ALGILANDI`;
+    if (i % 13 === 0) return `[ZİHİN] PARÇALANMA SEVİYESİ %` + (i % 100);
+    if (i % 9 === 0) return `[GÖZLEM] SİSTEM BİLİNÇ KAZANIYOR...`;
+    return `> ${"█".repeat(Math.random()*20 | 0)}`;
   });
 
-  function startHorrorSequence() {
-    terminal.style.display = 'block';
+  function startSequence() {
+    beep.play();
+    overlay.style.display = 'none';
+    access.style.display = 'block';
 
-    let messages = [];
-    for (let i = 0; i < 50; i++) {
-      messages.push(`[${i}] Veri çözülüyor...`);
-    }
-    for (let i = 51; i < 100; i++) {
-      messages.push(`[UYARI] Algoritma kararsız.`);
-    }
-    for (let i = 100; i < 200; i++) {
-      messages.push(`[KRİTİK] Bilinç müdahalesi tespit edildi!`);
-    }
+    setTimeout(() => {
+      access.style.display = 'none';
+      terminal.style.display = 'block';
+      runTerminal();
+    }, 4000);
+  }
 
-    let idx = 0;
-    let speed = 100;
-
-    function printMessages() {
-      if (idx >= messages.length) {
-        startLoop();
+  function runTerminal() {
+    let i = 0;
+    terminal.innerText = '';
+    terminal.classList.add('glitch');
+    const step = () => {
+      if (i >= terminalLines.length) {
+        redOverlay.style.display = 'block';
+        alarm.play();
+        loopHorror();
         return;
       }
-
-      terminal.innerText += messages[idx] + '\n';
+      terminal.innerText += terminalLines[i] + "\n";
       terminal.scrollTop = terminal.scrollHeight;
-
-      if (idx === 75) {
-        document.body.style.background = 'darkred';
-      }
-
-      if (idx === 100) {
-        document.body.classList.add('flash');
-        terminal.classList.add('tv-effect');
-      }
-
-      idx++;
-      setTimeout(printMessages, speed);
-    }
-
-    printMessages();
+      i++;
+      setTimeout(step, 150 - Math.min(i, 80));
+    };
+    step();
   }
 
-  function startLoop() {
-    // Sonsuz döngü aşaması
-    terminal.innerText = '';
-    alarm.loop = true;
-    alarm.play();
-
+  function loopHorror() {
     setInterval(() => {
-      let line = "[SİSTEM] KONTROL YOK // GÖZETLENİYORSUN...\n";
-      terminal.innerText += line;
+      terminal.innerText += `\n[∞] ZİHİN HAPSEDİLDİ...\n`;
       terminal.scrollTop = terminal.scrollHeight;
-
-      // Glitch efekti
-      terminal.classList.toggle('glitch');
-
-      // Arka plan rengi rastgele yanıp sönme
-      document.body.style.background = Math.random() > 0.5 ? 'black' : 'darkred';
-    }, 300);
+    }, 3000);
   }
+
+  startBtn.addEventListener('click', startSequence);
 </script>
 
 </body>
