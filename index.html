@@ -3,159 +3,182 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>HACKER MOD ++</title>
+  <title>HACKER MOD MEGA</title>
   <style>
     html, body {
       margin: 0;
       height: 100%;
       background: black;
       color: #00ff00;
-      font-family: "Courier New", Courier, monospace;
+      font-family: monospace;
       overflow: hidden;
     }
-
-    canvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-    }
-
-    .terminal {
-      position: absolute;
-      top: 10%;
-      left: 5%;
-      width: 90%;
-      height: 80%;
-      background: rgba(0, 0, 0, 0.85);
-      padding: 20px;
-      box-shadow: 0 0 20px lime;
-      overflow-y: auto;
-      white-space: pre-wrap;
-      border: 2px solid #00ff00;
-      z-index: 1;
-    }
-
-    .glow {
-      text-shadow: 0 0 5px #00ff00, 0 0 10px #00ff00;
-    }
-
-    .alert {
-      position: absolute;
-      top: 40%;
-      left: 25%;
-      width: 50%;
-      padding: 30px;
-      background: rgba(255, 0, 0, 0.9);
-      color: white;
-      text-align: center;
-      font-size: 2em;
-      font-weight: bold;
-      border: 3px solid #ff0000;
-      box-shadow: 0 0 20px red;
-      display: none;
+    #overlay {
+      position: fixed; top:0; left:0;
+      width:100%; height:100%;
+      background:black; display:flex;
+      align-items:center; justify-content:center;
       z-index: 9999;
+    }
+    #startBtn {
+      font-size: 4em; color: white;
+      background: none; border:none;
+      cursor: pointer;
+    }
+    canvas { position:absolute; top:0; left:0; }
+    .terminal {
+      position:absolute; top:10%; left:5%;
+      width:90%; height:60%;
+      background: rgba(0,0,0,0.85);
+      padding:20px; box-shadow:0 0 20px lime;
+      overflow-y:auto; white-space:pre-wrap;
+      border:2px solid #00ff00; z-index:1;
+    }
+    .glow { text-shadow:0 0 5px #00ff00; }
+    .alert {
+      position:fixed; top:40%; left:25%;
+      width:50%; padding:30px;
+      background:rgba(255,0,0,0.9);
+      color:white; text-align:center;
+      font-size:2em; font-weight:bold;
+      border:3px solid #ff0000;
+      box-shadow:0 0 20px red;
+      display:none; z-index:9998;
       animation: flash 0.5s infinite alternate;
     }
-
-    @keyframes flash {
-      0% { opacity: 1; }
-      100% { opacity: 0.5; }
-    }
-
+    @keyframes flash { 0%{opacity:1;}100%{opacity:0.5;} }
     @keyframes shake {
-      0%, 100% { transform: translate(0, 0); }
-      20% { transform: translate(-5px, 0); }
-      40% { transform: translate(5px, 0); }
-      60% { transform: translate(-5px, 0); }
-      80% { transform: translate(5px, 0); }
+      0%,100%{transform: translate(0,0);}
+      20%{transform: translate(-5px,0);}
+      40%{transform: translate(5px,0);}
+      60%{transform: translate(-5px,0);}
+      80%{transform: translate(5px,0);}
     }
-
-    .shake {
-      animation: shake 0.1s infinite;
+    .shake { animation: shake 0.1s infinite; }
+    #userInput {
+      position:absolute; bottom:5%; left:5%;
+      width:90%; padding:10px;
+      font-size:1.2em; background:rgba(0,0,0,0.8);
+      color:#0f0; border:2px solid #0f0;
+      outline:none;
     }
   </style>
 </head>
 <body>
-  <canvas id="matrixCanvas"></canvas>
-  <div class="terminal glow" id="terminal">
-    <div>Initializing...</div>
+  <div id="overlay">
+    <button id="startBtn">✖</button>
   </div>
-  <div id="alert" class="alert">SYSTEM BREACH DETECTED</div>
+
+  <canvas id="matrixCanvas"></canvas>
+  <div class="terminal glow" id="terminal"></div>
+  <div id="alert" class="alert">ACCESS GRANTED<br>@mhmtxaslan</div>
 
   <audio id="alarmSound" src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3" preload="auto"></audio>
+  <audio id="bgMusic" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" preload="auto" loop></audio>
+
+  <input id="userInput" placeholder="Type here..." disabled />
 
   <script>
-    // Matrix Rain Effect
+    const overlay = document.getElementById('overlay');
+    const startBtn = document.getElementById('startBtn');
+    const alertBox = document.getElementById('alert');
+    const alarmSound = document.getElementById('alarmSound');
+    const bgMusic = document.getElementById('bgMusic');
+    const terminal = document.getElementById('terminal');
+    const userInput = document.getElementById('userInput');
     const canvas = document.getElementById('matrixCanvas');
     const ctx = canvas.getContext('2d');
-    canvas.height = window.innerHeight;
-    canvas.width = window.innerWidth;
 
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
     const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     const fontSize = 16;
     const columns = canvas.width / fontSize;
     const drops = Array(Math.floor(columns)).fill(1);
+    let commands = [];
+    let cmdIndex = 0;
 
-    function drawMatrix() {
-      ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "#0F0";
-      ctx.font = fontSize + "px monospace";
-
-      for (let i = 0; i < drops.length; i++) {
-        const text = letters[Math.floor(Math.random() * letters.length)];
-        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-
-        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-          drops[i] = 0;
-        }
+    function drawMatrix(){
+      ctx.fillStyle='rgba(0,0,0,0.05)';
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+      ctx.fillStyle='#0F0';
+      ctx.font=fontSize+'px monospace';
+      for(let i=0;i<drops.length;i++){
+        const text=letters[Math.floor(Math.random()*letters.length)];
+        ctx.fillText(text,i*fontSize,drops[i]*fontSize);
+        if(drops[i]*fontSize>canvas.height && Math.random()>0.975) drops[i]=0;
         drops[i]++;
       }
     }
 
-    setInterval(drawMatrix, 33);
-
-    // Terminal Simulation
-    const terminal = document.getElementById("terminal");
-    const alertBox = document.getElementById("alert");
-    const alarmSound = document.getElementById("alarmSound");
-
-    const commands = [
-      "Accessing mainframe...",
-      "Bypassing firewall...",
-      "Decrypting security layers...",
-      "Injecting payload...",
-      "Tracking IP address: 192.168.0.13",
-      "Connection established. Root access granted.",
-      "Initiating remote override...",
-      "Uploading exploit package...",
-      ">>> BREACH DETECTED <<<"
-    ];
-
-    let index = 0;
-    function typeCommand() {
-      if (index < commands.length) {
-        const line = document.createElement("div");
-        line.textContent = commands[index];
+    function typeCommands(){
+      if(cmdIndex<commands.length){
+        const line = document.createElement('div');
+        line.textContent = commands[cmdIndex];
         terminal.appendChild(line);
         terminal.scrollTop = terminal.scrollHeight;
-        
-        if (commands[index].includes("BREACH")) {
-          triggerAlert();
-        }
-
-        index++;
-        setTimeout(typeCommand, 1000);
+        if(commands[cmdIndex].includes("ACCESS GRANTED")) triggerAI();
+        cmdIndex++;
+        setTimeout(typeCommands, 1000);
       }
     }
 
-    function triggerAlert() {
-      alertBox.style.display = "block";
-      document.body.classList.add("shake");
+    function triggerStartup(){
+      overlay.style.display='none';
+      alertBox.style.display='block';
+      document.body.classList.add('shake');
+      alertBox.textContent = "ACCESS GRANTED\n@mhmtxaslan";
       alarmSound.play();
+      setTimeout(() => {
+        alertBox.style.display='none';
+        document.body.classList.remove('shake');
+        bgMusic.play();
+        startMatrix();
+        startTerminal();
+        enableUserInput();
+      }, 3000);
     }
 
-    setTimeout(typeCommand, 1000);
+    function startMatrix(){
+      setInterval(drawMatrix,33);
+    }
+
+    function startTerminal(){
+      commands = [
+        "Initializing neural link...",
+        "Decrypting AI core...",
+        "AI module online.",
+        "ACCESS GRANTED",
+        "Welcome @mhmtxaslan.",
+        "You may type commands."
+      ];
+      setTimeout(() => { typeCommands(); }, 500);
+    }
+
+    function triggerAI(){
+      const aiLine = document.createElement('div');
+      aiLine.textContent = "AI: Hello user, I am your digital assistant. Type something.";
+      aiLine.style.color = '#ff0';
+      terminal.appendChild(aiLine);
+    }
+
+    function enableUserInput(){
+      userInput.disabled=false;
+      userInput.focus();
+      userInput.addEventListener('keydown', (e) => {
+        if(e.key==='Enter' && userInput.value.trim()){
+          const line = document.createElement('div');
+          line.textContent = "@mhmtxaslan: " + userInput.value;
+          terminal.appendChild(line);
+          terminal.scrollTop = terminal.scrollHeight;
+          userInput.value = '';
+          // otomatik sil ve yenile
+          setTimeout(() => { terminal.innerHTML = ''; cmdIndex=0; startTerminal(); }, 10000);
+        }
+      });
+    }
+
+    startBtn.addEventListener('click', triggerStartup);
   </script>
 </body>
 </html>
