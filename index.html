@@ -1,106 +1,160 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>INSTA HACKER NIGHTMARE</title>
+  <meta charset="UTF-8">
+  <title>HACKING...</title>
   <style>
-    html, body { margin:0; height:100%; background:black; color:#0f0; font-family:monospace; overflow:hidden; }
-    #overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:black; display:flex; align-items:center; justify-content:center; z-index:9999; }
-    #startBtn { font-size:4em; color:white; background:none; border:none; cursor:pointer; }
-    #usernameDisplay { position:fixed; top:5%; right:5%; font-size:1.5em; color:#f00; text-shadow:0 0 10px red; z-index:9998; }
-    canvas { position:absolute; top:0; left:0; }
-    .terminal { position:absolute; top:15%; left:5%; width:90%; height:65%; background:rgba(0,0,0,0.85); padding:20px; overflow-y:auto; white-space:pre-wrap; border:2px solid #0f0; box-shadow:0 0 20px lime; z-index:1; }
-    .shake { animation:shake 0.1s infinite; }
-    #crash { position:fixed; top:0; left:0; width:100%; height:100%; background:#390000; color:#fff; font-size:3em; display:none; align-items:center; justify-content:center; z-index:99999; animation:flash 0.3s infinite alternate; }
-    @keyframes flash { 0%,50% { opacity:1; } 100% { opacity:0.3; } }
-    @keyframes shake { 0%,100%{transform:translate(0,0);} 20%{transform:translate(-5px,0);} 40%{transform:translate(5px,0);} 60%{transform:translate(-5px,0);} 80%{transform:translate(5px,0);} }
+    html, body {
+      margin: 0;
+      background: black;
+      color: #0f0;
+      font-family: monospace;
+      overflow: hidden;
+      height: 100%;
+    }
+    #username {
+      position: fixed;
+      top: 10px;
+      right: 20px;
+      color: red;
+      font-size: 20px;
+      text-shadow: 0 0 10px red;
+      z-index: 10000;
+    }
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+    .terminal {
+      position: absolute;
+      top: 15%;
+      left: 5%;
+      width: 90%;
+      height: 70%;
+      background: rgba(0,0,0,0.85);
+      padding: 20px;
+      border: 2px solid #00ff00;
+      box-shadow: 0 0 10px lime;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      z-index: 10;
+    }
+    #crash {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: darkred;
+      color: white;
+      font-size: 3em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: flash 0.5s infinite alternate;
+      z-index: 99999;
+    }
+    @keyframes flash {
+      0% { opacity: 1; }
+      100% { opacity: 0.3; }
+    }
   </style>
 </head>
 <body>
-  <div id="overlay"><button id="startBtn">✖</button></div>
-  <div id="usernameDisplay"></div>
-  <canvas id="matrix"></canvas>
-  <div class="terminal" id="terminal"></div>
-  <div id="crash">!!! SYSTEM FAILURE !!!</div>
 
-  <audio id="bgMusic" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" preload="auto" loop></audio>
-  <audio id="crashMusic" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" preload="auto"></audio>
+<div id="username">@visitor</div>
+<canvas id="matrix"></canvas>
+<div class="terminal" id="terminal"></div>
+<div id="crash">!!! SYSTEM FAILURE !!!</div>
+
+<audio id="bgMusic" src="https://files.catbox.moe/0wvxli.mp3" autoplay loop></audio>
+<audio id="crashMusic" src="https://files.catbox.moe/nwwj6j.mp3"></audio>
 
 <script>
-const overlay = document.getElementById('overlay'),
-      startBtn = document.getElementById('startBtn'),
-      usernameDisplay = document.getElementById('usernameDisplay'),
-      terminal = document.getElementById('terminal'),
-      crash = document.getElementById('crash'),
-      bgMusic = document.getElementById('bgMusic'),
-      crashMusic = document.getElementById('crashMusic'),
-      canvas = document.getElementById('matrix'),
-      ctx = canvas.getContext('2d');
+  // Kullanıcı adını URL'den al
+  const params = new URLSearchParams(window.location.search);
+  const username = params.get("user") ? `@${params.get("user")}` : "@visitor";
+  document.getElementById("username").textContent = username;
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+  // Matrix animasyonu
+  const canvas = document.getElementById("matrix");
+  const ctx = canvas.getContext("2d");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const letters = "01#@$%&█▓▒░";
+  const fontSize = 16;
+  const columns = Math.floor(canvas.width / fontSize);
+  const drops = Array(columns).fill(1);
+  function drawMatrix() {
+    ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#0F0";
+    ctx.font = fontSize + "px monospace";
+    for (let i = 0; i < drops.length; i++) {
+      const text = letters[Math.floor(Math.random() * letters.length)];
+      ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+      if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+      drops[i]++;
+    }
+  }
+  setInterval(drawMatrix, 33);
 
-const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", fontSize=16;
-const cols = Math.floor(canvas.width/fontSize);
-const drops = Array(cols).fill(1);
-let lines = [
- ">> Injecting reverse shell payload...",
- ">> Exploit active on port 443...",
- ">> Firewall bypassed successfully.",
- ">> Establishing persistence...",
- ">> Remote desktop clone initiated on @INSTAGRAM_USER...",
- ">> Extracting credentials...",
- ">> Hashes cracked: admin:@INSTAGRAM_USER",
- ">> Uploading ransomware..."
-];
-let idx=0, interval=1000;
+  // Terminal yazıları
+  const terminal = document.getElementById("terminal");
+  const crash = document.getElementById("crash");
+  const bgMusic = document.getElementById("bgMusic");
+  const crashMusic = document.getElementById("crashMusic");
 
-function drawMatrix() {
-  ctx.fillStyle='rgba(0,0,0,0.05)'; ctx.fillRect(0,0,canvas.width,canvas.height);
-  ctx.fillStyle='#0F0'; ctx.font=fontSize+'px monospace';
-  drops.forEach((d,i)=>{
-    const txt = letters[Math.floor(Math.random()*letters.length)];
-    ctx.fillText(txt, i*fontSize, d*fontSize);
-    if(d*fontSize>canvas.height && Math.random()>0.975) drops[i]=0;
-    drops[i]++;
-  });
-}
+  const messages = [
+    ">> Connecting to Instagram servers...",
+    `>> User detected: ${username}`,
+    ">> Injecting backdoor payload...",
+    ">> Firewall bypassed successfully.",
+    ">> Establishing connection...",
+    ">> Stealing session tokens...",
+    ">> Extracting followers list...",
+    ">> Downloading private DMs...",
+    ">> Uploading spyware...",
+    ">> Overwriting credentials...",
+    ">> Deleting profile picture...",
+    ">> Changing bio: HACKED BY @mhmtxaslan",
+    ">> Sending messages to all followers...",
+    ">> Logging out all devices...",
+    ">> Activating camera...",
+    ">> Accessing phone gallery...",
+    ">> Enabling microphone...",
+    ">> Tracing IP address...",
+    ">> SYSTEM ERROR DETECTED",
+    ">> MEMORY DUMP COMPLETE",
+    ">> SYSTEM FAILURE IMMINENT"
+  ];
 
-function speedUp(){ interval = Math.max(50, interval-80); }
+  let i = 0;
+  let speed = 400;
 
-function showLine() {
-  drawMatrix();
-  if(idx < lines.length) {
-    const el = document.createElement('div');
-    el.textContent = lines[idx].replace(/@INSTAGRAM_USER/g, usernameDisplay.textContent);
-    terminal.appendChild(el);
-    terminal.scrollTop = terminal.scrollHeight;
-    idx++; speedUp();
-    setTimeout(showLine, interval);
-  } else triggerCrash();
-}
+  function showNextLine() {
+    if (i < messages.length) {
+      const line = document.createElement("div");
+      line.textContent = messages[i];
+      terminal.appendChild(line);
+      terminal.scrollTop = terminal.scrollHeight;
+      i++;
+      speed = Math.max(50, speed - 20);
+      setTimeout(showNextLine, speed);
+    } else {
+      triggerCrash();
+    }
+  }
 
-function triggerStartup() {
-  const user = prompt("Instagram kullanıcı adınızı girin:");
-  usernameDisplay.textContent = user ? "@"+user : "@unknown";
-  overlay.style.display='none';
-  bgMusic.play();
-  drawLoop = setInterval(drawMatrix,33);
-  showLine();
-}
+  function triggerCrash() {
+    bgMusic.pause();
+    crashMusic.play();
+    crash.style.display = "flex";
+  }
 
-function triggerCrash(){
-  clearInterval(drawLoop);
-  bgMusic.pause();
-  crashMusic.play();
-  document.body.classList.add('shake');
-  crash.style.display='flex';
-}
-
-let drawLoop;
-startBtn.onclick = triggerStartup;
-setInterval(drawMatrix,33);
+  showNextLine();
 </script>
+
 </body>
 </html>
