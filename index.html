@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Hacked</title>
+  <meta charset="UTF-8" />
+  <title>Hacker Simulation</title>
   <style>
     html, body {
       margin: 0;
       padding: 0;
       background: black;
+      color: white;
       height: 100%;
-      width: 100%;
       font-family: monospace;
       overflow: hidden;
       display: flex;
@@ -19,9 +19,9 @@
 
     #startBtn {
       font-size: 100px;
-      color: white;
       background: none;
       border: none;
+      color: white;
       cursor: pointer;
       z-index: 10;
     }
@@ -32,9 +32,9 @@
       top: 40%;
       left: 50%;
       transform: translate(-50%, -50%);
+      font-size: 48px;
       color: red;
-      font-size: 50px;
-      text-shadow: 0 0 20px red;
+      text-shadow: 0 0 15px red;
     }
 
     #terminal {
@@ -45,11 +45,12 @@
       width: 90%;
       height: 90%;
       padding: 20px;
-      color: #00ff00;
       background: black;
-      border: 1px solid #00ff00;
+      color: #00ff00;
+      border: 2px solid #00ff00;
       overflow-y: auto;
-      font-size: 16px;
+      font-size: 14px;
+      white-space: pre-wrap;
     }
 
     #crashScreen {
@@ -62,80 +63,81 @@
       font-size: 3rem;
       justify-content: center;
       align-items: center;
-      animation: blink 0.5s infinite alternate;
+      animation: flash 0.5s infinite alternate;
       z-index: 100;
     }
 
-    @keyframes blink {
-      0% { opacity: 1; }
-      100% { opacity: 0.2; }
+    @keyframes flash {
+      from { opacity: 1; }
+      to { opacity: 0.2; }
     }
   </style>
 </head>
 <body>
 
-<button id="startBtn">✖</button>
-<div id="username">@mhmtxaslan</div>
-<div id="terminal"></div>
-<div id="crashScreen">!!! SYSTEM FAILURE !!!</div>
+  <button id="startBtn">✖</button>
+  <div id="username">@mhmtxaslan</div>
+  <div id="terminal"></div>
+  <div id="crashScreen">!!! SYSTEM FAILURE !!!</div>
 
-<audio id="bgMusic" src="https://files.catbox.moe/0wvxli.mp3" preload="auto" loop></audio>
-<audio id="crashSound" src="https://files.catbox.moe/nwwj6j.mp3" preload="auto"></audio>
+  <audio id="bgMusic" src="https://files.catbox.moe/0wvxli.mp3" preload="auto" loop></audio>
+  <audio id="crashSound" src="https://files.catbox.moe/nwwj6j.mp3" preload="auto"></audio>
 
-<script>
-  const startBtn = document.getElementById("startBtn");
-  const username = document.getElementById("username");
-  const terminal = document.getElementById("terminal");
-  const crashScreen = document.getElementById("crashScreen");
-  const bgMusic = document.getElementById("bgMusic");
-  const crashSound = document.getElementById("crashSound");
+  <script>
+    const startBtn = document.getElementById('startBtn');
+    const username = document.getElementById('username');
+    const terminal = document.getElementById('terminal');
+    const crashScreen = document.getElementById('crashScreen');
+    const bgMusic = document.getElementById('bgMusic');
+    const crashSound = document.getElementById('crashSound');
 
-  const lines = [
-    ">> Hacking into Instagram...",
-    ">> Accessing user data...",
-    ">> Stealing credentials...",
-    ">> Uploading to dark web...",
-    ">> Encrypting files...",
-    ">> Spreading to contacts...",
-    ">> Initiating system crash...",
-    ">> SYSTEM FAILURE IMMINENT"
-  ];
+    const messages = [
+      '>> Hacking into Instagram account...',
+      '>> Downloading private data...',
+      '>> Spamming followers...',
+      '>> Disabling 2FA...',
+      '>> Selling credentials on dark web...',
+      '>> Initiating system corruption...',
+      '>> SYSTEM FAILURE DETECTED!'
+    ];
 
-  let index = 0;
-  let speed = 300;
+    let index = 0;
+    let speed = 300;
 
-  function writeLines() {
-    if (index < lines.length) {
-      const div = document.createElement("div");
-      div.textContent = lines[index++];
-      terminal.appendChild(div);
-      terminal.scrollTop = terminal.scrollHeight;
-      speed = Math.max(60, speed - 30);
-      setTimeout(writeLines, speed);
-    } else {
-      terminal.style.display = "none";
-      bgMusic.pause();
-      crashSound.play();
-      crashScreen.style.display = "flex";
+    function startHack() {
+      username.style.display = 'none';
+      terminal.style.display = 'block';
+      nextLine();
     }
-  }
 
-  startBtn.onclick = () => {
-    bgMusic.play().then(() => {
-      startBtn.style.display = "none"; // X butonunu gizle
-      username.style.display = "block"; // Kullanıcı adı göster
+    function nextLine() {
+      if (index < messages.length) {
+        const line = document.createElement('div');
+        line.textContent = messages[index++];
+        terminal.appendChild(line);
+        terminal.scrollTop = terminal.scrollHeight;
+        speed = Math.max(60, speed - 30);
+        setTimeout(nextLine, speed);
+      } else {
+        bgMusic.pause();
+        crashSound.play();
+        terminal.style.display = 'none';
+        crashScreen.style.display = 'flex';
+      }
+    }
 
-      setTimeout(() => {
-        username.style.display = "none";
-        terminal.style.display = "block";
-        writeLines();
-      }, 5000);
+    startBtn.addEventListener('click', () => {
+      bgMusic.play().then(() => {
+        startBtn.style.display = 'none';
+        username.style.display = 'block';
 
-    }).catch(() => {
-      alert("Lütfen sesi açın ve tekrar deneyin.");
+        setTimeout(startHack, 5000);
+      }).catch(err => {
+        alert("Lütfen sesi açın veya sayfayı tekrar yükleyip X'e yeniden tıklayın.");
+        console.error("Ses çalınamadı:", err);
+      });
     });
-  };
-</script>
+  </script>
 
 </body>
 </html>
