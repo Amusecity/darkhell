@@ -1,16 +1,18 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>KORKU</title>
+  <title>TAM ERİŞİM</title>
   <style>
     html, body {
-      margin: 0; padding: 0;
+      margin: 0;
+      padding: 0;
       background: black;
       color: #0f0;
       font-family: monospace;
-      height: 100vh;
       overflow: hidden;
+      user-select: none;
     }
     #overlay {
       position: fixed;
@@ -22,135 +24,163 @@
       align-items: center;
       z-index: 9999;
     }
-    #startBtn {
-      font-size: 80px;
+    #xButton {
+      font-size: 120px;
       color: red;
-      border: 5px solid red;
+      cursor: pointer;
+      border: 4px solid red;
       border-radius: 50%;
       width: 160px; height: 160px;
-      text-align: center;
       line-height: 140px;
-      cursor: pointer;
-      box-shadow: 0 0 30px red;
-    }
-    #access {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      background: black;
-      color: #0f0;
-      font-size: 36px;
       text-align: center;
-      line-height: 100vh;
-      z-index: 9998;
-      display: none;
-      animation: flash 2s linear infinite;
+      font-weight: bold;
+      animation: pulse 1s infinite;
     }
-    @keyframes flash {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0; }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 20px red; }
+      50% { box-shadow: 0 0 60px red; }
+    }
+    #accessGranted {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 36px;
+      color: lime;
+      background: black;
+      padding: 20px 50px;
+      border: 2px solid lime;
+      display: none;
+      z-index: 9998;
     }
     #terminal {
-      padding: 20px;
+      position: absolute;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      padding: 30px;
+      box-sizing: border-box;
       white-space: pre-wrap;
+      overflow-y: scroll;
       font-size: 18px;
       display: none;
     }
-    .glitch {
-      animation: glitch 0.2s infinite;
-    }
-    @keyframes glitch {
-      0% { transform: translate(0); }
-      20% { transform: translate(-1px, 2px); }
-      40% { transform: translate(2px, -1px); }
-      60% { transform: translate(-3px, 1px); }
-      80% { transform: translate(1px, -2px); }
-      100% { transform: translate(0); }
-    }
-    #redOverlay {
+    #flash {
       position: fixed;
       top: 0; left: 0;
       width: 100vw; height: 100vh;
-      background: rgba(255, 0, 0, 0.8);
-      z-index: 9997;
-      display: none;
-      animation: flicker 0.4s infinite;
-    }
-    @keyframes flicker {
-      0%, 100% { opacity: 0.9; }
-      50% { opacity: 0.3; }
+      background: red;
+      opacity: 0;
+      z-index: 10000;
+      pointer-events: none;
+      transition: opacity 0.2s;
     }
   </style>
 </head>
 <body>
 
 <div id="overlay">
-  <div id="startBtn">×</div>
+  <div id="xButton">×</div>
 </div>
 
-<div id="access">TAM ERİŞİM KAZANILDI</div>
-
-<div id="redOverlay"></div>
+<div id="accessGranted">TAM ERİŞİM KAZANILDI</div>
 <div id="terminal"></div>
+<div id="flash"></div>
 
 <audio id="beep" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
-<audio id="alarm" src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg"></audio>
+<audio id="alarm" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" loop></audio>
 
 <script>
-  const overlay = document.getElementById('overlay');
-  const access = document.getElementById('access');
-  const terminal = document.getElementById('terminal');
-  const redOverlay = document.getElementById('redOverlay');
-  const beep = document.getElementById('beep');
-  const alarm = document.getElementById('alarm');
-  const startBtn = document.getElementById('startBtn');
+const xButton = document.getElementById('xButton');
+const overlay = document.getElementById('overlay');
+const terminal = document.getElementById('terminal');
+const accessGranted = document.getElementById('accessGranted');
+const beep = document.getElementById('beep');
+const alarm = document.getElementById('alarm');
+const flash = document.getElementById('flash');
 
-  const terminalLines = Array.from({length: 200}, (_, i) => {
-    if (i % 20 === 0) return `[UYARI] BEYİN SİNYALİ ALGILANDI`;
-    if (i % 13 === 0) return `[ZİHİN] PARÇALANMA SEVİYESİ %` + (i % 100);
-    if (i % 9 === 0) return `[GÖZLEM] SİSTEM BİLİNÇ KAZANIYOR...`;
-    return `> ${"█".repeat(Math.random()*20 | 0)}`;
-  });
+let stage = 0;
 
-  function startSequence() {
-    beep.play();
-    overlay.style.display = 'none';
-    access.style.display = 'block';
+xButton.onclick = () => {
+  beep.play();
+  overlay.style.display = 'none';
+  accessGranted.style.display = 'block';
 
-    setTimeout(() => {
-      access.style.display = 'none';
-      terminal.style.display = 'block';
-      runTerminal();
-    }, 4000);
+  setTimeout(() => {
+    accessGranted.style.display = 'none';
+    terminal.style.display = 'block';
+    nextStage();
+  }, 2000);
+};
+
+function nextStage() {
+  if (stage === 0) {
+    terminal.innerHTML = "Sistem başlatılıyor...\n";
+    slowPrint([
+      "Dosyalar yükleniyor...",
+      "Yapay zekâ protokolü devreye alındı.",
+      "Kritik erişim anahtarı çözüldü.",
+      "Yavaş veri akışı başlatıldı..."
+    ], 1000, () => {
+      stage = 1;
+      nextStage();
+    });
+  } else if (stage === 1) {
+    slowPrint([
+      "\nZİRVE AŞAMASI AKTİF!",
+      "Kullanıcı kontrolü kaybedildi.",
+      "Kodlar bozuluyor...",
+      "Terminal bütünlüğü zarar görüyor...",
+      "██████████████████████"
+    ], 300, () => {
+      flashScreen();
+      setTimeout(() => {
+        stage = 2;
+        nextStage();
+      }, 3000);
+    });
+  } else if (stage === 2) {
+    terminal.innerHTML = "SONSUZ DÖNGÜ BAŞLADI...\n\n";
+    alarm.play();
+    infiniteTerminalLoop();
   }
+}
 
-  function runTerminal() {
-    let i = 0;
-    terminal.innerText = '';
-    terminal.classList.add('glitch');
-    const step = () => {
-      if (i >= terminalLines.length) {
-        redOverlay.style.display = 'block';
-        alarm.play();
-        loopHorror();
-        return;
-      }
-      terminal.innerText += terminalLines[i] + "\n";
+function slowPrint(lines, delay, callback) {
+  let i = 0;
+  function loop() {
+    if (i < lines.length) {
+      terminal.innerHTML += lines[i] + "\n";
       terminal.scrollTop = terminal.scrollHeight;
       i++;
-      setTimeout(step, 150 - Math.min(i, 80));
-    };
-    step();
+      setTimeout(loop, delay);
+    } else {
+      callback();
+    }
   }
+  loop();
+}
 
-  function loopHorror() {
-    setInterval(() => {
-      terminal.innerText += `\n[∞] ZİHİN HAPSEDİLDİ...\n`;
-      terminal.scrollTop = terminal.scrollHeight;
-    }, 3000);
-  }
+function flashScreen() {
+  flash.style.opacity = 1;
+  setTimeout(() => { flash.style.opacity = 0; }, 200);
+  setTimeout(() => { flash.style.opacity = 1; }, 400);
+  setTimeout(() => { flash.style.opacity = 0; }, 600);
+}
 
-  startBtn.addEventListener('click', startSequence);
+function infiniteTerminalLoop() {
+  const messages = [
+    "Veri tekrarı tespit edildi...",
+    "Kaçış mümkün değil.",
+    "KOD: #∞LOOP",
+    "ZAMAN DURDU...",
+    "YAPAY ZEKA: Artık buradasın."
+  ];
+  setInterval(() => {
+    const line = messages[Math.floor(Math.random() * messages.length)];
+    terminal.innerHTML += line + "\n";
+    terminal.scrollTop = terminal.scrollHeight;
+    flashScreen();
+  }, 1500);
+}
 </script>
 
 </body>
