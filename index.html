@@ -2,188 +2,139 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>Son Perde – @mhmtxaslan</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SolarWinds Sendromu – Kod 10.02</title>
   <style>
     html, body {
       margin:0; padding:0;
-      width:100%; height:100%;
-      background:#000;
-      color:#0f0;
-      font-family:monospace;
-      overflow:hidden;
+      background: black; color: #00ff00;
+      font-family: monospace; overflow:hidden; height:100%;
     }
     #triggerBtn {
-      position:absolute;
-      top:20px; right:20px;
-      background:#900;
-      color:#fff;
-      border:none;
-      font-size:2em;
-      padding:10px 20px;
-      cursor:pointer;
-      z-index:9999;
-    }
-    #intro {
-      position:absolute;
-      top:50%; left:50%;
-      transform:translate(-50%,-50%);
-      font-size:4em;
-      border:4px solid #0f0;
-      padding:20px;
-      animation: blinkIntro 0.4s infinite;
-      z-index:10;
-    }
-    @keyframes blinkIntro {
-      0%,100%{opacity:1;}
-      50%{opacity:0;}
+      position: absolute;
+      top: 20px; right: 20px;
+      background: red; color: white;
+      border: none; font-size: 2em;
+      padding: 10px 20px; cursor: pointer;
+      z-index: 1000;
     }
     #terminal {
-      position:absolute;
-      top:0; left:0;
+      display:none;
       padding:20px;
       width:100%; height:100%;
       box-sizing:border-box;
-      overflow:hidden;
+      white-space: pre-wrap;
+      font-size:1.1em;
+      overflow-y: auto;
+    }
+    #overlay {
       display:none;
-      white-space:pre-wrap;
-      font-size:1.2em;
-    }
-    #face {
-      position:absolute;
-      top:100%; left:50%;
-      transform:translate(-50%, -50%) scale(0.5);
-      font-size:1em;
-      color:red;
-      display:none;
-      white-space:pre;
-      z-index:8;
-      opacity:0;
-      animation: approach 10s linear forwards;
-    }
-    @keyframes approach {
-      0% { top:100%; opacity:0; transform:translate(-50%, -50%) scale(0.5); }
-      50% { top:50%; opacity:1; transform:translate(-50%, -50%) scale(2); }
-      100% { top:30%; opacity:1; transform:translate(-50%, -50%) scale(4); }
-    }
-    #finalOverlay {
-      position:absolute;
-      top:0; left:0;
+      position:absolute; top:0; left:0;
       width:100%; height:100%;
-      background:#f00;
-      opacity:0;
+      background: red;
+      animation: flash 0.15s infinite;
+      z-index: 999;
+    }
+    #finalMessage {
       display:none;
-      animation: flashFinal 0.2s ease-in-out infinite;
-      z-index:9;
-    }
-    @keyframes flashFinal {
-      0%,100%{opacity:0;}
-      25%,75%{opacity:1;}
-    }
-    #finalText {
       position:absolute;
       top:50%; left:50%;
-      transform:translate(-50%,-50%);
-      font-size:4em;
-      display:none;
-      color:#f00;
-      text-shadow:0 0 20px #f00;
+      transform: translate(-50%, -50%);
+      font-size: 3em;
+      color: white;
+      text-shadow: 0 0 20px red;
+      z-index: 1000;
+    }
+    @keyframes flash {
+      0%,100% { opacity: 0; }
+      50% { opacity: 1; }
     }
     .shake {
-      animation: shake 0.2s infinite alternate;
+      animation: shake 0.3s infinite;
     }
     @keyframes shake {
-      0%{transform:translate(0,0);}
-      25%{transform:translate(-5px,5px);}
-      50%{transform:translate(5px,-5px);}
-      75%{transform:translate(-5px,-5px);}
-      100%{transform:translate(5px,5px);}
+      0% { transform: translate(0, 0); }
+      25% { transform: translate(4px, -4px); }
+      50% { transform: translate(-4px, 4px); }
+      75% { transform: translate(4px, 4px); }
+      100% { transform: translate(-4px, -4px); }
     }
   </style>
 </head>
 <body>
   <button id="triggerBtn">X</button>
-  <div id="intro">@mhmtxaslan</div>
   <div id="terminal"></div>
-  <div id="face">
-    <pre>
-     ⠀⠀⠀⠀⣀⡀⠀⠀⠀⠀⠀
-     ⠀⠀⣤⣿⣿⣿⣶⣦⡀⠀⠀
-     ⠀⢸⣿⣿⣿⣿⣿⣿⣷⡀⠀
-     ⠀⣸⣿⣿⣿⣿⣿⣿⣿⣧⠀
-     ⠀⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀
-     ⣠⣿⣿⣿⣿⣿⣿⣿⣿⣿⣄
-     ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
-     ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
-     ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
-     ⠸⣿⣿⣿⣿⣿⣿⣿⣿⣿⠇
-     ⠀⠹⣿⣿⣿⣿⣿⣿⣿⠏⠀
-    </pre>
-  </div>
-  <div id="finalOverlay"></div>
-  <div id="finalText">SİSTEM HATASI</div>
-
-  <audio id="alarm" loop>
-    <source src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" type="audio/ogg">
-  </audio>
+  <div id="overlay"></div>
+  <div id="finalMessage">SİSTEM HATASI: ÇEKİRDEK BOZULDU</div>
+  <audio id="alarm" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" loop></audio>
 
   <script>
-    const intro = document.getElementById('intro'),
-          term = document.getElementById('terminal'),
-          face = document.getElementById('face'),
-          overlay = document.getElementById('finalOverlay'),
-          finalText = document.getElementById('finalText'),
-          alarm = document.getElementById('alarm'),
-          btn = document.getElementById('triggerBtn');
+    const btn = document.getElementById('triggerBtn');
+    const term = document.getElementById('terminal');
+    const overlay = document.getElementById('overlay');
+    const finalMsg = document.getElementById('finalMessage');
+    const alarm = document.getElementById('alarm');
 
-    const lines = [
-      "SİSTEME DÂHİL OLUYOR...",
-      "GÜVENLİK AŞILDI...",
-      "AKTİFLEŞTİRME MODU...",
-      "KONTROLÜ ELE GEÇİRİYOR...",
-      "DOSYA KOPYALANIYOR...",
-      "AĞ TRAFİĞİ YÖNLENDİRİLDİ...",
-      "KAMERA YANSITILIYOR...",
-      "İZİN YÜKLENİYOR...",
-      "SİSTEM MODÜLLERİ DEĞİŞTİRİLİYOR...",
-      "LOG DOSYALARI SİLİNİYOR...",
-      "UZAKTAN ERİŞİM SAĞLANDI...",
-      "YENİ PROTOKOL UYGULANIYOR...",
-      "ÇIKIŞ YOK...",
-      "SİSTEM HATASI"
+    const initialLines = [
+      "Bağlantı başlatılıyor...",
+      "Yetki seviyesi kontrol ediliyor...",
+      "Proxy üzerinden geçiş başarılı...",
+      "Sistem gözlemleniyor...",
+      "Arka plan servisleri kontrol altında...",
+      "Uygulama oturumu: sahte güvenli.",
+      "Yazılım bütünlüğü izleniyor...",
+      "Çekirdek etkinlikleri sapmaya başladı...",
+      "Bir şey yanlış, ama ne olduğunu bilmiyorsun."
+    ];
+    const corruptedLines = [
+      "█▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒",
+      "Kablolar çözüldü...",
+      "Veri akışı bozuluyor...",
+      "Giriş noktaları değişiyor...",
+      "Dosyalar çarpıtılıyor...",
+      "Geri dönüş olmayan bir durum!",
+      "Sistem paramparça..."
     ];
 
-    btn.addEventListener("click", () => {
-      btn.style.display = "none";
-      intro.remove();
-      term.style.display = "block";
+    btn.onclick = () => {
+      btn.remove();
+      term.style.display = 'block';
+
+      // İlk saf sızma
       let i = 0;
-      const interval = setInterval(() => {
-        const ln = lines[Math.floor(Math.random() * lines.length)];
-        const d = document.createElement('div');
-        d.textContent = ln;
-        term.appendChild(d);
-        term.scrollTop = term.scrollHeight;
-        i++; if (i > 60) clearInterval(interval);
-      }, 100);
+      const stepOne = setInterval(() => {
+        if (i < initialLines.length) {
+          term.innerHTML += initialLines[i++] + "\n";
+          term.scrollTop = term.scrollHeight;
+        } else {
+          clearInterval(stepOne);
+          setTimeout(startCorruption, 2000);
+        }
+      }, 1000);
+    };
+
+    function startCorruption() {
+      let j = 0;
+      const stepTwo = setInterval(() => {
+        if (j < corruptedLines.length) {
+          term.innerHTML += corruptedLines[j++] + "\n";
+          term.scrollTop = term.scrollHeight;
+        } else {
+          clearInterval(stepTwo);
+          triggerCollapse();
+        }
+      }, 300);
+    }
+
+    function triggerCollapse() {
+      document.body.classList.add('shake');
+      overlay.style.display = 'block';
+      alarm.volume = 0.6;
+      alarm.play();
 
       setTimeout(() => {
-        face.style.display = 'block';
-      }, 5000);
-
-      setTimeout(() => {
-        face.classList.add('shake');
-        term.classList.add('shake');
-        document.body.classList.add('shake');
-        alarm.volume = 0.6;
-        alarm.play();
-      }, 8000);
-
-      setTimeout(() => {
-        overlay.style.display = 'block';
-        finalText.style.display = 'block';
-      }, 12000);
-    });
+        finalMsg.style.display = 'block';
+      }, 2000);
+    }
   </script>
 </body>
 </html>
