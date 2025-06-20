@@ -1,51 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>HACKING...</title>
+  <meta charset="UTF-8" />
+  <title>Hacker Animation</title>
   <style>
     html, body {
-      margin: 0;
-      background: black;
-      color: #0f0;
-      font-family: monospace;
-      overflow: hidden;
-      height: 100%;
+      margin: 0; padding: 0; height: 100%; background: black; color: #0f0;
+      font-family: monospace; overflow: hidden;
+      display: flex; justify-content: center; align-items: center;
+      user-select: none;
     }
-    #username {
+    #startButton {
+      font-size: 120px;
+      color: white;
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s;
+      z-index: 1000;
+    }
+    #startButton:hover {
+      transform: scale(1.1);
+    }
+    #usernameDisplay {
       position: fixed;
-      top: 10px;
-      right: 20px;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 48px;
       color: red;
-      font-size: 20px;
-      text-shadow: 0 0 10px red;
-      z-index: 10000;
+      text-shadow: 0 0 20px red;
+      display: none;
+      z-index: 900;
     }
-    canvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-      z-index: 0;
-    }
-    .terminal {
-      position: absolute;
-      top: 15%;
+    #terminal {
+      position: fixed;
+      top: 10%;
       left: 5%;
       width: 90%;
-      height: 70%;
-      background: rgba(0,0,0,0.85);
-      padding: 20px;
+      height: 80%;
+      background: rgba(0,0,0,0.9);
       border: 2px solid #00ff00;
-      box-shadow: 0 0 10px lime;
+      box-shadow: 0 0 20px lime;
+      padding: 20px;
       overflow-y: auto;
       white-space: pre-wrap;
-      z-index: 10;
+      font-size: 18px;
+      display: none;
+      z-index: 800;
     }
     #crash {
       display: none;
       position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
+      top: 0; left: 0; width: 100%; height: 100%;
       background: darkred;
       color: white;
       font-size: 3em;
@@ -53,7 +60,7 @@
       align-items: center;
       justify-content: center;
       animation: flash 0.5s infinite alternate;
-      z-index: 99999;
+      z-index: 9999;
     }
     @keyframes flash {
       0% { opacity: 1; }
@@ -63,51 +70,32 @@
 </head>
 <body>
 
-<div id="username">@visitor</div>
-<canvas id="matrix"></canvas>
-<div class="terminal" id="terminal"></div>
+<button id="startButton">✖</button>
+<div id="usernameDisplay">@visitor</div>
+<div id="terminal"></div>
 <div id="crash">!!! SYSTEM FAILURE !!!</div>
 
-<audio id="bgMusic" src="https://files.catbox.moe/0wvxli.mp3" autoplay loop></audio>
-<audio id="crashMusic" src="https://files.catbox.moe/nwwj6j.mp3"></audio>
+<!-- Korkutucu arka plan müziği (loop) -->
+<audio id="bgMusic" src="https://files.catbox.moe/0wvxli.mp3" preload="auto" loop></audio>
+<!-- Sistem çökme müziği -->
+<audio id="crashMusic" src="https://files.catbox.moe/nwwj6j.mp3" preload="auto"></audio>
 
 <script>
-  // Kullanıcı adını URL'den al
+  // URL'den kullanıcı adı al
   const params = new URLSearchParams(window.location.search);
   const username = params.get("user") ? `@${params.get("user")}` : "@visitor";
-  document.getElementById("username").textContent = username;
 
-  // Matrix animasyonu
-  const canvas = document.getElementById("matrix");
-  const ctx = canvas.getContext("2d");
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-  const letters = "01#@$%&█▓▒░";
-  const fontSize = 16;
-  const columns = Math.floor(canvas.width / fontSize);
-  const drops = Array(columns).fill(1);
-  function drawMatrix() {
-    ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#0F0";
-    ctx.font = fontSize + "px monospace";
-    for (let i = 0; i < drops.length; i++) {
-      const text = letters[Math.floor(Math.random() * letters.length)];
-      ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-      if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
-      drops[i]++;
-    }
-  }
-  setInterval(drawMatrix, 33);
-
-  // Terminal yazıları
+  // DOM elementleri
+  const startButton = document.getElementById("startButton");
+  const usernameDisplay = document.getElementById("usernameDisplay");
   const terminal = document.getElementById("terminal");
   const crash = document.getElementById("crash");
   const bgMusic = document.getElementById("bgMusic");
   const crashMusic = document.getElementById("crashMusic");
 
+  // Yazılar
   const messages = [
-    ">> Connecting to Instagram servers...",
+    `>> Connecting to Instagram servers...`,
     `>> User detected: ${username}`,
     ">> Injecting backdoor payload...",
     ">> Firewall bypassed successfully.",
@@ -130,16 +118,16 @@
     ">> SYSTEM FAILURE IMMINENT"
   ];
 
-  let i = 0;
+  let msgIndex = 0;
   let speed = 400;
 
   function showNextLine() {
-    if (i < messages.length) {
+    if (msgIndex < messages.length) {
       const line = document.createElement("div");
-      line.textContent = messages[i];
+      line.textContent = messages[msgIndex];
       terminal.appendChild(line);
       terminal.scrollTop = terminal.scrollHeight;
-      i++;
+      msgIndex++;
       speed = Math.max(50, speed - 20);
       setTimeout(showNextLine, speed);
     } else {
@@ -153,7 +141,26 @@
     crash.style.display = "flex";
   }
 
-  showNextLine();
+  startButton.addEventListener("click", () => {
+    // Ses oynat (izin istiyor)
+    bgMusic.play().then(() => {
+      // Butonu gizle
+      startButton.style.display = "none";
+
+      // Kullanıcı adını göster
+      usernameDisplay.textContent = username;
+      usernameDisplay.style.display = "block";
+
+      // 5 saniye sonra terminal açılıp animasyon başlasın
+      setTimeout(() => {
+        usernameDisplay.style.display = "none";
+        terminal.style.display = "block";
+        showNextLine();
+      }, 5000);
+    }).catch(() => {
+      alert("Lütfen sesi etkinleştirin.");
+    });
+  });
 </script>
 
 </body>
