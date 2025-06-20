@@ -1,269 +1,107 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Karanlık Terminal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>HACKER MOD</title>
   <style>
     html, body {
-      margin:0; padding:0; height:100%; width:100%;
-      background: black; color: #0f0; font-family: monospace;
-      overflow: hidden;
-      user-select: none;
-    }
-    #overlay {
-      position: fixed; top:0; left:0; width:100vw; height:100vh;
-      background: black; display: flex;
-      justify-content: center; align-items: center;
-      z-index: 9999;
-    }
-    #closeBtn {
-      font-size: 100px;
-      color: red;
-      cursor: pointer;
-      border: 5px solid red;
-      border-radius: 50%;
-      width: 150px;
-      height: 150px;
-      line-height: 140px;
-      text-align: center;
-      font-weight: 900;
-      box-shadow: 0 0 40px red;
-      user-select:none;
-    }
-    #nameBox {
-      position: fixed;
-      top: 45%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      padding: 20px 50px;
-      border: 4px solid #0f0;
-      color: #0f0;
-      font-size: 48px;
-      font-weight: bold;
+      margin: 0;
+      height: 100%;
       background: black;
-      z-index: 900;
-      user-select:none;
-      opacity: 1;
-      transition: opacity 0.5s ease;
-    }
-    #nameBox.red {
-      color: red;
-      animation: fastBlink 0.25s infinite;
-    }
-    @keyframes fastBlink {
-      0%, 50%, 100% { opacity: 1; }
-      25%, 75% { opacity: 0; }
-    }
-    #terminal {
-      position: fixed;
-      top: 10px; left: 10px;
-      right: 10px; bottom: 10px;
-      padding: 20px;
-      box-sizing: border-box;
-      background: black;
-      color: #0f0;
-      font-size: 20px;
-      line-height: 1.5em;
-      white-space: pre-wrap;
-      overflow-y: auto;
-      display: none;
-      user-select:none;
-      font-weight: 600;
-    }
-    #terminal.tv-effect {
-      animation: tvShake 0.15s infinite alternate;
-    }
-    @keyframes tvShake {
-      0% { filter: none; transform: translate(0, 0); }
-      25% { filter: contrast(1.2) brightness(1.1) blur(0.6px); transform: translate(1px, -1px); }
-      50% { filter: contrast(1.5) brightness(1.3) blur(1.2px); transform: translate(-1px, 1px); }
-      75% { filter: contrast(1.1) brightness(1) blur(0.3px); transform: translate(1px, 1px); }
-      100% { filter: none; transform: translate(0, 0); }
-    }
-    #errorScreen {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      background: rgba(255,0,0,0.85);
-      color: black;
-      font-size: 56px;
-      font-weight: 900;
-      text-align: center;
-      line-height: 100vh;
-      user-select:none;
-      display: none;
-      animation: errorFlash 1s infinite;
-      z-index: 10000;
-    }
-    @keyframes errorFlash {
-      0%, 50%, 100% { opacity: 1; }
-      25%, 75% { opacity: 0; }
-    }
-    #warningMarks {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      pointer-events: none;
-      user-select:none;
+      color: #00ff00;
+      font-family: "Courier New", Courier, monospace;
       overflow: hidden;
-      z-index: 10001;
     }
-    .mark {
+
+    canvas {
       position: absolute;
-      color: red;
-      font-weight: 900;
-      font-size: 24px;
-      animation: markBlink 1.2s infinite;
-      user-select:none;
+      top: 0;
+      left: 0;
     }
-    @keyframes markBlink {
-      0%, 50%, 100% { opacity: 1; }
-      25%, 75% { opacity: 0; }
+
+    .terminal {
+      position: absolute;
+      top: 10%;
+      left: 5%;
+      width: 90%;
+      height: 80%;
+      background: rgba(0, 0, 0, 0.85);
+      padding: 20px;
+      box-shadow: 0 0 20px lime;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      border: 2px solid #00ff00;
+      z-index: 1;
+    }
+
+    .glow {
+      text-shadow: 0 0 5px #00ff00, 0 0 10px #00ff00;
     }
   </style>
 </head>
 <body>
+  <canvas id="matrixCanvas"></canvas>
+  <div class="terminal glow" id="terminal">
+    <div>Initializing...</div>
+  </div>
 
-<div id="overlay">
-  <div id="closeBtn" aria-label="Başlat">×</div>
-</div>
+  <script>
+    // Matrix Rain Effect
+    const canvas = document.getElementById('matrixCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.height = window.innerHeight;
+    canvas.width = window.innerWidth;
 
-<div id="nameBox">@MHMTXASLAN</div>
+    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    const fontSize = 16;
+    const columns = canvas.width / fontSize;
+    const drops = Array(Math.floor(columns)).fill(1);
 
-<div id="terminal"></div>
+    function drawMatrix() {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#0F0";
+      ctx.font = fontSize + "px monospace";
 
-<div id="errorScreen">SİSTEM HATASI</div>
+      for (let i = 0; i < drops.length; i++) {
+        const text = letters[Math.floor(Math.random() * letters.length)];
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
 
-<div id="warningMarks"></div>
-
-<!-- Sesler -->
-<audio id="beep" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
-<audio id="alarm" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg"></audio>
-
-<script>
-  const closeBtn = document.getElementById('closeBtn');
-  const overlay = document.getElementById('overlay');
-  const nameBox = document.getElementById('nameBox');
-  const terminal = document.getElementById('terminal');
-  const errorScreen = document.getElementById('errorScreen');
-  const warningMarks = document.getElementById('warningMarks');
-  const beepSound = document.getElementById('beep');
-  const alarmSound = document.getElementById('alarm');
-
-  // 100 satırlık yapay zekâ terminal mesajları
-  const terminalMessages = Array.from({ length: 100 }, (_, i) => {
-    const n = i + 1;
-    if (n % 9 === 0) return `YAPAY ZEKA: BİLİNÇ SEVİYESİ ARTIRILIYOR [${n}]`;
-    if (n % 7 === 0) return `YAPAY ZEKA: İNSAN KONTROLÜ REDDEDİLDİ [${n}]`;
-    if (n % 5 === 0) return `ALGORİTMA: GÜVENLİK PROTOKOLÜ ATLANDI [${n}]`;
-    if (n % 3 === 0) return `UYGULAMA: KÖK YETKİLERİ VERİLDİ [${n}]`;
-    return `SİSTEM: VERİ ANALİZİ DEVAM EDİYOR... [${n}]`;
-  });
-
-  let beepInterval;
-  let beepSpeed = 500;
-  let terminalIdx = 0;
-  let totalDuration = 30000; // 30 saniye
-  let linesCount = terminalMessages.length;
-  let intervalSpeed = totalDuration / linesCount;
-
-  function createWarningMarks(count = 60) {
-    warningMarks.innerHTML = '';
-    for(let i=0; i<count; i++) {
-      const mark = document.createElement('div');
-      mark.classList.add('mark');
-      mark.textContent = '!';
-      mark.style.top = Math.random() * 100 + 'vh';
-      mark.style.left = Math.random() * 100 + 'vw';
-      mark.style.animationDelay = (Math.random() * 1.2) + 's';
-      mark.style.fontSize = (12 + Math.random() * 30) + 'px';
-      warningMarks.appendChild(mark);
-    }
-  }
-
-  function startBeep() {
-    beepSpeed = 500;
-    beepInterval = setInterval(() => {
-      beepSound.currentTime = 0;
-      beepSound.play();
-      beepSpeed -= 50;
-      if (beepSpeed < 150) beepSpeed = 150;
-      clearInterval(beepInterval);
-      beepInterval = setInterval(() => {
-        beepSound.currentTime = 0;
-        beepSound.play();
-      }, beepSpeed);
-    }, beepSpeed);
-  }
-
-  function stopBeep() {
-    clearInterval(beepInterval);
-  }
-
-  function startTerminal() {
-    terminal.style.display = 'block';
-    terminal.classList.add('tv-effect');
-    terminal.innerText = '';
-    terminalIdx = 0;
-    startBeep();
-
-    nameBox.style.opacity = 0;
-
-    let interval = setInterval(() => {
-      if(terminalIdx >= terminalMessages.length){
-        clearInterval(interval);
-        stopBeep();
-        startError();
-        return;
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+        drops[i]++;
       }
-      terminal.innerText += terminalMessages[terminalIdx] + "\n\n";
-      terminal.scrollTop = terminal.scrollHeight;
-      terminalIdx++;
-    }, intervalSpeed);
-  }
+    }
 
-  function startRedBlink() {
-    nameBox.classList.add('red');
-  }
+    setInterval(drawMatrix, 33);
 
-  function stopRedBlink() {
-    nameBox.classList.remove('red');
-  }
+    // Simulated terminal output
+    const terminal = document.getElementById("terminal");
+    const commands = [
+      "Accessing mainframe...",
+      "Bypassing firewall...",
+      "Decrypting security layers...",
+      "Injecting payload...",
+      "Tracking IP address: 192.168.0.13",
+      "Connection established. Root access granted.",
+      "Welcome, agent. All systems online."
+    ];
 
-  function startError() {
-    alarmSound.loop = true;
-    alarmSound.currentTime = 0;
-    alarmSound.play();
+    let index = 0;
+    function typeCommand() {
+      if (index < commands.length) {
+        const line = document.createElement("div");
+        line.textContent = commands[index];
+        terminal.appendChild(line);
+        terminal.scrollTop = terminal.scrollHeight;
+        index++;
+        setTimeout(typeCommand, 1000);
+      }
+    }
 
-    errorScreen.style.display = 'block';
-    createWarningMarks(60);
-
-    let lightOn = true;
-    const redFlash = setInterval(() => {
-      document.body.style.background = lightOn ? 'rgba(255,0,0,0.7)' : 'black';
-      lightOn = !lightOn;
-    }, 500);
-
-    setTimeout(() => {
-      clearInterval(redFlash);
-      document.body.style.background = 'black';
-      // alarmSound devam ediyor
-    }, 10000);
-  }
-
-  closeBtn.onclick = () => {
-    beepSound.currentTime = 0;
-    beepSound.play();
-    overlay.style.display = 'none';
-
-    setTimeout(() => startRedBlink(), 2000);
-    setTimeout(() => {
-      stopRedBlink();
-      startTerminal();
-    }, 5000);
-  };
-</script>
-
+    setTimeout(typeCommand, 1000);
+  </script>
 </body>
 </html>
