@@ -1,72 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Hacker Animation</title>
-  <style>
-    html, body {
-      margin: 0; padding: 0; height: 100%; background: black; color: #0f0;
-      font-family: monospace; overflow: hidden;
-      display: flex; justify-content: center; align-items: center;
-      user-select: none;
-    }
-    #startButton {
-      font-size: 120px;
-      color: white;
-      background: none;
-      border: none;
-      cursor: pointer;
-      transition: transform 0.2s;
-      z-index: 1000;
-    }
-    #startButton:hover {
-      transform: scale(1.1);
-    }
-    #usernameDisplay {
-      position: fixed;
-      top: 40%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 48px;
-      color: red;
-      text-shadow: 0 0 20px red;
-      display: none;
-      z-index: 900;
-    }
-    #terminal {
-      position: fixed;
-      top: 10%;
-      left: 5%;
-      width: 90%;
-      height: 80%;
-      background: rgba(0,0,0,0.9);
-      border: 2px solid #00ff00;
-      box-shadow: 0 0 20px lime;
-      padding: 20px;
-      overflow-y: auto;
-      white-space: pre-wrap;
-      font-size: 18px;
-      display: none;
-      z-index: 800;
-    }
-    #crash {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: darkred;
-      color: white;
-      font-size: 3em;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      animation: flash 0.5s infinite alternate;
-      z-index: 9999;
-    }
-    @keyframes flash {
-      0% { opacity: 1; }
-      100% { opacity: 0.3; }
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Hacker Animation</title>
+<style>
+  html, body {
+    margin:0; padding:0; height:100%;
+    background:black;
+    color:#0f0;
+    font-family: monospace;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow:hidden;
+    user-select:none;
+  }
+  #startButton {
+    font-size:120px;
+    color:white;
+    background:none;
+    border:none;
+    cursor:pointer;
+    transition: transform 0.2s;
+    z-index: 1000;
+  }
+  #startButton:hover {
+    transform: scale(1.1);
+  }
+  #usernameDisplay {
+    position: fixed;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 48px;
+    color: red;
+    text-shadow: 0 0 20px red;
+    display: none;
+    z-index: 900;
+  }
+  #terminal {
+    position: fixed;
+    top: 10%;
+    left: 5%;
+    width: 90%;
+    height: 80%;
+    background: rgba(0,0,0,0.9);
+    border: 2px solid #00ff00;
+    box-shadow: 0 0 20px lime;
+    padding: 20px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    font-size: 18px;
+    display: none;
+    z-index: 800;
+  }
+  #crash {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: darkred;
+    color: white;
+    font-size: 3em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: flash 0.5s infinite alternate;
+    z-index: 9999;
+  }
+  @keyframes flash {
+    0% { opacity: 1; }
+    100% { opacity: 0.3; }
+  }
+</style>
 </head>
 <body>
 
@@ -75,9 +81,7 @@
 <div id="terminal"></div>
 <div id="crash">!!! SYSTEM FAILURE !!!</div>
 
-<!-- Korkutucu arka plan müziği (loop) -->
 <audio id="bgMusic" src="https://files.catbox.moe/0wvxli.mp3" preload="auto" loop></audio>
-<!-- Sistem çökme müziği -->
 <audio id="crashMusic" src="https://files.catbox.moe/nwwj6j.mp3" preload="auto"></audio>
 
 <script>
@@ -85,7 +89,6 @@
   const params = new URLSearchParams(window.location.search);
   const username = params.get("user") ? `@${params.get("user")}` : "@visitor";
 
-  // DOM elementleri
   const startButton = document.getElementById("startButton");
   const usernameDisplay = document.getElementById("usernameDisplay");
   const terminal = document.getElementById("terminal");
@@ -93,7 +96,6 @@
   const bgMusic = document.getElementById("bgMusic");
   const crashMusic = document.getElementById("crashMusic");
 
-  // Yazılar
   const messages = [
     `>> Connecting to Instagram servers...`,
     `>> User detected: ${username}`,
@@ -119,7 +121,7 @@
   ];
 
   let msgIndex = 0;
-  let speed = 400;
+  let speed = 300;
 
   function showNextLine() {
     if (msgIndex < messages.length) {
@@ -128,7 +130,7 @@
       terminal.appendChild(line);
       terminal.scrollTop = terminal.scrollHeight;
       msgIndex++;
-      speed = Math.max(50, speed - 20);
+      speed = Math.max(50, speed - 15);
       setTimeout(showNextLine, speed);
     } else {
       triggerCrash();
@@ -142,21 +144,17 @@
   }
 
   startButton.addEventListener("click", () => {
-    // Ses oynat (izin istiyor)
     bgMusic.play().then(() => {
-      // Butonu gizle
       startButton.style.display = "none";
-
-      // Kullanıcı adını göster
       usernameDisplay.textContent = username;
       usernameDisplay.style.display = "block";
 
-      // 5 saniye sonra terminal açılıp animasyon başlasın
       setTimeout(() => {
         usernameDisplay.style.display = "none";
         terminal.style.display = "block";
         showNextLine();
       }, 5000);
+
     }).catch(() => {
       alert("Lütfen sesi etkinleştirin.");
     });
