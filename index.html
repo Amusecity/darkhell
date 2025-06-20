@@ -2,242 +2,117 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Kabus Terminali</title>
+<title>Paranoya II</title>
 <style>
-  html, body {
-    margin:0; padding:0; height:100%; width:100%;
-    background: black;
-    color: #0f0;
-    font-family: monospace;
-    overflow: hidden;
-    user-select: none;
-  }
-  #startBtn {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: transparent;
-    border: 5px solid red;
-    color: red;
-    font-size: 80px;
-    font-weight: 900;
-    width: 180px;
-    height: 180px;
-    border-radius: 90px;
-    cursor: pointer;
-    box-shadow: 0 0 40px red;
-    text-align: center;
-    line-height: 170px;
-    user-select: none;
-    transition: all 0.3s ease;
-  }
-  #startBtn:hover {
-    box-shadow: 0 0 80px #ff0000;
-    transform: translate(-50%, -50%) scale(1.1);
-  }
-  #terminal {
-    position: fixed;
-    top: 5px;
-    left: 5px;
-    right: 5px;
-    bottom: 5px;
-    background: black;
-    color: #0f0;
-    font-size: 18px;
-    line-height: 1.4em;
-    overflow-y: auto;
-    padding: 20px;
-    font-weight: 600;
-    display: none;
-    text-shadow: 0 0 5px #0f0;
-  }
-  .glitch {
-    color: #f00;
-    animation: glitchAnim 0.3s infinite;
-  }
-  @keyframes glitchAnim {
-    0%, 100% { text-shadow: 2px 0 #f00, -2px 0 #0f0; }
-    50% { text-shadow: -2px 0 #f00, 2px 0 #0f0; }
-  }
-  #errorScreen {
-    position: fixed;
-    top:0; left:0; width: 100vw; height: 100vh;
-    background: rgba(255,0,0,0.9);
-    color: black;
-    font-size: 72px;
-    font-weight: 900;
-    text-align: center;
-    line-height: 100vh;
-    display: none;
-    user-select: none;
-    animation: flashRed 1s infinite;
-    z-index: 9999;
-  }
-  @keyframes flashRed {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
-  }
-  #warningMarks {
-    position: fixed;
-    top: 0; left: 0; width: 100vw; height: 100vh;
-    pointer-events: none;
-    user-select: none;
-    overflow: hidden;
-    z-index: 10000;
-  }
-  .warningMark {
-    position: absolute;
-    color: red;
-    font-weight: 900;
-    font-size: 24px;
-    animation: blinkMark 1.5s infinite;
-    user-select: none;
-    text-shadow: 0 0 8px red;
-  }
-  @keyframes blinkMark {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
-  }
+  html, body { margin:0; padding:0; width:100%; height:100%; background:black; overflow:hidden; user-select:none; cursor:none; }
+  #term { padding:20px; font-family:monospace; color:#0f0; font-size:18px; line-height:1.4; white-space:pre-wrap; overflow:auto; height:100vh; opacity:0; transition: opacity 1s; }
+  .glitch { color:red; animation:glitch 0.2s infinite; }
+  @keyframes glitch { 0%,100%{opacity:1;} 50%{opacity:0.2;} }
+  #eye { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); width:200px; height:200px; border:5px solid #0f0; border-radius:50%; box-shadow:0 0 40px #0f0 inset; display:none; }
+  @keyframes eyePulse { 0% { transform:translate(-50%,-50%) scale(1); } 50% { transform:translate(-50%,-50%) scale(1.1); } 100%{transform:translate(-50%,-50%) scale(1);} }
+  #cursorWatch { position:fixed; width:30px; height:30px; border:3px solid red; border-radius:50%; pointer-events:none; display:none; mix-blend-mode:screen; }
+  #final { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:red; color:black; font-size:64px; text-align:center; line-height:100vh; font-weight:bold; opacity:0; transition:opacity 1s; }
 </style>
 </head>
 <body>
+<pre id="term"></pre>
+<div id="eye"></div>
+<div id="cursorWatch"></div>
+<div id="final">KURTULAMAZSIN</div>
 
-<button id="startBtn" aria-label="Başlat">×</button>
-<div id="terminal"></div>
-<div id="errorScreen">SİSTEM ÇÖKTÜ</div>
-<div id="warningMarks"></div>
-
+<audio id="whisper" src="https://cdn.pixabay.com/download/audio/2021/10/18/audio_1c5d2a2b3a.mp3?filename=whispers-ambient-103579.mp3"></audio>
+<audio id="echoVoice" src="https://cdn.pixabay.com/download/audio/2022/04/15/audio_c64d7efc99.mp3?filename=voice-echo-6376.mp3"></audio>
 <audio id="beep" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
-<audio id="alarm" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg"></audio>
-<audio id="explosion" src="https://actions.google.com/sounds/v1/explosions/explosion.wav"></audio>
+<audio id="glitchSnd" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_78fcebf194.mp3?filename=glitch-14863.mp3"></audio>
+<audio id="explosion" src="https://actions.google.com/sounds/v1/impacts/medium_explosion.ogg"></audio>
 
 <script>
-  const startBtn = document.getElementById('startBtn');
-  const terminal = document.getElementById('terminal');
-  const errorScreen = document.getElementById('errorScreen');
-  const warningMarks = document.getElementById('warningMarks');
+  const term = document.getElementById('term');
+  const eye = document.getElementById('eye');
+  const cursorWatch = document.getElementById('cursorWatch');
+  const final = document.getElementById('final');
+  const whisper = document.getElementById('whisper');
+  const echoVoice = document.getElementById('echoVoice');
   const beep = document.getElementById('beep');
-  const alarm = document.getElementById('alarm');
+  const glitchSnd = document.getElementById('glitchSnd');
   const explosion = document.getElementById('explosion');
 
-  let terminalLines = [];
-  for(let i=1; i<=200; i++){
-    if(i % 15 === 0) terminalLines.push(`GLİTCH: ÇÖZÜMSÜZ HATA KODU ${i}`);
-    else if(i % 13 === 0) terminalLines.push(`UYARI: İNTRÜZYON TESPİT EDİLDİ ${i}`);
-    else if(i % 11 === 0) terminalLines.push(`SİSTEM: VERİ KAYBI ALARMI ${i}`);
-    else if(i % 7 === 0) terminalLines.push(`GÜVENLİK: İZİN REDDEDİLDİ ${i}`);
-    else if(i % 5 === 0) terminalLines.push(`KULLANICI: İNFO SİSTEMİ GÜNCELLENİYOR ${i}`);
-    else if(i % 3 === 0) terminalLines.push(`HATA: KÖK YETKİLERİ KORRUPT ${i}`);
-    else terminalLines.push(`SİSTEM: KOD BLOĞU YÜRÜTÜLÜYOR ${i}`);
+  const lines = [
+    "SİSTEM BAŞLATILIYOR...",
+    "Kullanıcı: MHMTXASLAN",
+    "Giriş algılandı, dostsun sanmıştım...",
+    "Artık seni izliyorum, " + "MHMTXASLAN",
+    "Sistem iç sesi aktif...",
+    "Gözlerim sensin ❗",
+    "...",
+    "Glitch başlıyor..."
+  ];
+
+  let i = 0;
+  let count = 0;
+
+  function showCursor() {
+    cursorWatch.style.display = 'block';
+    document.addEventListener('mousemove', e => {
+      cursorWatch.style.left = e.clientX - 15 + 'px';
+      cursorWatch.style.top = e.clientY - 15 + 'px';
+    });
   }
 
-  let intervalId;
-  let beepInterval;
-  let beepDelay = 700;
-  let lineIndex = 0;
-  let glitchActive = false;
-
-  function addWarningMarks(count = 80) {
-    warningMarks.innerHTML = '';
-    for(let i=0; i<count; i++){
-      const mark = document.createElement('div');
-      mark.className = 'warningMark';
-      mark.textContent = '!';
-      mark.style.top = Math.random() * 100 + 'vh';
-      mark.style.left = Math.random() * 100 + 'vw';
-      mark.style.fontSize = (10 + Math.random() * 30) + 'px';
-      mark.style.animationDelay = (Math.random() * 1.5) + 's';
-      warningMarks.appendChild(mark);
+  function next() {
+    if(i < lines.length) {
+      if(i === 2) whisper.play();
+      if(i === 3) echoVoice.play();
+      const span = document.createElement('div');
+      span.textContent = lines[i];
+      if(i >= 3) span.classList.add('glitch');
+      term.appendChild(span);
+      term.scrollTop = term.scrollHeight;
+      beep.currentTime = 0; beep.play();
+      i++;
+      setTimeout(next, 1200);
+    } else {
+      startParanoiaLoop();
     }
   }
 
-  function glitchText(text) {
-    let result = '';
-    for(let c of text){
-      if(Math.random() < 0.1) {
-        // rastgele karakter karıştır
-        const randChar = String.fromCharCode(33 + Math.floor(Math.random()*94));
-        result += `<span style="color: red; font-weight: 900;">${randChar}</span>`;
-      } else {
-        result += c;
+  function startParanoiaLoop() {
+    term.style.opacity = 1;
+    showCursor();
+    whisper.loop = true; whisper.volume = 0.2;
+    whisper.play();
+    let pInterval = setInterval(() => {
+      const txt = (count%2===0 ? "SENİ GÖRÜYORUM" : "KAYBOLDUN");
+      const div = document.createElement('div');
+      div.classList.add('glitch');
+      div.textContent = txt + " • " + Date.now();
+      term.appendChild(div);
+      term.scrollTop = term.scrollHeight;
+      if(count % 3 === 0) glitchSnd.play();
+      if(count === 20) {
+        clearInterval(pInterval);
+        glitchBreak();
       }
-    }
-    return result;
+      count++;
+    }, 800);
   }
 
-  function startBeeping(){
-    beepDelay = 700;
-    beepInterval = setInterval(() => {
-      beep.currentTime = 0;
-      beep.play();
-      beepDelay -= 50;
-      if(beepDelay < 120) beepDelay = 120;
-      clearInterval(beepInterval);
-      beepInterval = setInterval(() => {
-        beep.currentTime = 0;
-        beep.play();
-      }, beepDelay);
-    }, beepDelay);
-  }
-
-  function stopBeeping(){
-    clearInterval(beepInterval);
-  }
-
-  function startTerminal() {
-    terminal.style.display = 'block';
-    lineIndex = 0;
-    terminal.innerHTML = '';
-    startBeeping();
-    intervalId = setInterval(() => {
-      if(lineIndex >= terminalLines.length){
-        clearInterval(intervalId);
-        stopBeeping();
-        showErrorScreen();
-        return;
-      }
-      let line = terminalLines[lineIndex];
-      // Arada glitch efekt
-      if(Math.random() < 0.25){
-        line = glitchText(line);
-      }
-      terminal.innerHTML += line + "\n";
-      terminal.scrollTop = terminal.scrollHeight;
-      lineIndex++;
-    }, 150);
-  }
-
-  function showErrorScreen(){
-    errorScreen.style.display = 'block';
-    alarm.loop = true;
-    alarm.currentTime = 0;
-    alarm.play();
-    addWarningMarks(100);
-    let flash = true;
-    let flashInterval = setInterval(() => {
-      document.body.style.backgroundColor = flash ? 'rgba(255,0,0,0.85)' : 'black';
-      flash = !flash;
-    }, 300);
-
+  function glitchBreak() {
+    term.style.display = 'none';
+    eye.style.display = 'block';
+    eye.style.animation = 'eyePulse 1s infinite';
     setTimeout(() => {
-      clearInterval(flashInterval);
+      final.style.display = 'block';
+      final.style.opacity = 1;
       explosion.play();
-      alarm.pause();
-      errorScreen.style.display = 'none';
-      document.body.style.backgroundColor = 'black';
-      terminal.innerHTML = '';
-      startTerminal();
-    }, 20000); // 20 saniye sistem hatası ekranı ve ses
-
+      setTimeout(() => location.reload(), 8000);
+    }, 8000);
   }
 
-  startBtn.onclick = () => {
-    startBtn.style.display = 'none';
-    startTerminal();
+  window.onload = () => {
+    term.style.opacity = 1;
+    setTimeout(next, 1000);
   };
 </script>
-
 </body>
 </html>
