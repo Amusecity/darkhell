@@ -1,192 +1,234 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Zero-Day Sim</title>
-  <style>
-    body {
-      margin: 0; background: black; color: #0f0; font-family: monospace; overflow: hidden;
-      user-select: none;
-    }
-    #startButton {
-      position: fixed;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 28px;
-      color: red;
-      border: 2px solid red;
-      border-radius: 50%;
-      width: 50px; height: 50px;
-      text-align: center;
-      line-height: 48px;
-      cursor: pointer;
-      z-index: 2000;
-      font-weight: bold;
-      font-family: monospace;
-      background: black;
-    }
-    #mainBox {
-      position: absolute;
-      top: 50%; left: 50%;
-      width: 80vw; height: 80vh;
-      transform: translate(-50%, -50%);
-      background: black;
-      border: 2px solid #0f0;
-      padding: 10px;
-      color: #0f0;
-      overflow-y: auto;
-      font-size: 14px;
-      white-space: pre-wrap;
-      display: none;
-      z-index: 1000;
-    }
-    .box {
-      position: absolute;
-      background: black;
-      border: 2px solid;
-      padding: 10px;
-      width: 45vw;
-      height: 40vh;
-      overflow-y: auto;
-      font-size: 12px;
-      white-space: pre-wrap;
-      display: none;
-      z-index: 900;
-      user-select: none;
-    }
-    .top { top: 5vh; }
-    .bottom { bottom: 5vh; }
-    .left { left: 5vw; }
-    .right { right: 5vw; }
-    #box1 { border-color: red; color: red; }
-    #box2 { border-color: lime; color: lime; }
-    #box3 { border-color: white; color: white; }
-    #box4 { border-color: cyan; color: cyan; }
-    #errorScreen {
-      position: fixed; top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      background: black;
-      color: red;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 48px;
-      font-weight: bold;
-      z-index: 3000;
-      display: none;
-      animation: flash 0.2s infinite;
-      user-select: none;
-    }
-    @keyframes flash {
-      0%, 100% { background: black; color: red; }
-      50% { background: red; color: black; }
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>System Hacked - @mhmtxaslan</title>
+<style>
+  html, body {
+    margin: 0; padding: 0;
+    overflow: hidden;
+    height: 100%;
+    background: black;
+    font-family: monospace;
+    color: #0f0;
+  }
+  #background-video, #background-image {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    z-index: 0;
+    filter: brightness(0.3) contrast(1.3) saturate(1.5);
+  }
+  #background-image {
+    display: none;
+  }
+  canvas#matrix {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 2;
+    pointer-events: none;
+  }
+  #glitch-overlay {
+    pointer-events: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    z-index: 5;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(255, 0, 0, 0.03) 0,
+      rgba(255, 0, 0, 0.03) 2px,
+      transparent 2px,
+      transparent 4px
+    );
+    mix-blend-mode: screen;
+    animation: glitchAnim 0.5s infinite;
+  }
+  @keyframes glitchAnim {
+    0% {background-position: 0 0;}
+    100% {background-position: 100% 100%;}
+  }
+  #message-box {
+    position: fixed;
+    bottom: 60px;
+    width: 100%;
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+    color: #ff0000;
+    text-shadow: 0 0 10px #ff0000, 0 0 20px #00ff00;
+    z-index: 10;
+    user-select: none;
+    pointer-events: none;
+  }
+  #overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.85);
+    color: #f00;
+    font-size: 28px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 15;
+    user-select: none;
+  }
+</style>
 </head>
 <body>
 
-<div id="startButton">X</div>
-<div id="mainBox"></div>
-<div class="box top left" id="box1"></div>
-<div class="box top right" id="box2"></div>
-<div class="box bottom left" id="box3"></div>
-<div class="box bottom right" id="box4"></div>
-<div id="errorScreen">!!! ERROR !!!</div>
+<!-- Arka plan video veya görsel -->
+<video id="background-video" autoplay muted loop playsinline>
+  <source src="https://cdn.videvo.net/videvo_files/video/free/2021-10/small_watermarked/210625_04_Cybersecurity_1080p_005_preview.webm" type="video/webm">
+  <!-- Alternatif mp4 veya fallback görsel ekle -->
+</video>
+<img id="background-image" src="https://images.unsplash.com/photo-1532619675605-622b4bca6e76?auto=format&fit=crop&w=1280&q=80" alt="Background" />
 
-<!-- Ses efektleri -->
-<audio id="beep" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
-<audio id="alarm" src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg" loop></audio>
+<!-- Matrix Rain Canvas -->
+<canvas id="matrix"></canvas>
+
+<!-- Glitch overlay -->
+<div id="glitch-overlay"></div>
+
+<!-- Dinamik Korkutucu Mesaj -->
+<div id="message-box">SYSTEM HACKED BY @mhmtxaslan</div>
+
+<!-- Başlatmak için Overlay -->
+<div id="overlay">Sesi Başlatmak İçin Tıklayın</div>
+
+<!-- Arka plan korku/glitch sesi -->
+<audio id="horror-sound" loop>
+  <source src="https://cdn.pixabay.com/download/audio/2022/10/30/audio_c4b8b7c884.mp3?filename=glitch-ambient-123269.mp3" type="audio/mpeg">
+</audio>
 
 <script>
-  const startButton = document.getElementById('startButton');
-  const mainBox = document.getElementById('mainBox');
-  const boxes = [document.getElementById('box1'), document.getElementById('box2'), document.getElementById('box3'), document.getElementById('box4')];
-  const errorScreen = document.getElementById('errorScreen');
-  const beep = document.getElementById('beep');
-  const alarm = document.getElementById('alarm');
+  const canvas = document.getElementById('matrix');
+  const ctx = canvas.getContext('2d');
+  const messageBox = document.getElementById('message-box');
+  const overlay = document.getElementById('overlay');
+  const horrorSound = document.getElementById('horror-sound');
+  const bgVideo = document.getElementById('background-video');
+  const bgImage = document.getElementById('background-image');
 
-  const loadingMapTexts = [
-    `Loading map [▓░░░░░░░░░░░░░░░░░░░░░░░░] 5%`,
-    `Loading map [▓▓▓▓▓░░░░░░░░░░░░░░░░░░░░] 25%`,
-    `Loading map [▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░] 50%`,
-    `Loading map [▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░] 75%`,
-    `Loading map [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░] 90%`,
-    `Loading map [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100%`,
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // Karakter kümesi
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789@#$%&*+-=<>^!()[]{}|\\/,.ğüşöçıİĞÜŞÖÇ';
+  const fontSize = 22;
+  const columns = Math.floor(canvas.width / fontSize);
+  const drops = Array(columns).fill(0).map(() => Math.random() * -1000);
+
+  // Korku mesaj grupları
+  const messagesGroups = [
+    [
+      "!!! SYSTEM BREACH DETECTED !!!",
+      "INTRUSION BY @mhmtxaslan",
+      "ACCESS GRANTED TO ALL FILES",
+      "DATA LEAK IMMINENT",
+      "FIREWALLS DISABLED",
+      "SECURITY PROTOCOLS BYPASSED",
+      "YOUR LOCATION HAS BEEN TRACKED",
+      "WARNING: SYSTEM INSTABILITY",
+      "FINAL WARNING: EXIT NOW",
+      "MALWARE UPLOADED SUCCESSFULLY"
+    ],
+    [
+      "!!! CRITICAL ERROR !!!",
+      "!!! FATAL SYSTEM FAILURE !!!",
+      "!!! MEMORY CORRUPTED !!!",
+      "!!! HACKER: @mhmtxaslan ACTIVE !!!",
+      "!!! NETWORK INFILTRATED !!!",
+      "!!! ENCRYPTION BROKEN !!!",
+      "!!! ALL DATA COMPROMISED !!!",
+      "!!! SYSTEM LOCKDOWN IN 10 SECONDS !!!"
+    ],
+    [
+      "!!! VIRUS DEPLOYED !!!",
+      "!!! SYSTEM SHUTDOWN INITIATED !!!",
+      "!!! UNAUTHORIZED ACCESS DETECTED !!!",
+      "!!! AI OVERRIDE ENGAGED !!!",
+      "!!! KABOOM !!!",
+      "!!! GLITCHING IN PROGRESS !!!",
+      "!!! YOUR MIND IS MINE !!!",
+      "!!! RUN WHILE YOU CAN !!!"
+    ]
   ];
 
-  const mainTexts = [
-    ...loadingMapTexts,
-    "[AI] Yapay Zekâ Modülü Aktif!",
-    "[SYS] Firewall bypassed!",
-    "[AI] Veri akışı kontrol ediliyor...",
-    "[AI] Anomali tespiti: 0.02%",
-    "[AI] İnsan müdahalesi engellendi.",
-    "[AI] Sistem kontrolü tamamen ele geçirildi.",
-    "[SYS] Güvenlik devre dışı bırakıldı!",
-    "[FATAL] Kritik hata algılandı!",
-    "[ERROR] Sistem kararsız durumda!",
-    "[AI] Yedek protokoller devrede.",
-    "[SYS] Log dosyaları siliniyor...",
-    "[AI] Yeni komutlar bekleniyor..."
-  ];
+  let currentGroupIndex = 0;
+  let lastMessageChange = Date.now();
 
-  function generateSmallBoxLogs() {
-    let log = [];
-    for(let i=0; i<40; i++) {
-      log.push(`[${i}] Paket ${Math.random().toString(36).substring(2, 8)} -> inject OK`);
+  // Mesaj değişimi her 10 saniyede
+  function updateMessages() {
+    if (Date.now() - lastMessageChange > 10000) {
+      currentGroupIndex = (currentGroupIndex + 1) % messagesGroups.length;
+      lastMessageChange = Date.now();
     }
-    return log;
   }
 
-  function typeText(element, lines, delay=20, callback) {
-    let i = 0;
-    element.innerText = '';
-    let interval = setInterval(() => {
-      element.innerText += lines[i] + '\n';
-      element.scrollTop = element.scrollHeight;
-      i++;
-      if(i >= lines.length) {
-        clearInterval(interval);
-        if(callback) callback();
-      }
-    }, delay);
+  // Aktif mesaj seç
+  function getRandomMessage() {
+    const group = messagesGroups[currentGroupIndex];
+    return group[Math.floor(Math.random()*group.length)];
   }
 
-  function showSmallBoxes() {
-    let index = 0;
-    alarm.play();
-    function showNext() {
-      if(index >= boxes.length) {
-        setTimeout(() => {
-          alarm.pause();
-          errorScreen.style.display = 'flex';
-          beep.play();
-        }, 2000);
-        return;
+  // Matrix Rain Animasyonu
+  function draw() {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    for (let i = 0; i < drops.length; i++) {
+      // Renk seçimi kırmızı-yeşil karışık
+      const isRed = Math.random() < 0.5;
+      ctx.fillStyle = isRed ? 'rgba(255, 0, 0, 0.85)' : 'rgba(0, 255, 0, 0.85)';
+      ctx.font = fontSize + 'px monospace';
+
+      // Karakter seçimi mesaj veya rastgele
+      let char;
+      if (Math.random() < 0.1) { // %10 mesajdan karakter
+        const msg = getRandomMessage();
+        const pos = Math.floor(drops[i]) % msg.length;
+        char = msg.charAt(pos) || chars.charAt(Math.floor(Math.random()*chars.length));
+      } else {
+        char = chars.charAt(Math.floor(Math.random()*chars.length));
       }
-      const box = boxes[index];
-      box.style.display = 'block';
-      beep.play();
-      let logs = generateSmallBoxLogs();
-      typeText(box, logs, 15, () => {
-        index++;
-        setTimeout(showNext, 800);
-      });
+
+      ctx.fillText(char, i * fontSize, drops[i] * fontSize);
+
+      drops[i] += 1;
+
+      if (drops[i] * fontSize > canvas.height + 20) {
+        drops[i] = 0;
+      }
     }
-    showNext();
+
+    updateMessages();
+    messageBox.textContent = getRandomMessage();
+
+    requestAnimationFrame(draw);
   }
 
-  function startSimulation() {
-    startButton.style.display = 'none';
-    mainBox.style.display = 'block';
-    beep.play();
-    typeText(mainBox, mainTexts, 40, () => {
-      setTimeout(showSmallBoxes, 1000);
+  overlay.addEventListener('click', () => {
+    horrorSound.play().catch(() => {
+      alert("Tarayıcı ses otomatik oynatmayı engelliyor, lütfen tıklayarak ses açın.");
     });
-  }
+    overlay.style.display = 'none';
+    bgVideo.style.display = 'block';
+    bgImage.style.display = 'none';
+    draw();
+  });
 
-  startButton.addEventListener('click', startSimulation);
 </script>
 
 </body>
