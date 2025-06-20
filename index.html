@@ -24,7 +24,7 @@
       padding: 20px;
       cursor: pointer;
       background: black;
-      z-index: 20;
+      z-index: 999;
     }
     #intro {
       position:absolute; top:50%; left:50%;
@@ -48,6 +48,22 @@
       display:none;
       white-space:pre-wrap;
       font-size:1.2em;
+      color: #fff;
+      text-shadow: 0 0 5px red;
+      background: repeating-linear-gradient(
+        0deg, black, black 2px, #111 3px, black 4px
+      );
+    }
+    .glitch {
+      animation: glitch 0.2s infinite;
+    }
+    @keyframes glitch {
+      0% { transform: translate(0, 0); }
+      20% { transform: translate(-2px, 2px); }
+      40% { transform: translate(2px, -2px); }
+      60% { transform: translate(-1px, 1px); }
+      80% { transform: translate(1px, -1px); }
+      100% { transform: translate(0, 0); }
     }
     #face {
       position:absolute;
@@ -73,8 +89,8 @@
       background:#f00;
       opacity:0;
       display:none;
-      animation: flashFinal 0.2s ease-in-out 6 both;
-      z-index:9;
+      animation: flashFinal 0.2s ease-in-out 10 both;
+      z-index:20;
     }
     @keyframes flashFinal {
       0%,100%{opacity:0;}
@@ -88,6 +104,7 @@
       display:none;
       color:#f00;
       text-shadow:0 0 20px #f00;
+      z-index:21;
     }
     .shake {
       animation: shake 0.2s infinite alternate;
@@ -158,7 +175,7 @@
 
     function beep() {
       const a = new Audio(beeps[Math.floor(Math.random()*beeps.length)]);
-      a.volume = 0.5;
+      a.volume = 0.6;
       a.play();
     }
 
@@ -179,11 +196,13 @@
       setTimeout(()=>{
         intro.remove();
         term.style.display='block';
+        term.classList.add('glitch');
         let i=0;
         const iv = setInterval(()=>{
           const ln = lines[Math.floor(Math.random()*lines.length)];
           const d = document.createElement('div');
           d.textContent = ln;
+          d.classList.add('glitch');
           term.appendChild(d);
           term.scrollTop = term.scrollHeight;
           beep();
