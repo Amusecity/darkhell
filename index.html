@@ -1,153 +1,122 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8" />
-<title>Hack Simülasyonu</title>
-<style>
-  html, body {
-    margin: 0; padding: 0;
-    width: 100%; height: 100%;
-    background: black; overflow: hidden;
-    font-family: monospace; color: #0f0;
-  }
-  #startBtn {
-    position: absolute; top:50%; left:50%;
-    transform: translate(-50%,-50%);
-    width: 80px; height: 80px;
-    border: 3px solid red; border-radius:50%;
-    background: black; color: red;
-    font-size: 40px; cursor: pointer;
-    z-index: 10;
-  }
-  #warning {
-    display: none;
-    position: absolute; top:40%; left:50%;
-    transform: translate(-50%,-50%);
-    color: red; font-size:30px;
-    z-index: 9;
-    animation: flicker 0.1s infinite;
-  }
-  @keyframes flicker {
-    50% { opacity: 0.3; }
-  }
-  #terminal {
-    display: none;
-    position: absolute; top:0; left:0;
-    width:100%; height:100%;
-    padding:10px; font-size:14px;
-    overflow:hidden; white-space:pre-wrap;
-  }
-  .glitch {
-    animation: glitch 0.3s infinite;
-  }
-  @keyframes glitch {
-    0%,100% { color: red; transform: none; }
-    20% { color: lime; transform: translate(2px,-2px); }
-    40% { color: red; transform: translate(-2px,2px); }
-    60% { color: lime; transform: translate(2px,2px); }
-    80% { color: red; transform: translate(-2px,-2px); }
-  }
-  #sms {
-    display: none;
-    position: absolute; bottom:20px; right:20px;
-    width:250px; padding:15px;
-    background: rgba(0,0,0,0.8);
-    color: #fff; border:2px solid #0f0;
-    font-size: 16px;
-    animation: slideIn 1s forwards, blink 5s 1s 3;
-    z-index: 12;
-  }
-  @keyframes slideIn {
-    from { right: -300px; }
-    to { right: 20px; }
-  }
-  @keyframes blink {
-    0%,100% { opacity:1; }
-    50% { opacity:0.3; }
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SYSTEM HACKED</title>
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      color: #0f0;
+      font-family: monospace;
+      overflow: hidden;
+    }
+    #startBtn {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 30px;
+      color: red;
+      border: 2px solid red;
+      border-radius: 50%;
+      width: 60px; height: 60px;
+      text-align: center;
+      line-height: 56px;
+      cursor: pointer;
+      z-index: 1000;
+      background: black;
+    }
+    #hackScreen {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: black;
+      color: lime;
+      font-size: 20px;
+      padding: 20px;
+      overflow: hidden;
+    }
+    #terminal {
+      height: 80vh;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      font-size: 18px;
+    }
+    #error {
+      font-size: 32px;
+      color: red;
+      text-align: center;
+      margin-top: 20px;
+      display: none;
+    }
+    .big-message {
+      font-size: 28px;
+      color: red;
+      animation: flash 0.5s infinite;
+      text-align: center;
+      margin-top: 20px;
+    }
+    @keyframes flash {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.2; }
+    }
+  </style>
 </head>
 <body>
 
-<button id="startBtn">X</button>
-<div id="warning">Hesap Çalınıyor...</div>
-<pre id="terminal" class="glitch"></pre>
-<div id="sms">📱 SMS: "Giriş kodunuz: 8291XXXX"</div>
+<div id="startBtn">X</div>
 
-<audio id="beep" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
-<audio id="glitchSound" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg"></audio>
-<audio id="horror" src="https://cdn.pixabay.com/audio/2022/10/30/audio_c4b8b7c884.mp3" loop></audio>
+<div id="hackScreen">
+  <div class="big-message">INSTAGRAM HESABI ÇALINIYOR: @mhmtali_aslan</div>
+  <div id="terminal"></div>
+  <div id="error">SMS gönderildi: +90XXXXXXXXXX</div>
+</div>
+
+<audio id="sfx" src="https://cdn.pixabay.com/audio/2022/10/31/audio_a233d7d1c7.mp3" preload="auto"></audio>
 
 <script>
-  const start = document.getElementById('startBtn');
-  const warning = document.getElementById('warning');
+  const startBtn = document.getElementById('startBtn');
+  const hackScreen = document.getElementById('hackScreen');
   const terminal = document.getElementById('terminal');
-  const sms = document.getElementById('sms');
-  const beep = document.getElementById('beep');
-  const glitchSound = document.getElementById('glitchSound');
-  const horror = document.getElementById('horror');
+  const error = document.getElementById('error');
+  const sfx = document.getElementById('sfx');
 
-  const groups = [
-    [
-      "[!] Giriş kodu ele geçiriliyor...",
-      "[SYS] @mhmtali_aslan hesap hızla çalınıyor!",
-      "[ERR] Güvenlik sistemleri bypass edildi!",
-      "[!] SMS doğrulama hedeflendi!",
-      "[ALERT] Kredi kartı bilgileri sızdırıldı!"
-    ],
-    [
-      "[INTRUSION] 2FA devre dışı bırakıldı",
-      "[ACCESS] tam kontrol sağlandı",
-      "[TRACE] IP izleme aktif!",
-      "[!SYSTEM] tüm bilgiler kopyalandı",
-      "[!] @mhmtali_aslan hesabı kırmızıda!"
-    ],
-    [
-      "[FATAL] Sistem kararsız!",
-      "[LOADING] veri silme başlamadı!",
-      "[WARNING] takip ediliyorsunuz!",
-      "[[!] ALERT] parola sıfırlandı!",
-      "[!] kontrolü kaybettiniz!"
-    ]
+  const hackMessages = [
+    "Sunucuya bağlanılıyor...",
+    "Güvenlik duvarı aşıldı...",
+    "Parola: ********",
+    "@mhmtali_aslan hesabı hedefte...",
+    "Veriler ele geçiriliyor...",
+    "Kullanıcı bilgileri yedekleniyor...",
+    "SMS doğrulama atlanıyor...",
+    "Instagram güvenliği devre dışı bırakıldı...",
+    "Çıkış yapılıyor...",
+    "HESAP ARTIK BİZDE!",
   ];
-  let idx = 0;
 
-  function randomLine() {
-    const g = groups[idx];
-    return g[Math.floor(Math.random() * g.length)];
+  function simulateHack() {
+    let i = 0;
+    function nextLine() {
+      if (i < hackMessages.length) {
+        terminal.innerHTML += hackMessages[i] + "\n";
+        terminal.scrollTop = terminal.scrollHeight;
+        i++;
+        setTimeout(nextLine, 800);
+      } else {
+        error.style.display = 'block';
+      }
+    }
+    nextLine();
   }
 
-  function runTerminal() {
-    terminal.textContent = "";
-    let i=0;
-    const lines = 80;
-    const interval = setInterval(() => {
-      terminal.textContent += randomLine() + "\n";
-      terminal.scrollTop = terminal.scrollHeight;
-      i++;
-      if(i >= lines) clearInterval(interval);
-    }, 50);
-  }
-
-  start.onclick = async () => {
-    start.style.display = 'none';
-    beep.play();
-    warning.style.display = 'block';
-    setTimeout(() => {
-      warning.style.display = 'none';
-      terminal.style.display = 'block';
-      horror.play().catch(() => {});
-      glitchSound.play().catch(() => {});
-      runTerminal();
-      setInterval(() => {
-        idx = (idx + 1) % groups.length;
-        runTerminal();
-      }, 5000);
-      setTimeout(() => {
-        sms.style.display = 'block';
-      }, 3000);
-    }, 5000);
-  };
+  startBtn.addEventListener('click', () => {
+    startBtn.style.display = 'none';
+    hackScreen.style.display = 'block';
+    sfx.play();
+    simulateHack();
+  });
 </script>
 
 </body>
