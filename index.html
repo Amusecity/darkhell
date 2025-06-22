@@ -151,7 +151,6 @@
   const beepSound = document.getElementById('beep');
   const alarmSound = document.getElementById('alarm');
 
-  // 100 satırlık yapay zekâ terminal mesajları
   const terminalMessages = Array.from({ length: 100 }, (_, i) => {
     const n = i + 1;
     if (n % 9 === 0) return `YAPAY ZEKA: BİLİNÇ SEVİYESİ ARTIRILIYOR [${n}]`;
@@ -164,7 +163,7 @@
   let beepInterval;
   let beepSpeed = 500;
   let terminalIdx = 0;
-  let totalDuration = 30000; // 30 saniye
+  let totalDuration = 30000;
   let linesCount = terminalMessages.length;
   let intervalSpeed = totalDuration / linesCount;
 
@@ -242,13 +241,14 @@
     let lightOn = true;
     const redFlash = setInterval(() => {
       document.body.style.background = lightOn ? 'rgba(255,0,0,0.7)' : 'black';
+      document.body.style.transform = lightOn ? 'translate(1px, -1px)' : 'translate(-1px, 1px)';
       lightOn = !lightOn;
-    }, 500);
+    }, 250);
 
     setTimeout(() => {
       clearInterval(redFlash);
       document.body.style.background = 'black';
-      // alarmSound devam ediyor
+      document.body.style.transform = 'none';
     }, 10000);
   }
 
