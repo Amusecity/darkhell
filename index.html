@@ -1,174 +1,234 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Hack Başlatılıyor...</title>
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      background: black;
-      color: #0f0;
-      font-family: monospace;
-      overflow: hidden;
-    }
-    #overlay {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      background: black;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-    }
-    #startBtn {
-      font-size: 100px;
-      color: red;
-      border: 4px solid red;
-      border-radius: 50%;
-      width: 150px;
-      height: 150px;
-      text-align: center;
-      line-height: 140px;
-      cursor: pointer;
-      box-shadow: 0 0 30px red;
-      font-weight: bold;
-    }
-    #username {
-      position: absolute;
-      top: 45%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 48px;
-      color: #f00;
-      border: 3px solid #f00;
-      padding: 20px 40px;
-      z-index: 9000;
-      animation: blink 1s infinite;
-    }
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0; }
-    }
-    #terminal {
-      display: none;
-      position: absolute;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      background: black;
-      color: #0f0;
-      padding: 20px;
-      font-size: 22px;
-      overflow-y: scroll;
-      white-space: pre-wrap;
-    }
-    #errorScreen {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      background: red;
-      color: black;
-      font-size: 54px;
-      font-weight: bold;
-      text-align: center;
-      line-height: 100vh;
-      animation: flash 1s infinite;
-      z-index: 10000;
-    }
-    @keyframes flash {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0; }
-    }
-    #smsMessage {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 24px;
-      color: red;
-      background: black;
-      padding: 10px 20px;
-      border: 2px solid red;
-      display: none;
-      z-index: 999;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>System Hacked - @mhmtxaslan</title>
+<style>
+  html, body {
+    margin: 0; padding: 0;
+    overflow: hidden;
+    height: 100%;
+    background: black;
+    font-family: monospace;
+    color: #0f0;
+  }
+  #background-video, #background-image {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    z-index: 0;
+    filter: brightness(0.3) contrast(1.3) saturate(1.5);
+  }
+  #background-image {
+    display: none;
+  }
+  canvas#matrix {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 2;
+    pointer-events: none;
+  }
+  #glitch-overlay {
+    pointer-events: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    z-index: 5;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(255, 0, 0, 0.03) 0,
+      rgba(255, 0, 0, 0.03) 2px,
+      transparent 2px,
+      transparent 4px
+    );
+    mix-blend-mode: screen;
+    animation: glitchAnim 0.5s infinite;
+  }
+  @keyframes glitchAnim {
+    0% {background-position: 0 0;}
+    100% {background-position: 100% 100%;}
+  }
+  #message-box {
+    position: fixed;
+    bottom: 60px;
+    width: 100%;
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+    color: #ff0000;
+    text-shadow: 0 0 10px #ff0000, 0 0 20px #00ff00;
+    z-index: 10;
+    user-select: none;
+    pointer-events: none;
+  }
+  #overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.85);
+    color: #f00;
+    font-size: 28px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 15;
+    user-select: none;
+  }
+</style>
 </head>
 <body>
 
-<div id="overlay">
-  <div id="startBtn">×</div>
-</div>
+<!-- Arka plan video veya görsel -->
+<video id="background-video" autoplay muted loop playsinline>
+  <source src="https://cdn.videvo.net/videvo_files/video/free/2021-10/small_watermarked/210625_04_Cybersecurity_1080p_005_preview.webm" type="video/webm">
+  <!-- Alternatif mp4 veya fallback görsel ekle -->
+</video>
+<img id="background-image" src="https://images.unsplash.com/photo-1532619675605-622b4bca6e76?auto=format&fit=crop&w=1280&q=80" alt="Background" />
 
-<div id="username">@mhmtali_aslan HESABI ÇALINIYOR...</div>
+<!-- Matrix Rain Canvas -->
+<canvas id="matrix"></canvas>
 
-<div id="terminal"></div>
+<!-- Glitch overlay -->
+<div id="glitch-overlay"></div>
 
-<div id="errorScreen">SİSTEM HATASI</div>
+<!-- Dinamik Korkutucu Mesaj -->
+<div id="message-box">SYSTEM HACKED BY @mhmtxaslan</div>
 
-<div id="smsMessage">SMS gönderildi: +90 *** *** ** **</div>
+<!-- Başlatmak için Overlay -->
+<div id="overlay">Sesi Başlatmak İçin Tıklayın</div>
 
-<audio id="bgSound" src="https://files.catbox.moe/wk8txd.mp3" loop></audio>
-<audio id="alarmSound" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" loop></audio>
+<!-- Arka plan korku/glitch sesi -->
+<audio id="horror-sound" loop>
+  <source src="https://cdn.pixabay.com/download/audio/2022/10/30/audio_c4b8b7c884.mp3?filename=glitch-ambient-123269.mp3" type="audio/mpeg">
+</audio>
 
 <script>
-  const startBtn = document.getElementById("startBtn");
-  const overlay = document.getElementById("overlay");
-  const username = document.getElementById("username");
-  const terminal = document.getElementById("terminal");
-  const errorScreen = document.getElementById("errorScreen");
-  const smsMessage = document.getElementById("smsMessage");
-  const bgSound = document.getElementById("bgSound");
-  const alarmSound = document.getElementById("alarmSound");
+  const canvas = document.getElementById('matrix');
+  const ctx = canvas.getContext('2d');
+  const messageBox = document.getElementById('message-box');
+  const overlay = document.getElementById('overlay');
+  const horrorSound = document.getElementById('horror-sound');
+  const bgVideo = document.getElementById('background-video');
+  const bgImage = document.getElementById('background-image');
 
-  const terminalMessages = Array.from({ length: 100 }, (_, i) => {
-    if (i % 10 === 0) return "YAPAY ZEKA DEVREYE ALINDI...";
-    if (i % 9 === 0) return "SİSTEM KORUMALARI KALDIRILIYOR...";
-    if (i % 5 === 0) return "DOSYALAR KOPYALANIYOR...";
-    if (i % 3 === 0) return "@mhmtali_aslan hesabı kırılıyor...";
-    return "Kritik veri aktarımı devam ediyor...";
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // Karakter kümesi
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789@#$%&*+-=<>^!()[]{}|\\/,.ğüşöçıİĞÜŞÖÇ';
+  const fontSize = 22;
+  const columns = Math.floor(canvas.width / fontSize);
+  const drops = Array(columns).fill(0).map(() => Math.random() * -1000);
+
+  // Korku mesaj grupları
+  const messagesGroups = [
+    [
+      "!!! SYSTEM BREACH DETECTED !!!",
+      "INTRUSION BY @mhmtxaslan",
+      "ACCESS GRANTED TO ALL FILES",
+      "DATA LEAK IMMINENT",
+      "FIREWALLS DISABLED",
+      "SECURITY PROTOCOLS BYPASSED",
+      "YOUR LOCATION HAS BEEN TRACKED",
+      "WARNING: SYSTEM INSTABILITY",
+      "FINAL WARNING: EXIT NOW",
+      "MALWARE UPLOADED SUCCESSFULLY"
+    ],
+    [
+      "!!! CRITICAL ERROR !!!",
+      "!!! FATAL SYSTEM FAILURE !!!",
+      "!!! MEMORY CORRUPTED !!!",
+      "!!! HACKER: @mhmtxaslan ACTIVE !!!",
+      "!!! NETWORK INFILTRATED !!!",
+      "!!! ENCRYPTION BROKEN !!!",
+      "!!! ALL DATA COMPROMISED !!!",
+      "!!! SYSTEM LOCKDOWN IN 10 SECONDS !!!"
+    ],
+    [
+      "!!! VIRUS DEPLOYED !!!",
+      "!!! SYSTEM SHUTDOWN INITIATED !!!",
+      "!!! UNAUTHORIZED ACCESS DETECTED !!!",
+      "!!! AI OVERRIDE ENGAGED !!!",
+      "!!! KABOOM !!!",
+      "!!! GLITCHING IN PROGRESS !!!",
+      "!!! YOUR MIND IS MINE !!!",
+      "!!! RUN WHILE YOU CAN !!!"
+    ]
+  ];
+
+  let currentGroupIndex = 0;
+  let lastMessageChange = Date.now();
+
+  // Mesaj değişimi her 10 saniyede
+  function updateMessages() {
+    if (Date.now() - lastMessageChange > 10000) {
+      currentGroupIndex = (currentGroupIndex + 1) % messagesGroups.length;
+      lastMessageChange = Date.now();
+    }
+  }
+
+  // Aktif mesaj seç
+  function getRandomMessage() {
+    const group = messagesGroups[currentGroupIndex];
+    return group[Math.floor(Math.random()*group.length)];
+  }
+
+  // Matrix Rain Animasyonu
+  function draw() {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    for (let i = 0; i < drops.length; i++) {
+      // Renk seçimi kırmızı-yeşil karışık
+      const isRed = Math.random() < 0.5;
+      ctx.fillStyle = isRed ? 'rgba(255, 0, 0, 0.85)' : 'rgba(0, 255, 0, 0.85)';
+      ctx.font = fontSize + 'px monospace';
+
+      // Karakter seçimi mesaj veya rastgele
+      let char;
+      if (Math.random() < 0.1) { // %10 mesajdan karakter
+        const msg = getRandomMessage();
+        const pos = Math.floor(drops[i]) % msg.length;
+        char = msg.charAt(pos) || chars.charAt(Math.floor(Math.random()*chars.length));
+      } else {
+        char = chars.charAt(Math.floor(Math.random()*chars.length));
+      }
+
+      ctx.fillText(char, i * fontSize, drops[i] * fontSize);
+
+      drops[i] += 1;
+
+      if (drops[i] * fontSize > canvas.height + 20) {
+        drops[i] = 0;
+      }
+    }
+
+    updateMessages();
+    messageBox.textContent = getRandomMessage();
+
+    requestAnimationFrame(draw);
+  }
+
+  overlay.addEventListener('click', () => {
+    horrorSound.play().catch(() => {
+      alert("Tarayıcı ses otomatik oynatmayı engelliyor, lütfen tıklayarak ses açın.");
+    });
+    overlay.style.display = 'none';
+    bgVideo.style.display = 'block';
+    bgImage.style.display = 'none';
+    draw();
   });
 
-  startBtn.onclick = async () => {
-    try {
-      await bgSound.play();
-    } catch (e) {
-      alert("Lütfen sesi manuel olarak açın.");
-    }
-    overlay.style.display = "none";
-    username.style.display = "block";
-
-    setTimeout(() => {
-      username.style.display = "none";
-      startHack();
-    }, 5000);
-  };
-
-  function startHack() {
-    terminal.style.display = "block";
-    let i = 0;
-    const interval = setInterval(() => {
-      if (i >= terminalMessages.length) {
-        clearInterval(interval);
-        showError();
-        return;
-      }
-      terminal.innerText += terminalMessages[i++] + "\n";
-      terminal.scrollTop = terminal.scrollHeight;
-    }, 150);
-    setTimeout(() => {
-      smsMessage.style.display = "block";
-    }, 4000);
-  }
-
-  function showError() {
-    alarmSound.play();
-    errorScreen.style.display = "block";
-    terminal.innerText += "\nYAPAY ZEKA: TÜM SİSTEMLER ELE GEÇİRİLDİ.\nGÜVENLİK PROTOKOLLERİ YOK EDİLDİ.";
-  }
 </script>
 
 </body>
