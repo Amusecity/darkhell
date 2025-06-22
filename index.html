@@ -2,8 +2,8 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SYSTEM HACKED</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hack Simülasyonu</title>
   <style>
     body {
       margin: 0;
@@ -12,111 +12,99 @@
       font-family: monospace;
       overflow: hidden;
     }
-    #startBtn {
+    #startButton {
       position: fixed;
-      top: 50%; left: 50%;
+      top: 50%;
+      left: 50%;
       transform: translate(-50%, -50%);
-      font-size: 30px;
+      font-size: 32px;
       color: red;
-      border: 2px solid red;
+      border: 3px solid red;
       border-radius: 50%;
-      width: 60px; height: 60px;
+      width: 60px;
+      height: 60px;
       text-align: center;
       line-height: 56px;
       cursor: pointer;
-      z-index: 1000;
+      z-index: 9999;
+      font-weight: bold;
       background: black;
     }
     #hackScreen {
       display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
+      width: 100vw;
+      height: 100vh;
       background: black;
       color: lime;
-      font-size: 20px;
       padding: 20px;
-      overflow: hidden;
-    }
-    #terminal {
-      height: 80vh;
-      overflow-y: auto;
+      overflow-y: hidden;
+      font-size: 22px;
       white-space: pre-wrap;
-      font-size: 18px;
     }
-    #error {
+    #aiMessage {
+      display: none;
+      position: absolute;
+      bottom: 10%;
+      width: 100%;
+      text-align: center;
       font-size: 32px;
       color: red;
-      text-align: center;
-      margin-top: 20px;
-      display: none;
-    }
-    .big-message {
-      font-size: 28px;
-      color: red;
-      animation: flash 0.5s infinite;
-      text-align: center;
-      margin-top: 20px;
-    }
-    @keyframes flash {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.2; }
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
 
-<div id="startBtn">X</div>
+<div id="startButton">X</div>
+<div id="hackScreen"></div>
+<div id="aiMessage">[AI] Sistem tamamen ele geçirildi. Kaçamazsın @mhmtali_aslan</div>
 
-<div id="hackScreen">
-  <div class="big-message">INSTAGRAM HESABI ÇALINIYOR: @mhmtali_aslan</div>
-  <div id="terminal"></div>
-  <div id="error">SMS gönderildi: +90XXXXXXXXXX</div>
-</div>
-
-<audio id="sfx" src="https://cdn.pixabay.com/audio/2022/10/31/audio_a233d7d1c7.mp3" preload="auto"></audio>
+<audio id="bgSound" src="https://cdn.pixabay.com/audio/2022/03/01/audio_54d3e3df43.mp3" loop></audio>
 
 <script>
-  const startBtn = document.getElementById('startBtn');
-  const hackScreen = document.getElementById('hackScreen');
-  const terminal = document.getElementById('terminal');
-  const error = document.getElementById('error');
-  const sfx = document.getElementById('sfx');
+const startButton = document.getElementById('startButton');
+const hackScreen = document.getElementById('hackScreen');
+const aiMessage = document.getElementById('aiMessage');
+const bgSound = document.getElementById('bgSound');
 
-  const hackMessages = [
-    "Sunucuya bağlanılıyor...",
-    "Güvenlik duvarı aşıldı...",
-    "Parola: ********",
-    "@mhmtali_aslan hesabı hedefte...",
-    "Veriler ele geçiriliyor...",
-    "Kullanıcı bilgileri yedekleniyor...",
-    "SMS doğrulama atlanıyor...",
-    "Instagram güvenliği devre dışı bırakıldı...",
-    "Çıkış yapılıyor...",
-    "HESAP ARTIK BİZDE!",
-  ];
+const hackTexts = [
+  "Instagram hesabın @mhmtali_aslan ele geçiriliyor...",
+  "Şifreler çözüldü...",
+  "Erişim token'ı kopyalandı...",
+  "Veriler sunucuya yükleniyor...",
+  "2FA sistemin geçersiz...",
+  "Telefon numaran hack sistemine gönderildi.",
+  "SMS: 'Kodunuz: 837263' gönderildi.",
+  "Sosyal medya hesapların kontrol altında...",
+  "Yedek hesaplar taranıyor...",
+  "Her şey gözlerimizin önünde...",
+  "Kaçamazsın.",
+];
 
-  function simulateHack() {
-    let i = 0;
-    function nextLine() {
-      if (i < hackMessages.length) {
-        terminal.innerHTML += hackMessages[i] + "\n";
-        terminal.scrollTop = terminal.scrollHeight;
-        i++;
-        setTimeout(nextLine, 800);
-      } else {
-        error.style.display = 'block';
-      }
-    }
-    nextLine();
+let index = 0;
+
+function loopText() {
+  if (index >= hackTexts.length) {
+    index = 0;
+    hackScreen.innerText = "";
   }
+  hackScreen.innerText += hackTexts[index] + "\n";
+  hackScreen.scrollTop = hackScreen.scrollHeight;
+  index++;
+}
 
-  startBtn.addEventListener('click', () => {
-    startBtn.style.display = 'none';
-    hackScreen.style.display = 'block';
-    sfx.play();
-    simulateHack();
-  });
+function startHack() {
+  startButton.style.display = "none";
+  hackScreen.style.display = "block";
+  bgSound.play().catch(() => alert("Lütfen sesi manuel olarak açın."));
+
+  setInterval(loopText, 3000); // Her 3 sn'de yeni yazı
+  setTimeout(() => {
+    aiMessage.style.display = 'block';
+  }, 25000); // 25 sn sonra yapay zekâ mesajı göster
+}
+
+startButton.addEventListener('click', startHack);
 </script>
 
 </body>
