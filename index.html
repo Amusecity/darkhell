@@ -1,130 +1,212 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8" />
-<title>Korkutucu Hacker Terminal</title>
-<style>
-  body {
-    margin: 0; background: black; font-family: monospace; overflow: hidden; color: #0f0;
-  }
-  #terminal {
-    white-space: pre-wrap;
-    font-size: 14px;
-    padding: 20px;
-    height: 100vh;
-    overflow-y: hidden;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-  }
-  .line {
-    animation: fadein 0.3s linear;
-  }
-  .red { color: red; }
-  .green { color: lime; }
-  #startOverlay {
-    position: fixed; top:0; left:0; width:100vw; height:100vh;
-    background: black;
-    color: #f00;
-    display: flex; justify-content: center; align-items: center;
-    font-size: 30px;
-    cursor: pointer;
-    user-select: none;
-    z-index: 9999;
-  }
-  @keyframes fadein {
-    from {opacity: 0;}
-    to {opacity: 1;}
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zero-Day HACK</title>
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      color: #0f0;
+      font-family: monospace;
+      overflow: hidden;
+    }
+    #startButton {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 28px;
+      color: red;
+      border: 2px solid red;
+      border-radius: 50%;
+      width: 60px; height: 60px;
+      text-align: center;
+      line-height: 58px;
+      cursor: pointer;
+      z-index: 9999;
+      font-weight: bold;
+      background: black;
+    }
+    #usernameDisplay {
+      display: none;
+      position: fixed;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 36px;
+      color: red;
+      z-index: 9998;
+      animation: flicker 0.1s infinite;
+    }
+    @keyframes flicker {
+      0% { opacity: 1; }
+      50% { opacity: 0.4; }
+      100% { opacity: 1; }
+    }
+    #mainBox {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 80vw; height: 80vh;
+      transform: translate(-50%, -50%);
+      background: black;
+      border: 2px solid #0f0;
+      padding: 10px;
+      color: #0f0;
+      overflow-y: auto;
+      font-size: 14px;
+      white-space: pre-wrap;
+      display: none;
+      z-index: 1000;
+    }
+    .box {
+      position: absolute;
+      background: black;
+      border: 2px solid;
+      padding: 10px;
+      width: 45vw;
+      height: 40vh;
+      overflow-y: auto;
+      font-size: 12px;
+      white-space: pre-wrap;
+      display: none;
+      z-index: 1100;
+      animation: boxIn 1s ease forwards;
+    }
+    @keyframes boxIn {
+      0% { transform: scale(0.6); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .top { top: 5vh; }
+    .bottom { bottom: 5vh; }
+    .left { left: 5vw; }
+    .right { right: 5vw; }
+    #box1 { border-color: red; color: red; }
+    #box2 { border-color: lime; color: lime; }
+    #box3 { border-color: white; color: white; }
+    #box4 { border-color: cyan; color: cyan; }
+
+    #errorScreen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: black;
+      color: red;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      font-weight: bold;
+      z-index: 99999;
+      animation: flash 0.2s infinite;
+    }
+    @keyframes flash {
+      0%, 100% { background: black; color: red; }
+      50% { background: red; color: black; }
+    }
+  </style>
 </head>
 <body>
 
-<div id="startOverlay">Sesi Başlatmak için Tıklayın</div>
-<div id="terminal"></div>
+<div id="startButton">X</div>
+<div id="usernameDisplay">@mhmtxaslan</div>
+<div id="mainBox"></div>
+<div class="box top left" id="box1"></div>
+<div class="box top right" id="box2"></div>
+<div class="box bottom left" id="box3"></div>
+<div class="box bottom right" id="box4"></div>
+<div id="errorScreen">!!! SYSTEM FAILURE !!!</div>
 
-<audio id="horrorSound" loop>
-  <source src="https://cdn.pixabay.com/download/audio/2022/10/30/audio_c4b8b7c884.mp3?filename=glitch-ambient-123269.mp3" type="audio/mpeg" />
-  <!-- Alternatif korkutucu ses kaynakları da ekleyebilirsin -->
-</audio>
+<!-- Sesler -->
+<audio id="beep" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
+<audio id="alarm" src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg" loop></audio>
+<audio id="horror" src="https://cdn.pixabay.com/audio/2022/03/14/audio_a7ec38b816.mp3" loop></audio>
+<audio id="errorEnd" src="https://cdn.pixabay.com/audio/2021/09/20/audio_0a845b16e2.mp3"></audio>
 
 <script>
-  const terminal = document.getElementById('terminal');
-  const startOverlay = document.getElementById('startOverlay');
-  const horrorSound = document.getElementById('horrorSound');
+  const startButton = document.getElementById('startButton');
+  const usernameDisplay = document.getElementById('usernameDisplay');
+  const mainBox = document.getElementById('mainBox');
+  const boxes = [document.getElementById('box1'), document.getElementById('box2'), document.getElementById('box3'), document.getElementById('box4')];
+  const errorScreen = document.getElementById('errorScreen');
+  const beep = document.getElementById('beep');
+  const alarm = document.getElementById('alarm');
+  const horror = document.getElementById('horror');
+  const errorEnd = document.getElementById('errorEnd');
 
-  const messageGroups = [
-    [
-      "[ERROR] Sistem çöküyor...",
-      "[FATAL] Yapay zekâ kontrolden çıktı!",
-      "[ALERT] Tüm dosyalar siliniyor...",
-      "[SYS] @mhmtxaslan bulundu!",
-      "[AI] İnsanlık sona erdi."
-    ],
-    [
-      "[INTRUSION] IP adresi tespit edildi.",
-      "[AI] Nefes almanıza gerek yok.",
-      "[TRACE] Konumunuz takip ediliyor...",
-      "[SYS] Kamera aktif!",
-      "[DATA] Tüm anılarınız analiz ediliyor..."
-    ],
-    [
-      "[WARNING] Beyin frekansı çözüldü.",
-      "[CRITICAL] Kodlama çözüldü: mhmtxaslan",
-      "[!] Korku seviyesi %94'e ulaştı.",
-      "[GLITCH] Zihin kontrol devrede.",
-      "[EXPERIMENT] Göz hareketi analiz ediliyor..."
-    ]
-  ];
-
-  let currentGroup = 0;
-  let linesPerBatch = 20;
-  let intervalId, switchGroupId;
-
-  function getRandomLine(group) {
-    const text = group[Math.floor(Math.random() * group.length)];
-    const color = Math.random() > 0.5 ? 'red' : 'green';
-    return { text, color };
-  }
-
-  function printBatch() {
-    for(let i=0; i<linesPerBatch; i++) {
-      const lineObj = getRandomLine(messageGroups[currentGroup]);
-      const div = document.createElement('div');
-      div.textContent = lineObj.text;
-      div.className = 'line ' + lineObj.color;
-      terminal.appendChild(div);
+  function generateLogs(count) {
+    let logs = [];
+    for(let i=0; i<count; i++) {
+      logs.push(`[${i}] ${Math.random().toString(36).substring(2, 8)}: SYSTEM BREACH`);
     }
-    // Scroll son satıra otomatik kaydır
-    terminal.scrollTop = terminal.scrollHeight;
+    return logs;
+  }
 
-    // Sınırlama: Çok büyümesin diye 500 satırdan fazla ise baştan sil
-    while(terminal.children.length > 500) {
-      terminal.removeChild(terminal.firstChild);
+  function typeText(element, lines, delay=25, callback) {
+    let i = 0;
+    element.innerText = '';
+    let interval = setInterval(() => {
+      element.innerText += lines[i] + '\\n';
+      element.scrollTop = element.scrollHeight;
+      i++;
+      if(i >= lines.length) {
+        clearInterval(interval);
+        if(callback) callback();
+      }
+    }, delay);
+  }
+
+  function showBoxes() {
+    alarm.play();
+    let index = 0;
+    function nextBox() {
+      if (index >= boxes.length) {
+        setTimeout(() => {
+          alarm.pause();
+          horror.pause();
+          errorEnd.play();
+          errorScreen.style.display = 'flex';
+        }, 2000);
+        return;
+      }
+      const box = boxes[index];
+      box.style.display = 'block';
+      beep.play();
+      let logs = generateLogs(30);
+      typeText(box, logs, 15, () => {
+        index++;
+        setTimeout(nextBox, 1500);
+      });
     }
+    nextBox();
   }
 
-  function switchGroup() {
-    currentGroup = (currentGroup + 1) % messageGroups.length;
+  function startSimulation() {
+    startButton.style.display = 'none';
+    usernameDisplay.style.display = 'block';
+    setTimeout(() => {
+      usernameDisplay.style.display = 'none';
+      mainBox.style.display = 'block';
+      horror.play();
+      const logs = [
+        "[AI] Bağlantı kuruldu.",
+        "[AI] Ana bilgisayar kontrolü ele geçiriliyor...",
+        "[FATAL] Güvenlik sistemleri çökertildi.",
+        "[SYS] Veri sızıntısı başlatıldı.",
+        "[AI] Kodlamalar çözüldü.",
+        "[!] Tehlikeli aktivite algılandı.",
+        "[AI] Geri dönüş engellendi.",
+        "[CRITICAL] Zihin senkronizasyonu başlatıldı...",
+        "[ERROR] Sistem sınırı aşıldı.",
+        "[SYS] Geri dönüşsüz çöküş başlıyor...",
+      ];
+      typeText(mainBox, logs, 40, () => {
+        setTimeout(showBoxes, 1000);
+      });
+    }, 5000);
   }
 
-  function start() {
-    // Korkutucu ses başlat
-    horrorSound.play().catch(() => {
-      // Otomatik oynatma engellenirse uyarı olabilir
-      console.warn("Ses oynatılamadı, kullanıcı etkileşimi gerekli.");
-    });
-
-    startOverlay.style.display = 'none';
-
-    // Çok hızlı ve yoğun yazı akışı: her 200 ms'de 20 satır => 100 satır/saniye gibi yoğunluk
-    intervalId = setInterval(printBatch, 200);
-
-    // 5 saniyede bir grup değiştir
-    switchGroupId = setInterval(switchGroup, 5000);
-  }
-
-  startOverlay.addEventListener('click', start);
+  startButton.addEventListener('click', startSimulation);
 </script>
 </body>
 </html>
