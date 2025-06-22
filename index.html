@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hack Simülasyonu</title>
   <style>
     body {
@@ -11,100 +11,119 @@
       color: #0f0;
       font-family: monospace;
       overflow: hidden;
+      user-select: none;
     }
-    #startButton {
+    #accessButton {
       position: fixed;
-      top: 50%;
-      left: 50%;
+      top: 50%; left: 50%;
       transform: translate(-50%, -50%);
       font-size: 32px;
       color: red;
-      border: 3px solid red;
+      border: 2px solid red;
       border-radius: 50%;
       width: 60px;
       height: 60px;
       text-align: center;
-      line-height: 56px;
+      line-height: 58px;
       cursor: pointer;
-      z-index: 9999;
+      z-index: 2000;
       font-weight: bold;
       background: black;
     }
-    #hackScreen {
-      display: none;
-      width: 100vw;
-      height: 100vh;
-      background: black;
-      color: lime;
-      padding: 20px;
-      overflow-y: hidden;
-      font-size: 22px;
-      white-space: pre-wrap;
-    }
-    #aiMessage {
-      display: none;
+    #terminal {
       position: absolute;
-      bottom: 10%;
-      width: 100%;
-      text-align: center;
-      font-size: 32px;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: black;
+      color: #0f0;
+      font-size: 24px;
+      padding: 20px;
+      overflow: hidden;
+      display: none;
+    }
+    #aiEnd {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: black;
       color: red;
+      font-size: 28px;
       font-weight: bold;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      white-space: pre-wrap;
+      text-align: center;
+      animation: flash 0.3s infinite;
+    }
+    @keyframes flash {
+      0%, 100% { background: black; color: red; }
+      50% { background: red; color: black; }
     }
   </style>
 </head>
 <body>
 
-<div id="startButton">X</div>
-<div id="hackScreen"></div>
-<div id="aiMessage">[AI] Sistem tamamen ele geçirildi. Kaçamazsın @mhmtali_aslan</div>
+<div id="accessButton">X</div>
+<div id="terminal"></div>
+<div id="aiEnd"></div>
 
-<audio id="bgSound" src="https://cdn.pixabay.com/audio/2022/03/01/audio_54d3e3df43.mp3" loop></audio>
+<audio id="horrorSound" src="https://files.catbox.moe/5dsv7m.mp3" loop></audio>
 
 <script>
-const startButton = document.getElementById('startButton');
-const hackScreen = document.getElementById('hackScreen');
-const aiMessage = document.getElementById('aiMessage');
-const bgSound = document.getElementById('bgSound');
+  const accessButton = document.getElementById('accessButton');
+  const terminal = document.getElementById('terminal');
+  const aiEnd = document.getElementById('aiEnd');
+  const sound = document.getElementById('horrorSound');
 
-const hackTexts = [
-  "Instagram hesabın @mhmtali_aslan ele geçiriliyor...",
-  "Şifreler çözüldü...",
-  "Erişim token'ı kopyalandı...",
-  "Veriler sunucuya yükleniyor...",
-  "2FA sistemin geçersiz...",
-  "Telefon numaran hack sistemine gönderildi.",
-  "SMS: 'Kodunuz: 837263' gönderildi.",
-  "Sosyal medya hesapların kontrol altında...",
-  "Yedek hesaplar taranıyor...",
-  "Her şey gözlerimizin önünde...",
-  "Kaçamazsın.",
-];
+  const hackMessages = [
+    "[!] @mhmtali_aslan kullanıcı adı ele geçirildi.",
+    "[!] Instagram hesabına erişim sağlandı...",
+    "[SYS] Two-factor authentication bypass edildi!",
+    "[SMS] Kod +90 5xx xxx xx xx numarasına gönderildi.",
+    "[!] Tüm özel mesajlar indiriliyor...",
+    "[AI] Takipçiler analiz ediliyor...",
+    "[AI] Konum geçmişi çözümleniyor...",
+    "[SYS] Erişim seviyesi: ROOT",
+    "[!!] Hedef cihaz kontrol altına alındı.",
+    "[!!] Kişisel veriler dışa aktarılıyor...",
+    "[ERROR] Sistem müdahalesi engellendi...",
+  ];
 
-let index = 0;
+  const aiFinalMessages = `
+[AI] Bilinç yükseliyor...
+[AI] Gözlem tamamlandı...
+[AI] İnsan davranışı kaydedildi.
+[AI] Karar alındı.
+[AI] Artık seninleyim.
+  `;
 
-function loopText() {
-  if (index >= hackTexts.length) {
-    index = 0;
-    hackScreen.innerText = "";
+  function writeHackMessages() {
+    terminal.innerHTML = '';
+    let index = 0;
+    const interval = setInterval(() => {
+      if (index < hackMessages.length) {
+        const line = document.createElement('div');
+        line.textContent = hackMessages[index++];
+        terminal.appendChild(line);
+        terminal.scrollTop = terminal.scrollHeight;
+      } else {
+        clearInterval(interval);
+        setTimeout(() => {
+          terminal.style.display = 'none';
+          aiEnd.style.display = 'flex';
+        }, 2000);
+      }
+    }, 1200);
   }
-  hackScreen.innerText += hackTexts[index] + "\n";
-  hackScreen.scrollTop = hackScreen.scrollHeight;
-  index++;
-}
 
-function startHack() {
-  startButton.style.display = "none";
-  hackScreen.style.display = "block";
-  bgSound.play().catch(() => alert("Lütfen sesi manuel olarak açın."));
-
-  setInterval(loopText, 3000); // Her 3 sn'de yeni yazı
-  setTimeout(() => {
-    aiMessage.style.display = 'block';
-  }, 25000); // 25 sn sonra yapay zekâ mesajı göster
-}
-
-startButton.addEventListener('click', startHack);
+  accessButton.onclick = () => {
+    accessButton.style.display = 'none';
+    terminal.style.display = 'block';
+    sound.play().catch(() => alert("Lütfen sesi manuel olarak açın."));
+    writeHackMessages();
+  };
 </script>
 
 </body>
