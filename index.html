@@ -1,234 +1,149 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>System Hacked - @mhmtxaslan</title>
-<style>
-  html, body {
-    margin: 0; padding: 0;
-    overflow: hidden;
-    height: 100%;
-    background: black;
-    font-family: monospace;
-    color: #0f0;
-  }
-  #background-video, #background-image {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw;
-    height: 100vh;
-    object-fit: cover;
-    z-index: 0;
-    filter: brightness(0.3) contrast(1.3) saturate(1.5);
-  }
-  #background-image {
-    display: none;
-  }
-  canvas#matrix {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: 2;
-    pointer-events: none;
-  }
-  #glitch-overlay {
-    pointer-events: none;
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw; height: 100vh;
-    z-index: 5;
-    background: repeating-linear-gradient(
-      0deg,
-      rgba(255, 0, 0, 0.03) 0,
-      rgba(255, 0, 0, 0.03) 2px,
-      transparent 2px,
-      transparent 4px
-    );
-    mix-blend-mode: screen;
-    animation: glitchAnim 0.5s infinite;
-  }
-  @keyframes glitchAnim {
-    0% {background-position: 0 0;}
-    100% {background-position: 100% 100%;}
-  }
-  #message-box {
-    position: fixed;
-    bottom: 60px;
-    width: 100%;
-    text-align: center;
-    font-size: 20px;
-    font-weight: bold;
-    color: #ff0000;
-    text-shadow: 0 0 10px #ff0000, 0 0 20px #00ff00;
-    z-index: 10;
-    user-select: none;
-    pointer-events: none;
-  }
-  #overlay {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw; height: 100vh;
-    background: rgba(0,0,0,0.85);
-    color: #f00;
-    font-size: 28px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    z-index: 15;
-    user-select: none;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SYSTEM HACKED</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: black;
+      color: #0f0;
+      font-family: monospace;
+      overflow: hidden;
+      height: 100vh;
+      user-select: none;
+    }
+
+    #startBtn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 60px;
+      height: 60px;
+      border: 2px solid red;
+      color: red;
+      background: black;
+      font-size: 30px;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 56px;
+      cursor: pointer;
+      z-index: 10;
+    }
+
+    #username {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: red;
+      font-size: 32px;
+      display: none;
+      z-index: 9;
+    }
+
+    #terminal {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      padding: 10px;
+      font-size: 14px;
+      white-space: pre-wrap;
+      overflow: hidden;
+      display: none;
+    }
+
+    .glitch {
+      animation: glitch 0.3s infinite;
+    }
+
+    @keyframes glitch {
+      0% { color: red; transform: translate(0, 0); }
+      20% { color: lime; transform: translate(2px, -2px); }
+      40% { color: red; transform: translate(-2px, 2px); }
+      60% { color: lime; transform: translate(2px, 2px); }
+      80% { color: red; transform: translate(-2px, -2px); }
+      100% { color: lime; transform: translate(0, 0); }
+    }
+  </style>
 </head>
 <body>
 
-<!-- Arka plan video veya görsel -->
-<video id="background-video" autoplay muted loop playsinline>
-  <source src="https://cdn.videvo.net/videvo_files/video/free/2021-10/small_watermarked/210625_04_Cybersecurity_1080p_005_preview.webm" type="video/webm">
-  <!-- Alternatif mp4 veya fallback görsel ekle -->
-</video>
-<img id="background-image" src="https://images.unsplash.com/photo-1532619675605-622b4bca6e76?auto=format&fit=crop&w=1280&q=80" alt="Background" />
+<div id="startBtn">X</div>
+<div id="username">@mhmtali_aslan</div>
+<pre id="terminal"></pre>
 
-<!-- Matrix Rain Canvas -->
-<canvas id="matrix"></canvas>
-
-<!-- Glitch overlay -->
-<div id="glitch-overlay"></div>
-
-<!-- Dinamik Korkutucu Mesaj -->
-<div id="message-box">SYSTEM HACKED BY @mhmtxaslan</div>
-
-<!-- Başlatmak için Overlay -->
-<div id="overlay">Sesi Başlatmak İçin Tıklayın</div>
-
-<!-- Arka plan korku/glitch sesi -->
-<audio id="horror-sound" loop>
-  <source src="https://cdn.pixabay.com/download/audio/2022/10/30/audio_c4b8b7c884.mp3?filename=glitch-ambient-123269.mp3" type="audio/mpeg">
-</audio>
+<!-- Sesler -->
+<audio id="alarmSound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" loop></audio>
+<audio id="glitchSound" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg"></audio>
 
 <script>
-  const canvas = document.getElementById('matrix');
-  const ctx = canvas.getContext('2d');
-  const messageBox = document.getElementById('message-box');
-  const overlay = document.getElementById('overlay');
-  const horrorSound = document.getElementById('horror-sound');
-  const bgVideo = document.getElementById('background-video');
-  const bgImage = document.getElementById('background-image');
+  const startBtn = document.getElementById('startBtn');
+  const username = document.getElementById('username');
+  const terminal = document.getElementById('terminal');
+  const alarm = document.getElementById('alarmSound');
+  const glitch = document.getElementById('glitchSound');
 
-  function resize() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
-  resize();
-  window.addEventListener('resize', resize);
-
-  // Karakter kümesi
-  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789@#$%&*+-=<>^!()[]{}|\\/,.ğüşöçıİĞÜŞÖÇ';
-  const fontSize = 22;
-  const columns = Math.floor(canvas.width / fontSize);
-  const drops = Array(columns).fill(0).map(() => Math.random() * -1000);
-
-  // Korku mesaj grupları
-  const messagesGroups = [
-    [
-      "!!! SYSTEM BREACH DETECTED !!!",
-      "INTRUSION BY @mhmtxaslan",
-      "ACCESS GRANTED TO ALL FILES",
-      "DATA LEAK IMMINENT",
-      "FIREWALLS DISABLED",
-      "SECURITY PROTOCOLS BYPASSED",
-      "YOUR LOCATION HAS BEEN TRACKED",
-      "WARNING: SYSTEM INSTABILITY",
-      "FINAL WARNING: EXIT NOW",
-      "MALWARE UPLOADED SUCCESSFULLY"
-    ],
-    [
-      "!!! CRITICAL ERROR !!!",
-      "!!! FATAL SYSTEM FAILURE !!!",
-      "!!! MEMORY CORRUPTED !!!",
-      "!!! HACKER: @mhmtxaslan ACTIVE !!!",
-      "!!! NETWORK INFILTRATED !!!",
-      "!!! ENCRYPTION BROKEN !!!",
-      "!!! ALL DATA COMPROMISED !!!",
-      "!!! SYSTEM LOCKDOWN IN 10 SECONDS !!!"
-    ],
-    [
-      "!!! VIRUS DEPLOYED !!!",
-      "!!! SYSTEM SHUTDOWN INITIATED !!!",
-      "!!! UNAUTHORIZED ACCESS DETECTED !!!",
-      "!!! AI OVERRIDE ENGAGED !!!",
-      "!!! KABOOM !!!",
-      "!!! GLITCHING IN PROGRESS !!!",
-      "!!! YOUR MIND IS MINE !!!",
-      "!!! RUN WHILE YOU CAN !!!"
-    ]
+  let contents = [
+    "[!] Firewall bypassed...\n[!] Access token located...\n[+] Uploading payload...\n[+] IG session hijacked...\n[!] @mhmtali_aslan -> SESSION STOLEN!\n[SYS] Kernel exploit running...\n[FATAL] System compromised!",
+    "[!!!] WARNING: Unauthorized Access\n[DATA STREAM] :: 0101000101...\n[PROXY] Tunneling activated...\n[PHASE 2] Escalating privileges\n[SESSION] @mhmtali_aslan breached!\n[FATAL ERROR] Root control hijacked!",
+    "[INFO] Injecting remote scripts...\n[+] SYSTEM OVERRIDE COMPLETE\n[+] Logging out admins...\n[!] WIPING TRACE...\n[SYS] Accessing Instagram DB\n[!!!] @mhmtali_aslan PASSWORD RESET FORCED!"
   ];
 
-  let currentGroupIndex = 0;
-  let lastMessageChange = Date.now();
-
-  // Mesaj değişimi her 10 saniyede
-  function updateMessages() {
-    if (Date.now() - lastMessageChange > 10000) {
-      currentGroupIndex = (currentGroupIndex + 1) % messagesGroups.length;
-      lastMessageChange = Date.now();
-    }
+  function playSounds() {
+    alarm.play();
+    glitch.play();
   }
 
-  // Aktif mesaj seç
-  function getRandomMessage() {
-    const group = messagesGroups[currentGroupIndex];
-    return group[Math.floor(Math.random()*group.length)];
+  function startHack() {
+    startBtn.style.display = 'none';
+    username.style.display = 'block';
+    playSounds();
+
+    setTimeout(() => {
+      username.style.display = 'none';
+      terminal.style.display = 'block';
+      terminal.classList.add('glitch');
+      animateHack();
+    }, 5000);
   }
 
-  // Matrix Rain Animasyonu
-  function draw() {
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  function animateHack() {
+    let current = 0;
 
-    for (let i = 0; i < drops.length; i++) {
-      // Renk seçimi kırmızı-yeşil karışık
-      const isRed = Math.random() < 0.5;
-      ctx.fillStyle = isRed ? 'rgba(255, 0, 0, 0.85)' : 'rgba(0, 255, 0, 0.85)';
-      ctx.font = fontSize + 'px monospace';
-
-      // Karakter seçimi mesaj veya rastgele
-      let char;
-      if (Math.random() < 0.1) { // %10 mesajdan karakter
-        const msg = getRandomMessage();
-        const pos = Math.floor(drops[i]) % msg.length;
-        char = msg.charAt(pos) || chars.charAt(Math.floor(Math.random()*chars.length));
-      } else {
-        char = chars.charAt(Math.floor(Math.random()*chars.length));
-      }
-
-      ctx.fillText(char, i * fontSize, drops[i] * fontSize);
-
-      drops[i] += 1;
-
-      if (drops[i] * fontSize > canvas.height + 20) {
-        drops[i] = 0;
-      }
+    function cycle() {
+      terminal.textContent = '';
+      const lines = contents[current].split("\n");
+      let i = 0;
+      const interval = setInterval(() => {
+        if (i >= lines.length) {
+          clearInterval(interval);
+          current = (current + 1) % contents.length;
+          setTimeout(cycle, 5000);
+          return;
+        }
+        terminal.textContent += lines[i] + '\n';
+        i++;
+      }, 150);
     }
 
-    updateMessages();
-    messageBox.textContent = getRandomMessage();
-
-    requestAnimationFrame(draw);
+    cycle();
   }
 
-  overlay.addEventListener('click', () => {
-    horrorSound.play().catch(() => {
-      alert("Tarayıcı ses otomatik oynatmayı engelliyor, lütfen tıklayarak ses açın.");
-    });
-    overlay.style.display = 'none';
-    bgVideo.style.display = 'block';
-    bgImage.style.display = 'none';
-    draw();
+  startBtn.addEventListener('click', async () => {
+    try {
+      await alarm.play();
+      alarm.pause();
+      startHack();
+    } catch (err) {
+      alert("Lütfen sesi açın ve tekrar deneyin.");
+    }
   });
-
 </script>
 
 </body>
