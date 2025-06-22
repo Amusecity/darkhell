@@ -2,194 +2,129 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Hacker Matrix Rain - @mhmtxaslan</title>
+<title>Korkutucu Hacker Terminal</title>
 <style>
-  html, body {
-    margin: 0; padding: 0; overflow: hidden;
-    background: black;
-    height: 100%;
-    font-family: monospace;
-    color: #0f0;
+  body {
+    margin: 0; background: black; font-family: monospace; overflow: hidden; color: #0f0;
   }
-  canvas {
-    display: block;
-    position: fixed;
-    top:0; left:0;
-    width: 100vw;
+  #terminal {
+    white-space: pre-wrap;
+    font-size: 14px;
+    padding: 20px;
     height: 100vh;
-    z-index: 1;
-    background: black;
-  }
-  #overlay {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw; height: 100vh;
+    overflow-y: hidden;
     display: flex;
-    justify-content: center;
-    align-items: center;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+  .line {
+    animation: fadein 0.3s linear;
+  }
+  .red { color: red; }
+  .green { color: lime; }
+  #startOverlay {
+    position: fixed; top:0; left:0; width:100vw; height:100vh;
+    background: black;
     color: #f00;
-    font-size: 24px;
-    background: rgba(0,0,0,0.9);
-    z-index: 10;
+    display: flex; justify-content: center; align-items: center;
+    font-size: 30px;
     cursor: pointer;
     user-select: none;
+    z-index: 9999;
   }
-  #messages {
-    position: fixed;
-    bottom: 50px;
-    width: 100%;
-    text-align: center;
-    font-size: 18px;
-    z-index: 15;
-    font-weight: bold;
-    text-shadow:
-      0 0 5px red,
-      0 0 10px red,
-      0 0 20px lime;
+  @keyframes fadein {
+    from {opacity: 0;}
+    to {opacity: 1;}
   }
 </style>
 </head>
 <body>
 
-<div id="overlay">Sesi Başlatmak için Tıklayın</div>
-<canvas id="matrix"></canvas>
-<div id="messages"></div>
+<div id="startOverlay">Sesi Başlatmak için Tıklayın</div>
+<div id="terminal"></div>
 
-<audio id="horrorAudio" loop>
+<audio id="horrorSound" loop>
   <source src="https://cdn.pixabay.com/download/audio/2022/10/30/audio_c4b8b7c884.mp3?filename=glitch-ambient-123269.mp3" type="audio/mpeg" />
+  <!-- Alternatif korkutucu ses kaynakları da ekleyebilirsin -->
 </audio>
 
 <script>
-  const canvas = document.getElementById('matrix');
-  const ctx = canvas.getContext('2d');
-  const overlay = document.getElementById('overlay');
-  const messagesDiv = document.getElementById('messages');
-  const horrorAudio = document.getElementById('horrorAudio');
+  const terminal = document.getElementById('terminal');
+  const startOverlay = document.getElementById('startOverlay');
+  const horrorSound = document.getElementById('horrorSound');
 
-  // Boyut ayarla
-  function resize() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
-  resize();
-  window.addEventListener('resize', resize);
-
-  // Karakterler (Türkçe dahil)
-  const letters = 'abcdefghijklmnopqrstuvwxyz0123456789@#$%&*+-=<>^!()[]{}|\\/,.';
-  const turkishChars = 'ğüşöçıİĞÜŞÖÇ';
-  const chars = letters + turkishChars;
-
-  // Kayan sütun sayısı
-  const fontSize = 20;
-  const columns = Math.floor(canvas.width / fontSize);
-
-  // Her sütunun y pozisyonu
-  const drops = [];
-  for(let x=0; x<columns; x++) {
-    drops[x] = Math.random() * -1000; // farklı başlangıç
-  }
-
-  // Korkutucu mesajlar, kırmızı ve yeşil arasında geçişli
-  const messagesGroups = [
+  const messageGroups = [
     [
-      "!!! SYSTEM BREACH DETECTED !!!",
-      "INTRUSION BY @mhmtxaslan",
-      "ACCESS GRANTED TO ALL FILES",
-      "DATA LEAK IMMINENT",
-      "FIREWALLS DISABLED",
-      "SECURITY PROTOCOLS BYPASSED",
-      "YOUR LOCATION HAS BEEN TRACKED",
-      "WARNING: SYSTEM INSTABILITY",
-      "FINAL WARNING: EXIT NOW",
-      "MALWARE UPLOADED SUCCESSFULLY"
+      "[ERROR] Sistem çöküyor...",
+      "[FATAL] Yapay zekâ kontrolden çıktı!",
+      "[ALERT] Tüm dosyalar siliniyor...",
+      "[SYS] @mhmtxaslan bulundu!",
+      "[AI] İnsanlık sona erdi."
     ],
     [
-      "!!! CRITICAL ERROR !!!",
-      "!!! FATAL SYSTEM FAILURE !!!",
-      "!!! MEMORY CORRUPTED !!!",
-      "!!! HACKER: @mhmtxaslan ACTIVE !!!",
-      "!!! NETWORK INFILTRATED !!!",
-      "!!! ENCRYPTION BROKEN !!!",
-      "!!! ALL DATA COMPROMISED !!!",
-      "!!! SYSTEM LOCKDOWN IN 10 SECONDS !!!"
+      "[INTRUSION] IP adresi tespit edildi.",
+      "[AI] Nefes almanıza gerek yok.",
+      "[TRACE] Konumunuz takip ediliyor...",
+      "[SYS] Kamera aktif!",
+      "[DATA] Tüm anılarınız analiz ediliyor..."
     ],
     [
-      "!!! VIRUS DEPLOYED !!!",
-      "!!! SYSTEM SHUTDOWN INITIATED !!!",
-      "!!! UNAUTHORIZED ACCESS DETECTED !!!",
-      "!!! AI OVERRIDE ENGAGED !!!",
-      "!!! KABOOM !!!",
-      "!!! GLITCHING IN PROGRESS !!!",
-      "!!! YOUR MIND IS MINE !!!",
-      "!!! RUN WHILE YOU CAN !!!"
+      "[WARNING] Beyin frekansı çözüldü.",
+      "[CRITICAL] Kodlama çözüldü: mhmtxaslan",
+      "[!] Korku seviyesi %94'e ulaştı.",
+      "[GLITCH] Zihin kontrol devrede.",
+      "[EXPERIMENT] Göz hareketi analiz ediliyor..."
     ]
   ];
 
-  let currentGroupIndex = 0;
+  let currentGroup = 0;
+  let linesPerBatch = 20;
+  let intervalId, switchGroupId;
 
-  // Mesaj değişimi her 10 saniyede
-  setInterval(() => {
-    currentGroupIndex = (currentGroupIndex + 1) % messagesGroups.length;
-  }, 10000);
-
-  // Aktif mesaj dizisi
-  function getRandomMessage() {
-    const group = messagesGroups[currentGroupIndex];
-    return group[Math.floor(Math.random()*group.length)];
+  function getRandomLine(group) {
+    const text = group[Math.floor(Math.random() * group.length)];
+    const color = Math.random() > 0.5 ? 'red' : 'green';
+    return { text, color };
   }
 
-  // Animasyon fonksiyonu
-  function draw() {
-    // Transparan siyah üstten çizelim (fading efekti)
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Her sütun için karakter çiz
-    for(let i=0; i<drops.length; i++) {
-      // Rastgele kırmızı-yeşil renk (karışık)
-      const isRed = Math.random() < 0.5;
-      ctx.fillStyle = isRed ? 'rgba(255,0,0,0.8)' : 'rgba(0,255,0,0.8)';
-      ctx.font = fontSize + "px monospace";
-
-      // Karakter seç (mesajdan veya rastgele)
-      let char;
-      if (Math.random() < 0.07) {
-        // %7 ihtimal mesaj karakteri koy (mesaj en son çizilen harf olabilir)
-        const msg = getRandomMessage();
-        const posInMsg = Math.floor((drops[i] / fontSize)) % msg.length;
-        char = msg.charAt(posInMsg) || chars.charAt(Math.floor(Math.random()*chars.length));
-      } else {
-        char = chars.charAt(Math.floor(Math.random()*chars.length));
-      }
-
-      // Karakteri çiz
-      ctx.fillText(char, i*fontSize, drops[i]*fontSize);
-
-      // Pozisyonu güncelle
-      drops[i] += 1;
-
-      // Ekranın altına gelince başa dön
-      if(drops[i]*fontSize > canvas.height + 20) {
-        drops[i] = 0;
-      }
+  function printBatch() {
+    for(let i=0; i<linesPerBatch; i++) {
+      const lineObj = getRandomLine(messageGroups[currentGroup]);
+      const div = document.createElement('div');
+      div.textContent = lineObj.text;
+      div.className = 'line ' + lineObj.color;
+      terminal.appendChild(div);
     }
+    // Scroll son satıra otomatik kaydır
+    terminal.scrollTop = terminal.scrollHeight;
 
-    // Alt kısımda korkutucu mesaj göster
-    messagesDiv.textContent = getRandomMessage();
-
-    requestAnimationFrame(draw);
+    // Sınırlama: Çok büyümesin diye 500 satırdan fazla ise baştan sil
+    while(terminal.children.length > 500) {
+      terminal.removeChild(terminal.firstChild);
+    }
   }
 
-  overlay.addEventListener('click', () => {
-    horrorAudio.play().catch(() => {
-      alert("Tarayıcı ses otomatik oynatmayı engelliyor, lütfen tıklayarak ses açın.");
+  function switchGroup() {
+    currentGroup = (currentGroup + 1) % messageGroups.length;
+  }
+
+  function start() {
+    // Korkutucu ses başlat
+    horrorSound.play().catch(() => {
+      // Otomatik oynatma engellenirse uyarı olabilir
+      console.warn("Ses oynatılamadı, kullanıcı etkileşimi gerekli.");
     });
-    overlay.style.display = 'none';
-    draw();
-  });
 
+    startOverlay.style.display = 'none';
+
+    // Çok hızlı ve yoğun yazı akışı: her 200 ms'de 20 satır => 100 satır/saniye gibi yoğunluk
+    intervalId = setInterval(printBatch, 200);
+
+    // 5 saniyede bir grup değiştir
+    switchGroupId = setInterval(switchGroup, 5000);
+  }
+
+  startOverlay.addEventListener('click', start);
 </script>
-
 </body>
 </html>
