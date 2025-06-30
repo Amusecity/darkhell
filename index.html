@@ -3,163 +3,211 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Hack Alarmı: Kırmızı Ekran Şoku</title>
+<title>Yapay Zekâ Kâbusu</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
   html, body {
     margin: 0; padding: 0; height: 100%;
-    background: black;
+    background: #000;
     overflow: hidden;
     font-family: 'Share Tech Mono', monospace;
     color: #0f0;
-  }
-  #overlay {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: black;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
     user-select: none;
-    cursor: pointer;
-    overflow: hidden;
   }
-  #code {
+
+  #container {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: black;
+    overflow: hidden;
+    cursor: pointer;
+    perspective: 800px;
+  }
+
+  #codeStream {
     position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-    color: #0f0;
-    font-size: 12px;
-    line-height: 14px;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    font-size: 14px;
+    line-height: 16px;
     white-space: nowrap;
+    text-shadow: 0 0 8px #0f0, 0 0 15px #0f0, 0 0 30px #0f0;
     overflow: hidden;
     pointer-events: none;
-    text-shadow:
-      0 0 5px #0f0,
-      0 0 10px #0f0,
-      0 0 20px #0f0,
-      0 0 40px #0f0;
   }
-  #alert {
-    position: relative;
-    z-index: 10;
-    font-size: 3em;
-    font-weight: bold;
-    color: red;
+
+  #redAlert {
+    position: absolute;
+    top: 40vh;
+    width: 100%;
+    text-align: center;
+    font-size: 4rem;
+    color: #ff0000;
     text-shadow:
-      0 0 10px #f00,
-      0 0 20px #f00,
-      0 0 30px #f00;
-    animation: pulse 1s infinite alternate;
+      0 0 15px #f00,
+      0 0 30px #f00,
+      0 0 50px #f00,
+      0 0 80px #ff0000;
+    animation: pulseRed 1.2s infinite alternate;
     user-select: none;
+    z-index: 10;
+    pointer-events: none;
   }
-  @keyframes pulse {
+
+  @keyframes pulseRed {
     0% { text-shadow:
-      0 0 10px #f00,
-      0 0 20px #f00,
-      0 0 30px #f00; }
+      0 0 15px #f00,
+      0 0 30px #f00,
+      0 0 50px #f00; }
     100% { text-shadow:
       0 0 30px #f00,
       0 0 60px #f00,
       0 0 90px #f00; }
   }
-  @keyframes shake {
-    0% { transform: translate(0, 0) rotate(0deg); }
-    20% { transform: translate(-10px, 5px) rotate(-3deg); }
-    40% { transform: translate(10px, -5px) rotate(3deg); }
-    60% { transform: translate(-10px, 5px) rotate(-3deg); }
-    80% { transform: translate(10px, -5px) rotate(3deg); }
-    100% { transform: translate(0, 0) rotate(0deg); }
+
+  #glitchLayer {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    opacity: 0.7;
+    z-index: 5;
   }
-  #overlay.shake {
-    animation: shake 0.5s ease-in-out;
+
+  .shake {
+    animation: shakeScreen 0.6s cubic-bezier(.36,.07,.19,.97) both;
+  }
+  @keyframes shakeScreen {
+    10%, 90% { transform: translate3d(-5px, 0, 0) rotate(-1deg); }
+    20%, 80% { transform: translate3d(5px, 0, 0) rotate(1deg); }
+    30%, 50%, 70% { transform: translate3d(-5px, 0, 0) rotate(-1deg); }
+    40%, 60% { transform: translate3d(5px, 0, 0) rotate(1deg); }
   }
 </style>
 </head>
 <body>
-  <div id="overlay" title="Tıkla ve Alarmı Durdur / Sarsıntıyı Başlat">
-    <div id="alert">!!! SİSTEM HACKED !!!</div>
-    <pre id="code"></pre>
+  <div id="container" title="Tıkla ve Sarsıl!">
+    <pre id="codeStream"></pre>
+    <div id="redAlert">!!! SİSTEM HACKED !!!</div>
+    <canvas id="glitchLayer"></canvas>
   </div>
 
 <script>
-  const overlay = document.getElementById('overlay');
-  const codeEl = document.getElementById('code');
+  const container = document.getElementById('container');
+  const codeStream = document.getElementById('codeStream');
+  const redAlert = document.getElementById('redAlert');
+  const glitchCanvas = document.getElementById('glitchLayer');
+  const ctx = glitchCanvas.getContext('2d');
 
-  // Yeşil kod satırlarını oluştur
-  const chars = '01ABCDEF1234567890#@$%&*+=-<>?';
-  const linesCount = 60;
+  const chars = '01ABCDEF1234567890#@$%&*+=-<>?[]{}';
   const lineLength = 120;
+  const linesCount = 40;
+
   let codeLines = [];
 
   function randomChar() {
     return chars.charAt(Math.floor(Math.random() * chars.length));
   }
 
-  for(let i=0; i<linesCount; i++) {
-    let line = '';
-    for(let j=0; j<lineLength; j++) {
-      line += randomChar();
+  function generateCodeLines() {
+    codeLines = [];
+    for(let i=0; i<linesCount; i++) {
+      let line = '';
+      for(let j=0; j<lineLength; j++) {
+        line += randomChar();
+      }
+      codeLines.push(line);
     }
-    codeLines.push(line);
   }
-  codeEl.textContent = codeLines.join('\n');
 
-  // Kayan kod animasyonu
+  generateCodeLines();
+
+  // Animate the code vertically scrolling
   let offset = 0;
   function animateCode() {
     offset++;
     if(offset > linesCount) offset = 0;
-    let visible = codeLines.slice(offset).concat(codeLines.slice(0, offset));
-    codeEl.textContent = visible.join('\n');
+    let visibleLines = codeLines.slice(offset).concat(codeLines.slice(0, offset));
+    codeStream.textContent = visibleLines.join('\n');
     requestAnimationFrame(animateCode);
   }
   animateCode();
 
-  // Alarm sesi oluşturma
+  // Resize canvas
+  function resizeCanvas() {
+    glitchCanvas.width = window.innerWidth;
+    glitchCanvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  // Glitch effect drawing
+  function glitchEffect() {
+    ctx.clearRect(0,0,glitchCanvas.width, glitchCanvas.height);
+
+    for(let i=0; i<15; i++) {
+      let x = Math.random() * glitchCanvas.width;
+      let y = Math.random() * glitchCanvas.height;
+      let w = 20 + Math.random() * 100;
+      let h = 5 + Math.random() * 20;
+      let r = Math.random() * 255;
+      let g = 0;
+      let b = 0;
+      ctx.fillStyle = `rgba(${r},${g},${b},0.6)`;
+      ctx.fillRect(x, y, w, h);
+    }
+    requestAnimationFrame(glitchEffect);
+  }
+  glitchEffect();
+
+  // Sound alarm on first click
   let audioCtx = null;
+  let alarmPlaying = false;
+
   function playAlarm() {
-    if (!audioCtx) {
+    if(alarmPlaying) return;
+    alarmPlaying = true;
+    if(!audioCtx) {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
-    const oscillator = audioCtx.createOscillator();
+
+    const osc = audioCtx.createOscillator();
     const gainNode = audioCtx.createGain();
-    oscillator.type = 'square';
-    oscillator.frequency.setValueAtTime(440, audioCtx.currentTime);
-    oscillator.connect(gainNode);
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+    osc.connect(gainNode);
     gainNode.connect(audioCtx.destination);
-    gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+    gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
 
-    oscillator.start();
+    osc.start();
 
-    // 0.2 saniye aralıklarla aç-kapa
-    let isOn = true;
+    let toggle = true;
     let count = 0;
     const interval = setInterval(() => {
-      if(count > 10) {
-        oscillator.stop();
-        oscillator.disconnect();
+      if(count > 15) {
+        osc.stop();
+        osc.disconnect();
         gainNode.disconnect();
         clearInterval(interval);
+        alarmPlaying = false;
         return;
       }
-      gainNode.gain.setValueAtTime(isOn ? 0.1 : 0, audioCtx.currentTime);
-      isOn = !isOn;
+      gainNode.gain.setValueAtTime(toggle ? 0.15 : 0, audioCtx.currentTime);
+      toggle = !toggle;
       count++;
-    }, 200);
+    }, 150);
   }
 
-  // Başlangıçta ses başlatmak için kullanıcı etkileşimi gerekiyor:
-  overlay.addEventListener('click', () => {
-    // Sesi çal
-    if(audioCtx === null) {
-      playAlarm();
+  container.addEventListener('click', () => {
+    if(audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume();
     }
-    // Sarsıntı efekti ver
-    overlay.classList.add('shake');
-    setTimeout(() => {
-      overlay.classList.remove('shake');
-    }, 600);
+    playAlarm();
+
+    container.classList.add('shake');
+    setTimeout(() => container.classList.remove('shake'), 600);
   });
 
 </script>
