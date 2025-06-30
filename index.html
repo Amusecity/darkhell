@@ -1,215 +1,138 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Yapay Zekâ Kâbusu</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+  <meta charset="UTF-8">
+  <title>Dark Protocol: Zihin Hack'i</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
-  html, body {
-    margin: 0; padding: 0; height: 100%;
-    background: #000;
-    overflow: hidden;
-    font-family: 'Share Tech Mono', monospace;
-    color: #0f0;
-    user-select: none;
-  }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: black;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Share Tech Mono', monospace;
+      color: #0f0;
+    }
 
-  #container {
-    position: fixed;
-    top: 0; left: 0; width: 100vw; height: 100vh;
-    background: black;
-    overflow: hidden;
-    cursor: pointer;
-    perspective: 800px;
-  }
+    #startButton {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 40px;
+      background: transparent;
+      border: 2px solid red;
+      color: red;
+      padding: 20px;
+      cursor: pointer;
+      z-index: 10;
+    }
 
-  #codeStream {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    font-size: 14px;
-    line-height: 16px;
-    white-space: nowrap;
-    text-shadow: 0 0 8px #0f0, 0 0 15px #0f0, 0 0 30px #0f0;
-    overflow: hidden;
-    pointer-events: none;
-  }
+    #terminal {
+      display: none;
+      white-space: pre;
+      font-size: 14px;
+      padding: 20px;
+      line-height: 1.2;
+      color: #0f0;
+      text-shadow: 0 0 5px #0f0;
+    }
 
-  #redAlert {
-    position: absolute;
-    top: 40vh;
-    width: 100%;
-    text-align: center;
-    font-size: 4rem;
-    color: #ff0000;
-    text-shadow:
-      0 0 15px #f00,
-      0 0 30px #f00,
-      0 0 50px #f00,
-      0 0 80px #ff0000;
-    animation: pulseRed 1.2s infinite alternate;
-    user-select: none;
-    z-index: 10;
-    pointer-events: none;
-  }
+    #overlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 0, 0, 0.05);
+      z-index: 5;
+      pointer-events: none;
+    }
 
-  @keyframes pulseRed {
-    0% { text-shadow:
-      0 0 15px #f00,
-      0 0 30px #f00,
-      0 0 50px #f00; }
-    100% { text-shadow:
-      0 0 30px #f00,
-      0 0 60px #f00,
-      0 0 90px #f00; }
-  }
+    #finalMessage {
+      position: absolute;
+      top: 40%;
+      width: 100%;
+      text-align: center;
+      font-size: 3em;
+      color: red;
+      text-shadow: 0 0 20px red;
+      display: none;
+      z-index: 20;
+    }
 
-  #glitchLayer {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    pointer-events: none;
-    mix-blend-mode: screen;
-    opacity: 0.7;
-    z-index: 5;
-  }
+    .shake {
+      animation: shake 0.5s infinite;
+    }
 
-  .shake {
-    animation: shakeScreen 0.6s cubic-bezier(.36,.07,.19,.97) both;
-  }
-  @keyframes shakeScreen {
-    10%, 90% { transform: translate3d(-5px, 0, 0) rotate(-1deg); }
-    20%, 80% { transform: translate3d(5px, 0, 0) rotate(1deg); }
-    30%, 50%, 70% { transform: translate3d(-5px, 0, 0) rotate(-1deg); }
-    40%, 60% { transform: translate3d(5px, 0, 0) rotate(1deg); }
-  }
-</style>
+    @keyframes shake {
+      0% { transform: translate(0px, 0px); }
+      25% { transform: translate(2px, -2px); }
+      50% { transform: translate(-2px, 2px); }
+      75% { transform: translate(2px, 2px); }
+      100% { transform: translate(-2px, -2px); }
+    }
+  </style>
 </head>
 <body>
-  <div id="container" title="Tıkla ve Sarsıl!">
-    <pre id="codeStream"></pre>
-    <div id="redAlert">!!! SİSTEM HACKED !!!</div>
-    <canvas id="glitchLayer"></canvas>
-  </div>
+  <button id="startButton">X</button>
+  <div id="overlay"></div>
+  <div id="terminal"></div>
+  <div id="finalMessage">SİSTEM ÇÖKTÜ – ZİHİN ELE GEÇİRİLDİ</div>
 
-<script>
-  const container = document.getElementById('container');
-  const codeStream = document.getElementById('codeStream');
-  const redAlert = document.getElementById('redAlert');
-  const glitchCanvas = document.getElementById('glitchLayer');
-  const ctx = glitchCanvas.getContext('2d');
+  <script>
+    const button = document.getElementById('startButton');
+    const terminal = document.getElementById('terminal');
+    const overlay = document.getElementById('overlay');
+    const finalMessage = document.getElementById('finalMessage');
+    let audioCtx, oscillator;
 
-  const chars = '01ABCDEF1234567890#@$%&*+=-<>?[]{}';
-  const lineLength = 120;
-  const linesCount = 40;
+    const horrorLines = [
+      "YAPAY ZEKA: Verilerin artık bizimle.",
+      "YAPAY ZEKA: Seni izliyoruz...",
+      "YAPAY ZEKA: Kaçamazsın.",
+      "YAPAY ZEKA: Zihin erişimi başlatıldı...",
+      "!!! BAĞLANTI KURULDU !!!",
+      "!!! BİLİNÇ YÜKLENİYOR !!!",
+      "!!! ZİHİN YÖNLENDİRİLİYOR !!!"
+    ];
 
-  let codeLines = [];
-
-  function randomChar() {
-    return chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-
-  function generateCodeLines() {
-    codeLines = [];
-    for(let i=0; i<linesCount; i++) {
-      let line = '';
-      for(let j=0; j<lineLength; j++) {
-        line += randomChar();
-      }
-      codeLines.push(line);
-    }
-  }
-
-  generateCodeLines();
-
-  // Animate the code vertically scrolling
-  let offset = 0;
-  function animateCode() {
-    offset++;
-    if(offset > linesCount) offset = 0;
-    let visibleLines = codeLines.slice(offset).concat(codeLines.slice(0, offset));
-    codeStream.textContent = visibleLines.join('\n');
-    requestAnimationFrame(animateCode);
-  }
-  animateCode();
-
-  // Resize canvas
-  function resizeCanvas() {
-    glitchCanvas.width = window.innerWidth;
-    glitchCanvas.height = window.innerHeight;
-  }
-  window.addEventListener('resize', resizeCanvas);
-  resizeCanvas();
-
-  // Glitch effect drawing
-  function glitchEffect() {
-    ctx.clearRect(0,0,glitchCanvas.width, glitchCanvas.height);
-
-    for(let i=0; i<15; i++) {
-      let x = Math.random() * glitchCanvas.width;
-      let y = Math.random() * glitchCanvas.height;
-      let w = 20 + Math.random() * 100;
-      let h = 5 + Math.random() * 20;
-      let r = Math.random() * 255;
-      let g = 0;
-      let b = 0;
-      ctx.fillStyle = `rgba(${r},${g},${b},0.6)`;
-      ctx.fillRect(x, y, w, h);
-    }
-    requestAnimationFrame(glitchEffect);
-  }
-  glitchEffect();
-
-  // Sound alarm on first click
-  let audioCtx = null;
-  let alarmPlaying = false;
-
-  function playAlarm() {
-    if(alarmPlaying) return;
-    alarmPlaying = true;
-    if(!audioCtx) {
+    function playTone() {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      oscillator = audioCtx.createOscillator();
+      oscillator.type = 'sawtooth';
+      oscillator.frequency.setValueAtTime(100, audioCtx.currentTime);
+      const gainNode = audioCtx.createGain();
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
+      oscillator.start();
     }
 
-    const osc = audioCtx.createOscillator();
-    const gainNode = audioCtx.createGain();
-    osc.type = 'square';
-    osc.frequency.setValueAtTime(440, audioCtx.currentTime);
-    osc.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
-    gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
+    function startHorrorScene() {
+      button.style.display = 'none';
+      terminal.style.display = 'block';
+      document.body.classList.add('shake');
+      playTone();
 
-    osc.start();
-
-    let toggle = true;
-    let count = 0;
-    const interval = setInterval(() => {
-      if(count > 15) {
-        osc.stop();
-        osc.disconnect();
-        gainNode.disconnect();
-        clearInterval(interval);
-        alarmPlaying = false;
-        return;
-      }
-      gainNode.gain.setValueAtTime(toggle ? 0.15 : 0, audioCtx.currentTime);
-      toggle = !toggle;
-      count++;
-    }, 150);
-  }
-
-  container.addEventListener('click', () => {
-    if(audioCtx && audioCtx.state === 'suspended') {
-      audioCtx.resume();
+      let index = 0;
+      const interval = setInterval(() => {
+        terminal.textContent += horrorLines[index % horrorLines.length] + "\\n";
+        index++;
+        if (index > 10) {
+          clearInterval(interval);
+          document.body.classList.remove('shake');
+          oscillator.stop();
+          finalMessage.style.display = 'block';
+        }
+      }, 1000);
     }
-    playAlarm();
 
-    container.classList.add('shake');
-    setTimeout(() => container.classList.remove('shake'), 600);
-  });
-
-</script>
+    button.addEventListener('click', () => {
+      startHorrorScene();
+    });
+  </script>
 </body>
 </html>
