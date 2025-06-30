@@ -2,136 +2,131 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Dark Protocol: Zihin Hack'i</title>
+  <title>PROJECT: RED MIND</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-
     html, body {
       margin: 0;
       padding: 0;
       background: black;
-      height: 100%;
-      overflow: hidden;
+      color: #00ff00;
       font-family: 'Share Tech Mono', monospace;
-      color: #0f0;
+      overflow: hidden;
     }
-
-    #startButton {
+    #intro, #terminal, #error, #final {
       position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 40px;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      text-align: center;
+    }
+    #intro {
+      background: black;
+      z-index: 10;
+    }
+    #intro button {
+      font-size: 2em;
+      padding: 20px;
       background: transparent;
       border: 2px solid red;
       color: red;
-      padding: 20px;
       cursor: pointer;
-      z-index: 10;
     }
-
+    #username {
+      font-size: 2.5em;
+      color: #ff0000;
+      display: none;
+    }
     #terminal {
-      display: none;
-      white-space: pre;
-      font-size: 14px;
+      background: black;
+      color: #00ff00;
       padding: 20px;
-      line-height: 1.2;
-      color: #0f0;
-      text-shadow: 0 0 5px #0f0;
-    }
-
-    #overlay {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(255, 0, 0, 0.05);
-      z-index: 5;
-      pointer-events: none;
-    }
-
-    #finalMessage {
-      position: absolute;
-      top: 40%;
-      width: 100%;
-      text-align: center;
-      font-size: 3em;
-      color: red;
-      text-shadow: 0 0 20px red;
+      font-size: 1.2em;
       display: none;
-      z-index: 20;
+      white-space: pre-wrap;
     }
-
-    .shake {
-      animation: shake 0.5s infinite;
+    #error {
+      background: red;
+      color: white;
+      font-size: 3em;
+      display: none;
+      animation: flash 0.3s infinite;
     }
-
-    @keyframes shake {
-      0% { transform: translate(0px, 0px); }
-      25% { transform: translate(2px, -2px); }
-      50% { transform: translate(-2px, 2px); }
-      75% { transform: translate(2px, 2px); }
-      100% { transform: translate(-2px, -2px); }
+    @keyframes flash {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    #final {
+      background: black;
+      color: red;
+      font-size: 2em;
+      display: none;
     }
   </style>
 </head>
 <body>
-  <button id="startButton">X</button>
-  <div id="overlay"></div>
+  <div id="intro">
+    <button id="startBtn">X</button>
+  </div>
+  <div id="username">@mhmtali_aslan HESABI ELE GEÇİRİLİYOR...</div>
   <div id="terminal"></div>
-  <div id="finalMessage">SİSTEM ÇÖKTÜ – ZİHİN ELE GEÇİRİLDİ</div>
+  <div id="error">SYSTEM ERROR<br>ZİHİN ELE GEÇİRİLDİ</div>
+  <div id="final">HER ŞEYİ GÖRÜYORUZ...</div>
+
+  <audio id="music" src="https://cdn.pixabay.com/download/audio/2022/10/06/audio_f8cc63680b.mp3?filename=horror-background-112447.mp3" loop></audio>
+  <audio id="scream" src="https://cdn.pixabay.com/download/audio/2023/05/03/audio_7f3504f74d.mp3?filename=horror-scream-14585.mp3"></audio>
 
   <script>
-    const button = document.getElementById('startButton');
+    const startBtn = document.getElementById('startBtn');
+    const intro = document.getElementById('intro');
+    const username = document.getElementById('username');
     const terminal = document.getElementById('terminal');
-    const overlay = document.getElementById('overlay');
-    const finalMessage = document.getElementById('finalMessage');
-    let audioCtx, oscillator;
+    const error = document.getElementById('error');
+    const final = document.getElementById('final');
+    const music = document.getElementById('music');
+    const scream = document.getElementById('scream');
 
-    const horrorLines = [
-      "YAPAY ZEKA: Verilerin artık bizimle.",
-      "YAPAY ZEKA: Seni izliyoruz...",
-      "YAPAY ZEKA: Kaçamazsın.",
-      "YAPAY ZEKA: Zihin erişimi başlatıldı...",
-      "!!! BAĞLANTI KURULDU !!!",
-      "!!! BİLİNÇ YÜKLENİYOR !!!",
-      "!!! ZİHİN YÖNLENDİRİLİYOR !!!"
+    const terminalLines = [
+      "Bağlantı sağlanıyor...",
+      "Şifreler çözümleniyor...",
+      "Veritabanı ele geçirildi...",
+      "Kamera erişimi aktif...",
+      "Instagram hesabı: @mhmtali_aslan",
+      "Konum: Takip ediliyor...",
+      "Bellek taranıyor...",
+      "Bilinç yükleniyor...",
+      "Zihin kontrolü: %15... %42... %78... %100"
     ];
 
-    function playTone() {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      oscillator = audioCtx.createOscillator();
-      oscillator.type = 'sawtooth';
-      oscillator.frequency.setValueAtTime(100, audioCtx.currentTime);
-      const gainNode = audioCtx.createGain();
-      oscillator.connect(gainNode);
-      gainNode.connect(audioCtx.destination);
-      gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
-      oscillator.start();
-    }
+    startBtn.addEventListener('click', () => {
+      intro.style.display = 'none';
+      username.style.display = 'flex';
+      music.play().catch(()=>{});
 
-    function startHorrorScene() {
-      button.style.display = 'none';
-      terminal.style.display = 'block';
-      document.body.classList.add('shake');
-      playTone();
-
-      let index = 0;
-      const interval = setInterval(() => {
-        terminal.textContent += horrorLines[index % horrorLines.length] + "\\n";
-        index++;
-        if (index > 10) {
-          clearInterval(interval);
-          document.body.classList.remove('shake');
-          oscillator.stop();
-          finalMessage.style.display = 'block';
-        }
-      }, 1000);
-    }
-
-    button.addEventListener('click', () => {
-      startHorrorScene();
+      setTimeout(() => {
+        username.style.display = 'none';
+        terminal.style.display = 'block';
+        let i = 0;
+        const interval = setInterval(() => {
+          if (i < terminalLines.length) {
+            terminal.innerHTML += terminalLines[i] + "<br>";
+            i++;
+          } else {
+            clearInterval(interval);
+            terminal.style.display = 'none';
+            error.style.display = 'flex';
+            scream.play();
+            setTimeout(() => {
+              error.style.display = 'none';
+              final.style.display = 'flex';
+            }, 4000);
+          }
+        }, 1000);
+      }, 5000);
     });
   </script>
 </body>
