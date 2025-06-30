@@ -2,83 +2,141 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <title>Kaçan Buton</title>
+  <title>Sistem Hacklendi</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      background: linear-gradient(to right, #0f0c29, #302b63, #24243e);
-      color: white;
-      font-family: 'Comic Sans MS', cursive;
+      background: black;
+      color: #00ff00;
+      font-family: 'Courier New', Courier, monospace;
+      overflow: hidden;
+    }
+
+    #terminal {
+      width: 100%;
       height: 100vh;
-      display: flex;
-      flex-direction: column;
+      padding: 20px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      font-size: 18px;
+      animation: flicker 0.2s infinite alternate;
+      display: none;
+    }
+
+    @keyframes flicker {
+      0% { opacity: 1; }
+      100% { opacity: 0.95; }
+    }
+
+    #start-btn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 32px;
+      background: red;
+      color: white;
+      border: none;
+      padding: 20px 40px;
+      cursor: pointer;
+      border-radius: 10px;
+      z-index: 1000;
+    }
+
+    #error-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(200,0,0,0.9);
+      color: white;
+      font-size: 36px;
+      display: none;
       justify-content: center;
       align-items: center;
-      overflow: hidden;
-      margin: 0;
-    }
-
-    h1 {
-      margin-bottom: 40px;
-      font-size: 2.5em;
-      text-shadow: 2px 2px #000;
-    }
-
-    #escape-btn {
-      position: absolute;
-      padding: 15px 30px;
-      font-size: 18px;
-      background-color: crimson;
-      border: none;
-      border-radius: 10px;
-      color: white;
-      cursor: pointer;
-      transition: 0.1s;
-    }
-
-    #escape-btn:active {
-      transform: scale(0.9);
-    }
-
-    #win-message {
-      font-size: 2em;
-      color: #00ff00;
-      display: none;
-      margin-top: 30px;
-      animation: pulse 1s infinite;
+      text-align: center;
+      animation: pulse 0.5s infinite alternate;
     }
 
     @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.2); }
-      100% { transform: scale(1); }
+      0% { opacity: 1; }
+      100% { opacity: 0.5; }
     }
   </style>
 </head>
 <body>
-  <h1>😈 Kaçan Butona Tıkla!</h1>
-  <button id="escape-btn">Yakala Beni 😜</button>
-  <div id="win-message">🎉 ZAFER! Butonu Yakaladın! 🎉</div>
+
+  <button id="start-btn">Başlat</button>
+
+  <div id="terminal"></div>
+
+  <div id="error-screen"></div>
+
+  <audio id="horror-audio" loop>
+    <source src="https://cdn.pixabay.com/audio/2021/08/04/audio_9b5461d44e.mp3" type="audio/mp3">
+  </audio>
+
+  <audio id="alarm-audio">
+    <source src="https://cdn.pixabay.com/audio/2022/03/15/audio_9b0b3706a1.mp3" type="audio/mp3">
+  </audio>
 
   <script>
-    const button = document.getElementById("escape-btn");
-    const winMessage = document.getElementById("win-message");
+    const terminal = document.getElementById("terminal");
+    const startBtn = document.getElementById("start-btn");
+    const horrorAudio = document.getElementById("horror-audio");
+    const alarmAudio = document.getElementById("alarm-audio");
+    const errorScreen = document.getElementById("error-screen");
 
-    let clicked = false;
+    let userName = "";
 
-    button.addEventListener("mouseover", () => {
-      if (clicked) return;
-      const x = Math.random() * (window.innerWidth - button.offsetWidth);
-      const y = Math.random() * (window.innerHeight - button.offsetHeight);
-      button.style.left = `${x}px`;
-      button.style.top = `${y}px`;
+    const messagesTemplate = [
+      "[GİRİŞ BAŞLATILDI]",
+      "Kullanıcı algılandı: ",
+      "Yapay zekâ devrede...",
+      "Veri taranıyor...",
+      "Karanlık ağ bağlantısı kuruldu.",
+      "İzin alınmadan sistem erişimi sağlandı.",
+      "Dosyalar şifreleniyor...",
+      "Konum verisi ele geçirildi.",
+      "Instagram hesabı analiz ediliyor...",
+      "Şifre bulundu: ******",
+      "Uygulama davranışı izleniyor...",
+      "Bilinç yüklemesi başlatıldı.",
+      "ZİHİN KONTROLÜ AKTİF.",
+      "UYARI: Sistem dengesiz.",
+      "HATA: Bellek taşması.",
+      "!!! SİSTEM HATASI !!!"
+    ];
+
+    startBtn.addEventListener("click", () => {
+      userName = prompt("Instagram kullanıcı adını gir:") || "anonymous_user";
+      startBtn.style.display = "none";
+      terminal.style.display = "block";
+      horrorAudio.play().catch(() => console.warn("Ses izni verilmedi"));
+      startMessages();
     });
 
-    button.addEventListener("click", () => {
-      clicked = true;
-      button.style.display = "none";
-      winMessage.style.display = "block";
-    });
+    function startMessages() {
+      let i = 0;
+      const messages = [...messagesTemplate];
+      messages[1] = messages[1] + userName;
+      terminal.innerText = "";
+      const interval = setInterval(() => {
+        if (i < messages.length) {
+          terminal.innerText += messages[i] + "\n";
+          terminal.scrollTop = terminal.scrollHeight;
+          i++;
+        } else {
+          clearInterval(interval);
+          horrorAudio.pause();
+          alarmAudio.play();
+          errorScreen.innerHTML = `SİSTEM ÇÖKTÜ<br>HATA KODU: 666<br>@${userName}`;
+          errorScreen.style.display = "flex";
+        }
+      }, 1500);
+    }
   </script>
 </body>
 </html>
