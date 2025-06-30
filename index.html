@@ -1,133 +1,187 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <title>PROJECT: RED MIND</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-    html, body {
-      margin: 0;
-      padding: 0;
-      background: black;
-      color: #00ff00;
-      font-family: 'Share Tech Mono', monospace;
-      overflow: hidden;
-    }
-    #intro, #terminal, #error, #final {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      text-align: center;
-    }
-    #intro {
-      background: black;
-      z-index: 10;
-    }
-    #intro button {
-      font-size: 2em;
-      padding: 20px;
-      background: transparent;
-      border: 2px solid red;
-      color: red;
-      cursor: pointer;
-    }
-    #username {
-      font-size: 2.5em;
-      color: #ff0000;
-      display: none;
-    }
-    #terminal {
-      background: black;
-      color: #00ff00;
-      padding: 20px;
-      font-size: 1.2em;
-      display: none;
-      white-space: pre-wrap;
-    }
-    #error {
-      background: red;
-      color: white;
-      font-size: 3em;
-      display: none;
-      animation: flash 0.3s infinite;
-    }
-    @keyframes flash {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0; }
-    }
-    #final {
-      background: black;
-      color: red;
-      font-size: 2em;
-      display: none;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>RED MIND HACK SIMÜLASYONU</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: black;
+    color: #0f0;
+    font-family: 'Share Tech Mono', monospace;
+    overflow: hidden;
+  }
+  #startScreen {
+    position: fixed; top:0; left:0; width: 100%; height: 100%;
+    background: #000;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column;
+  }
+  #startBtn {
+    font-size: 4rem;
+    color: red;
+    border: 3px solid red;
+    background: transparent;
+    padding: 1rem 2rem;
+    cursor: pointer;
+    user-select: none;
+    border-radius: 8px;
+    transition: background 0.3s, color 0.3s;
+  }
+  #startBtn:hover {
+    background: red;
+    color: black;
+  }
+
+  #usernameScreen, #terminalScreen, #errorScreen, #finalScreen {
+    position: fixed; top:0; left:0; width: 100%; height: 100%;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+  }
+  #usernameScreen {
+    color: #ff0000;
+    font-size: 3rem;
+    font-weight: bold;
+    background: black;
+  }
+  #terminalScreen {
+    color: #00ff00;
+    background: black;
+    font-size: 1.5rem;
+    line-height: 1.4;
+    padding: 3rem;
+    overflow-y: auto;
+    text-align: left;
+  }
+  #errorScreen {
+    background: #ff0000;
+    color: white;
+    font-size: 4rem;
+    font-weight: 900;
+    animation: blink 0.5s infinite;
+  }
+  #finalScreen {
+    background: black;
+    color: #ff0000;
+    font-size: 2.5rem;
+    font-weight: 700;
+  }
+  @keyframes blink {
+    0%, 100% {opacity:1;}
+    50% {opacity:0;}
+  }
+
+  /* Ekran sarsıntısı efekti */
+  .shake {
+    animation: shake 0.6s;
+    animation-iteration-count: 3;
+  }
+  @keyframes shake {
+    0% { transform: translate(0, 0); }
+    20% { transform: translate(-10px, 5px); }
+    40% { transform: translate(10px, -5px); }
+    60% { transform: translate(-10px, 5px); }
+    80% { transform: translate(10px, -5px); }
+    100% { transform: translate(0, 0); }
+  }
+</style>
 </head>
 <body>
-  <div id="intro">
-    <button id="startBtn">X</button>
-  </div>
-  <div id="username">@mhmtali_aslan HESABI ELE GEÇİRİLİYOR...</div>
-  <div id="terminal"></div>
-  <div id="error">SYSTEM ERROR<br>ZİHİN ELE GEÇİRİLDİ</div>
-  <div id="final">HER ŞEYİ GÖRÜYORUZ...</div>
 
-  <audio id="music" src="https://cdn.pixabay.com/download/audio/2022/10/06/audio_f8cc63680b.mp3?filename=horror-background-112447.mp3" loop></audio>
-  <audio id="scream" src="https://cdn.pixabay.com/download/audio/2023/05/03/audio_7f3504f74d.mp3?filename=horror-scream-14585.mp3"></audio>
+<div id="startScreen">
+  <button id="startBtn">X</button>
+  <div style="color:#444; font-family:sans-serif; margin-top:20px;">Başlamak için 'X' tuşuna basın</div>
+</div>
 
-  <script>
-    const startBtn = document.getElementById('startBtn');
-    const intro = document.getElementById('intro');
-    const username = document.getElementById('username');
-    const terminal = document.getElementById('terminal');
-    const error = document.getElementById('error');
-    const final = document.getElementById('final');
-    const music = document.getElementById('music');
-    const scream = document.getElementById('scream');
+<div id="usernameScreen">@*********** HESABI ELE GEÇİRİLİYOR...</div>
+<div id="terminalScreen"></div>
+<div id="errorScreen">SYSTEM ERROR<br>ZİHİN ELE GEÇİRİLDİ</div>
+<div id="finalScreen">HER ŞEYİ GÖRÜYORUZ...</div>
 
-    const terminalLines = [
-      "Bağlantı sağlanıyor...",
-      "Şifreler çözümleniyor...",
-      "Veritabanı ele geçirildi...",
-      "Kamera erişimi aktif...",
-      "Instagram hesabı: @mhmtali_aslan",
-      "Konum: Takip ediliyor...",
-      "Bellek taranıyor...",
-      "Bilinç yükleniyor...",
-      "Zihin kontrolü: %15... %42... %78... %100"
-    ];
+<audio id="bgMusic" loop>
+  <source src="https://cdn.pixabay.com/download/audio/2022/10/06/audio_f8cc63680b.mp3?filename=horror-background-112447.mp3" type="audio/mpeg">
+</audio>
+<audio id="scream" >
+  <source src="https://cdn.pixabay.com/download/audio/2023/05/03/audio_7f3504f74d.mp3?filename=horror-scream-14585.mp3" type="audio/mpeg">
+</audio>
 
-    startBtn.addEventListener('click', () => {
-      intro.style.display = 'none';
-      username.style.display = 'flex';
-      music.play().catch(()=>{});
+<script>
+  const startBtn = document.getElementById('startBtn');
+  const startScreen = document.getElementById('startScreen');
+  const usernameScreen = document.getElementById('usernameScreen');
+  const terminalScreen = document.getElementById('terminalScreen');
+  const errorScreen = document.getElementById('errorScreen');
+  const finalScreen = document.getElementById('finalScreen');
+  const bgMusic = document.getElementById('bgMusic');
+  const scream = document.getElementById('scream');
 
-      setTimeout(() => {
-        username.style.display = 'none';
-        terminal.style.display = 'block';
-        let i = 0;
-        const interval = setInterval(() => {
-          if (i < terminalLines.length) {
-            terminal.innerHTML += terminalLines[i] + "<br>";
-            i++;
-          } else {
-            clearInterval(interval);
-            terminal.style.display = 'none';
-            error.style.display = 'flex';
-            scream.play();
-            setTimeout(() => {
-              error.style.display = 'none';
-              final.style.display = 'flex';
-            }, 4000);
-          }
-        }, 1000);
-      }, 5000);
-    });
-  </script>
+  // Terminal yazıları
+  const terminalLines = [
+    "Bağlantı kuruluyor...",
+    "Şifreler çözümleniyor...",
+    "Veri tabanı ele geçirildi...",
+    "Kamera erişimi sağlandı...",
+    "Instagram hesabı: @mhmtxaslan",
+    "Konum izleniyor...",
+    "Bellek taraması yapılıyor...",
+    "Zihin kontrolü başlatılıyor...",
+    "Kontrol yüzdesi: %15... %42... %78... %100",
+  ];
+
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  async function runSimulation() {
+    startScreen.style.display = 'none';
+    usernameScreen.style.display = 'flex';
+    bgMusic.volume = 0.15;
+    try { await bgMusic.play(); } catch(e) {}
+
+    await sleep(5000);
+
+    usernameScreen.style.display = 'none';
+    terminalScreen.style.display = 'block';
+
+    for(let line of terminalLines) {
+      terminalScreen.innerHTML += line + "<br>";
+      terminalScreen.scrollTop = terminalScreen.scrollHeight;
+      await sleep(1500);
+    }
+
+    terminalScreen.classList.add('shake');
+    await sleep(1800);
+    terminalScreen.classList.remove('shake');
+
+    terminalScreen.style.display = 'none';
+    errorScreen.style.display = 'flex';
+
+    scream.volume = 0.5;
+    try { await scream.play(); } catch(e) {}
+
+    // Error ekranı yanıp sönecek 4 saniye
+    let blinkCount = 0;
+    const blinkInterval = setInterval(() => {
+      errorScreen.style.visibility = errorScreen.style.visibility === 'hidden' ? 'visible' : 'hidden';
+      blinkCount++;
+      if (blinkCount >= 8) {
+        clearInterval(blinkInterval);
+        errorScreen.style.visibility = 'visible';
+        errorScreen.style.display = 'none';
+        finalScreen.style.display = 'flex';
+      }
+    }, 500);
+  }
+
+  startBtn.addEventListener('click', runSimulation);
+
+</script>
+
 </body>
 </html>
